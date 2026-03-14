@@ -6,7 +6,6 @@ const Green = "#7EE8B2";
 const Bg = "#08090C";
 const W = (a) => `rgba(255,255,255,${a})`;
 
-// ─── STRIPE CHECKOUT ──────────────────────────────────────────
 async function handleCheckout() {
   const res = await fetch("/api/checkout", { method: "POST" });
   const data = await res.json();
@@ -1140,7 +1139,7 @@ Respond ONLY with valid JSON (no markdown, no backticks):
 
                 {/* URGENCY + CTA */}
                 <CountdownBar />
-                <button onClick={() => setShowPaywall(true)} style={{ width: "100%", padding: 16, borderRadius: 14, background: `linear-gradient(135deg,${Gold},#D4A843)`, color: Bg, fontSize: 15, fontWeight: 700, border: "none", cursor: "pointer", boxShadow: "0 4px 24px rgba(232,200,114,.2)", marginBottom: 6 }}>
+                <button onClick={handleCheckout} style={{ width: "100%", padding: 16, borderRadius: 14, background: `linear-gradient(135deg,${Gold},#D4A843)`, color: Bg, fontSize: 15, fontWeight: 700, border: "none", cursor: "pointer", boxShadow: "0 4px 24px rgba(232,200,114,.2)", marginBottom: 6 }}>
                   🔓 Unlock Full Blueprint — $19
                 </button>
                 <div style={{ display: "flex", justifyContent: "center", gap: 12, marginBottom: 20 }}>
