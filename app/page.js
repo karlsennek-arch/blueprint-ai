@@ -201,13 +201,13 @@ function DemoMockup() {
       <div>
         <div style={{ fontSize: 9, color: Gold, fontWeight: 600, letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 8 }}>💬 AI Chat</div>
         <div style={{ padding: "7px 10px", background: W(.02), border: `1px solid ${W(.04)}`, borderRadius: "8px 8px 8px 3px", marginBottom: 5, fontSize: 9.5, color: W(.45), lineHeight: 1.4 }}>
-          <span style={{ fontSize: 8, color: Gold, fontWeight: 700 }}>Blueprint AI</span><br/>I recommend starting with LinkedIn outreach. Here's a specific approach for your situation...
+          <span style={{ fontSize: 8, color: Gold, fontWeight: 700 }}>Ventrix AI</span><br/>I recommend starting with LinkedIn outreach. Here's a specific approach for your situation...
         </div>
         <div style={{ padding: "7px 10px", background: "rgba(232,200,114,.06)", border: "1px solid rgba(232,200,114,.15)", borderRadius: "8px 8px 3px 8px", marginBottom: 5, fontSize: 9.5, color: W(.6), textAlign: "right" }}>
           What if I only have 2 hours a day?
         </div>
         <div style={{ padding: "7px 10px", background: W(.02), border: `1px solid ${W(.04)}`, borderRadius: "8px 8px 8px 3px", fontSize: 9.5, color: W(.45), lineHeight: 1.4 }}>
-          <span style={{ fontSize: 8, color: Gold, fontWeight: 700 }}>Blueprint AI</span><br/>Great question! With 2 hours, focus on...
+          <span style={{ fontSize: 8, color: Gold, fontWeight: 700 }}>Ventrix AI</span><br/>Great question! With 2 hours, focus on...
         </div>
       </div>
     )},
@@ -909,7 +909,7 @@ Respond ONLY with valid JSON (no markdown, no backticks):
 
   const faqs = [
     { q: "Is this actually free?", a: "Yes! The basic blueprint with your recommended path, match score, and revenue potential is 100% free. The full blueprint with day-by-day plan, scripts, tools, and progress tracker is $19 one-time." },
-    { q: "How is this different from just asking ChatGPT?", a: "ChatGPT gives generic advice. Blueprint AI asks about YOUR specific skills, schedule, budget, and goals, then runs your profile through 1,400+ income models to find the best match. You get a personalized day-by-day action plan, copy-paste scripts, exact tools with pricing, and a progress tracker. It's the difference between a Google search and a personal consultant." },
+    { q: "How is this different from just asking ChatGPT?", a: "ChatGPT gives generic advice. Ventrix AI asks about YOUR specific skills, schedule, budget, and goals, then runs your profile through 1,400+ income models to find the best match. You get a personalized day-by-day action plan, copy-paste scripts, exact tools with pricing, and a progress tracker. It's the difference between a Google search and a personal consultant." },
     { q: "What if I have no skills?", a: "That's actually the most common starting point! The AI is specifically designed to find paths that work for beginners. Many of our highest-rated blueprints are for people who selected 'starting from zero.' AI is the great equalizer." },
     { q: "Is this a scam? Will I actually make money?", a: "We provide a detailed, actionable plan — not a guarantee. Your results depend entirely on your execution. What we can guarantee: the strategies are real, the tools exist, the pricing is accurate, and thousands of people are using similar approaches to earn income. We also offer a 30-day refund policy." },
     { q: "Is my data private?", a: "Absolutely. We don't store your quiz answers or share any personal information. Your blueprint is generated in real-time and only you can see it. We use Stripe for payments — we never see your card details." },
@@ -946,8 +946,8 @@ Respond ONLY with valid JSON (no markdown, no backticks):
         {/* NAV */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: page === "landing" ? 56 : 36, animation: "fi .5s both" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer" }} onClick={() => setPage("landing")}>
-            <div style={{ width: 28, height: 28, borderRadius: 6, background: `linear-gradient(135deg,${Gold},#D4A843)`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 900, color: Bg }}>B</div>
-            <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: 4, textTransform: "uppercase", color: W(.4) }}>BLUEPRINT</span>
+            <div style={{ width: 28, height: 28, borderRadius: 6, background: `linear-gradient(135deg,${Gold},#D4A843)`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 900, color: Bg }}>V</div>
+            <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: 4, textTransform: "uppercase", color: W(.4) }}>VENTRIX</span>
           </div>
           {page === "landing" && <button onClick={startQuiz} style={{ padding: "8px 18px", borderRadius: 9, background: `linear-gradient(135deg,${Gold},#D4A843)`, color: Bg, fontSize: 12, fontWeight: 700 }}>
             Get Started — Free
@@ -1491,7 +1491,7 @@ Respond ONLY with valid JSON (no markdown, no backticks):
 
         {/* FOOTER */}
         <div style={{ textAlign: "center", paddingTop: 24, borderTop: `1px solid ${W(.03)}` }}>
-          <div style={{ fontSize: 10, color: W(.1) }}>Blueprint AI © 2026 • blueprint-ai.com</div>
+          <div style={{ fontSize: 10, color: W(.1) }}>Ventrix AI © 2026 • ventrixai.com</div>
         </div>
       </div>
     </>
