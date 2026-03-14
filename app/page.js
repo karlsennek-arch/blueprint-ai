@@ -265,7 +265,7 @@ function DemoMockup() {
 }
 
 // ─── SAMPLE BLUEPRINT PREVIEW (blurred) ─────────────────────────
-function BlueprintPreview() {
+function BlueprintPreview({ isPaid = false }) {
   return (
     <div style={{ background: W(.015), border: `1px solid ${W(.04)}`, borderRadius: 18, padding: "24px 20px", position: "relative", overflow: "hidden" }}>
       {/* Visible part */}
@@ -1376,7 +1376,7 @@ Respond ONLY with valid JSON (no markdown, no backticks):
             <h2 style={{ fontSize: "clamp(20px, 4vw, 28px)", fontWeight: 800 }}>Here's what a real blueprint looks like</h2>
             <p style={{ fontSize: 13, color: W(.3), marginTop: 6, fontFamily: "'Crimson Pro',serif", fontStyle: "italic" }}>Generated for a full-time employee with coding skills, 10hrs/week, $0 budget</p>
           </div>
-          <BlueprintPreview />
+          <BlueprintPreview isPaid={isPaid} />
         </div>
 
         {/* ═══════════ WHAT YOU GET (compact) ═══════════ */}
