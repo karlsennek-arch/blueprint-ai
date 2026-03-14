@@ -11,6 +11,7 @@ export default function SuccessPage() {
   const [confetti, setConfetti] = useState([]);
 
   useEffect(() => {
+    document.cookie = "ventrix_paid=true;path=/;max-age=31536000;SameSite=Lax";
     setTimeout(() => setShow(true), 100);
     const pieces = Array.from({ length: 40 }, (_, i) => ({
       id: i,
@@ -133,16 +134,16 @@ export default function SuccessPage() {
             What you unlocked
           </div>
           {[
-            ["📅", "Day-by-day action plan (4 weeks)"],
-            ["📝", "Copy-paste outreach scripts"],
-            ["📊", "6-month revenue projections"],
-            ["💰", "Detailed income breakdown"],
-            ["🛠", "Exact tools with pricing"],
-            ["🕐", "Custom daily schedule"],
-            ["💬", "AI follow-up chat advisor"],
-            ["🔀", "Blueprint comparison mode"],
-            ["✅", "Interactive progress tracker"],
-            ["📄", "PDF export"],
+            ["\u{1F4C5}", "Day-by-day action plan (4 weeks)"],
+            ["\u{1F4DD}", "Copy-paste outreach scripts"],
+            ["\u{1F4CA}", "6-month revenue projections"],
+            ["\u{1F4B0}", "Detailed income breakdown"],
+            ["\u{1F6E0}", "Exact tools with pricing"],
+            ["\u{1F550}", "Custom daily schedule"],
+            ["\u{1F4AC}", "AI follow-up chat advisor"],
+            ["\u{1F500}", "Blueprint comparison mode"],
+            ["\u2705", "Interactive progress tracker"],
+            ["\u{1F4C4}", "PDF export"],
           ].map(([icon, text], i) => (
             <div key={i} style={{
               display: "flex",
@@ -154,7 +155,7 @@ export default function SuccessPage() {
             }}>
               <span style={{ fontSize: 14 }}>{icon}</span>
               <span style={{ fontSize: 13, color: W(.6) }}>{text}</span>
-              <span style={{ marginLeft: "auto", color: Green, fontSize: 13 }}>✓</span>
+              <span style={{ marginLeft: "auto", color: Green, fontSize: 13 }}>{"\u2713"}</span>
             </div>
           ))}
         </div>
@@ -185,7 +186,7 @@ export default function SuccessPage() {
           gap: 14,
           marginTop: 20,
         }}>
-          {["🔒 256-bit encrypted", "💳 Powered by Stripe", "↩️ 30-day refund"].map((t, i) => (
+          {["\u{1F512} 256-bit encrypted", "\u{1F4B3} Powered by Stripe", "\u21A9\uFE0F 30-day refund"].map((t, i) => (
             <span key={i} style={{ fontSize: 9.5, color: W(.15) }}>{t}</span>
           ))}
         </div>

@@ -6,6 +6,10 @@ const Green = "#7EE8B2";
 const Bg = "#08090C";
 const W = (a) => `rgba(255,255,255,${a})`;
 
+function checkPaid() {
+  if (typeof document === "undefined") return false;
+  return document.cookie.includes("ventrix_paid=true");
+}
 async function handleCheckout() {
   const res = await fetch("/api/checkout", { method: "POST" });
   const data = await res.json();
@@ -285,7 +289,7 @@ function BlueprintPreview() {
       </div>
 
       {/* Blurred sections */}
-      <div style={{ filter: "blur(5px)", opacity: .4, pointerEvents: "none", userSelect: "none" }}>
+      <div style={{ filter: isPaid ? "none" : "blur(5px)", opacity: isPaid ? 1 : .4, pointerEvents: isPaid ? "auto" : "none", userSelect: isPaid ? "auto" : "none" }}>
         <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: 3, color: Gold, marginBottom: 10 }}>Income Streams</div>
         {["Core service — $2,000–$4,000", "Upsells — $500–$1,500", "Passive — $300–$1,000"].map((t, i) => (
           <div key={i} style={{ padding: "10px 12px", background: W(.013), border: `1px solid ${W(.03)}`, borderRadius: 8, marginBottom: 5, fontSize: 12, color: W(.5) }}>{t}</div>
@@ -311,6 +315,8 @@ export default function LandingPage() {
   const [faq, setFaq] = useState(-1);
   const [page, setPage] = useState("landing"); // "landing" or "quiz"
   const [showPaywall, setShowPaywall] = useState(false);
+  const [isPaid, setIsPaid] = useState(false);
+  useEffect(() => { setIsPaid(checkPaid()); }, []);
 
   // ─── QUIZ STATE (embedded quiz) ───
   const [step, setStep] = useState(-1); // -1 = language select, 0+ = questions
@@ -878,10 +884,10 @@ USER: Situation: ${a.situation} | Skills: ${(a.skills||[]).join(",")} | Interest
 Respond ONLY with valid JSON (no markdown, no backticks):
 {"primary":{"name":"string","match":85-97,"tagline":"one exciting sentence","description":"3 sentences: what it is, who you serve, why it works","whyYou":"2 sentences why their specific skills make this perfect","monthlyRevenue":"$X,XXX – $X,XXX","timeToFirstDollar":"X – X weeks","difficulty":"Low|Medium|Medium-High|High","revenueProjection":[{"month":"Mo 1","low":200,"high":500},{"month":"Mo 2","low":500,"high":1200},{"month":"Mo 3","low":1000,"high":2500},{"month":"Mo 4","low":1800,"high":4000},{"month":"Mo 5","low":2500,"high":5500},{"month":"Mo 6","low":3500,"high":8000}],"incomeBreakdown":[{"source":"stream name","amount":"$X,XXX","howItWorks":"2 sentences"}],"tools":[{"name":"Real Tool","cost":"$XX/mo or Free","purpose":"what for"}],"dailySchedule":{"description":"How their day looks","blocks":[{"time":"time range","task":"specific task","duration":"X min"}]},"weeklyPlan":[{"week":"Week 1","title":"Phase","goal":"end of week goal","days":[{"day":"Mon","tasks":["task 1","task 2"]},{"day":"Tue","tasks":["t","t"]},{"day":"Wed","tasks":["t","t"]},{"day":"Thu","tasks":["t","t"]},{"day":"Fri","tasks":["t","t"]}]},{"week":"Week 2","title":"Phase","goal":"goal","days":[{"day":"Mon","tasks":["t","t"]},{"day":"Tue","tasks":["t","t"]},{"day":"Wed","tasks":["t","t"]},{"day":"Thu","tasks":["t","t"]},{"day":"Fri","tasks":["t","t"]}]},{"week":"Week 3","title":"Phase","goal":"goal","days":[{"day":"Mon","tasks":["t","t"]},{"day":"Tue","tasks":["t","t"]},{"day":"Wed","tasks":["t","t"]},{"day":"Thu","tasks":["t","t"]},{"day":"Fri","tasks":["t","t"]}]},{"week":"Week 4","title":"Phase","goal":"goal","days":[{"day":"Mon","tasks":["t","t"]},{"day":"Tue","tasks":["t","t"]},{"day":"Wed","tasks":["t","t"]},{"day":"Thu","tasks":["t","t"]},{"day":"Fri","tasks":["t","t"]}]}],"scripts":[{"context":"situation","script":"copy-paste template"}],"milestones":[{"month":"Month 1","target":"$XXX","milestone":"goal"},{"month":"Month 3","target":"$X,XXX","milestone":"goal"},{"month":"Month 6","target":"$X,XXX","milestone":"goal"}],"risks":["risk 1","risk 2"],"mitigations":["solution 1","solution 2"]},"secondary":{"name":"str","match":75-89,"tagline":"str","description":"str","monthlyRevenue":"str","timeToFirstDollar":"str","difficulty":"str","quickWin":"str"},"tertiary":{"name":"str","match":65-82,"tagline":"str","description":"str","monthlyRevenue":"str","timeToFirstDollar":"str","difficulty":"str","quickWin":"str"},"personalInsight":"2 motivating sentences about their unique advantages","quickestWin":"The fastest thing they can do in 60 minutes — absurdly specific","shareCard":{"headline":"AI says I can make $X,XXX/mo as a...","path":"primary name","match":94,"timeframe":"in X months"}}`;
 
-          const r = await fetch("https://api.anthropic.com/v1/messages", {
+          const r = await fetch("/api/chat", {
             method: "POST", headers: { "Content-Type": "application/json" },
             signal: AbortSignal.timeout(45000),
-            body: JSON.stringify({ model: "claude-sonnet-4-20250514", max_tokens: 4000, messages: [{ role: "user", content: prompt }] }),
+            body: JSON.stringify({ messages: [{ role: "user", content: prompt }] }),
           });
           const d = await r.json();
           const t = d.content?.map(b => b.text || "").join("") || "";
@@ -1112,7 +1118,7 @@ Respond ONLY with valid JSON (no markdown, no backticks):
                 {/* BLURRED: 6-Month Projection */}
                 <h3 style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: 3.5, color: Gold, marginBottom: 14, marginTop: 32 }}>6-Month Projection</h3>
                 <div style={{ position: "relative", marginBottom: 12, cursor: "pointer" }} onClick={() => setShowPaywall(true)}>
-                  <div style={{ filter: "blur(6px)", opacity: .4, pointerEvents: "none", userSelect: "none" }}>
+                  <div style={{ filter: isPaid ? "none" : "blur(6px)", opacity: isPaid ? 1 : .4, pointerEvents: isPaid ? "auto" : "none", userSelect: isPaid ? "auto" : "none" }}>
                     <div style={{ background: W(.015), border: `1px solid ${W(.035)}`, borderRadius: 13, padding: "14px 10px 6px", height: 180 }}>
                       <svg width="100%" height="140" viewBox="0 0 320 140"><path d="M0,130 L53,110 L106,85 L159,60 L212,35 L265,15 L320,5" fill="none" stroke={Gold} strokeWidth="2"/><path d="M0,130 L53,120 L106,100 L159,80 L212,60 L265,45 L320,30" fill="none" stroke={Green} strokeWidth="2"/></svg>
                     </div>
@@ -1125,7 +1131,7 @@ Respond ONLY with valid JSON (no markdown, no backticks):
                 {/* BLURRED: Income Streams */}
                 <h3 style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: 3.5, color: Gold, marginBottom: 14, marginTop: 32 }}>Income Streams</h3>
                 <div style={{ position: "relative", marginBottom: 12, cursor: "pointer" }} onClick={() => setShowPaywall(true)}>
-                  <div style={{ filter: "blur(6px)", opacity: .4, pointerEvents: "none", userSelect: "none" }}>
+                  <div style={{ filter: isPaid ? "none" : "blur(6px)", opacity: isPaid ? 1 : .4, pointerEvents: isPaid ? "auto" : "none", userSelect: isPaid ? "auto" : "none" }}>
                     {(r.incomeBreakdown || [{source:"Core service",amount:"$2,000–$4,000"},{source:"Upsells",amount:"$500–$1,500"},{source:"Passive",amount:"$300–$1,000"}]).map((s,i) => (
                       <div key={i} style={{ padding: "13px 16px", background: W(.013), border: `1px solid ${W(.035)}`, borderRadius: 11, marginBottom: 7 }}>
                         <div style={{ display: "flex", justifyContent: "space-between" }}><span style={{ fontSize: 13, fontWeight: 600, color: "#fff" }}>{s.source}</span><span style={{ fontSize: 13, fontWeight: 700, color: Gold }}>{s.amount}</span></div>
@@ -1151,7 +1157,7 @@ Respond ONLY with valid JSON (no markdown, no backticks):
                 {/* BLURRED: Daily Schedule */}
                 <h3 style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: 3.5, color: Gold, marginBottom: 14, marginTop: 24 }}>Your Daily Schedule</h3>
                 <div style={{ position: "relative", marginBottom: 12, cursor: "pointer" }} onClick={() => setShowPaywall(true)}>
-                  <div style={{ filter: "blur(6px)", opacity: .4, pointerEvents: "none", userSelect: "none" }}>
+                  <div style={{ filter: isPaid ? "none" : "blur(6px)", opacity: isPaid ? 1 : .4, pointerEvents: isPaid ? "auto" : "none", userSelect: isPaid ? "auto" : "none" }}>
                     <div style={{ background: W(.013), border: `1px solid ${W(.035)}`, borderRadius: 13, padding: 16 }}>
                       {(r.dailySchedule?.blocks || [{time:"Morning",task:"Content creation",duration:"30 min"},{time:"Midday",task:"Client outreach",duration:"30 min"},{time:"Afternoon",task:"Deep work",duration:"60 min"},{time:"Evening",task:"Admin & planning",duration:"20 min"}]).map((b,i) => (
                         <div key={i} style={{ display: "flex", gap: 10, padding: "9px 0", borderBottom: i < 3 ? `1px solid ${W(.025)}` : "none" }}>
@@ -1170,7 +1176,7 @@ Respond ONLY with valid JSON (no markdown, no backticks):
                 {/* BLURRED: Tools */}
                 <h3 style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: 3.5, color: Gold, marginBottom: 14, marginTop: 24 }}>Tools</h3>
                 <div style={{ position: "relative", marginBottom: 12, cursor: "pointer" }} onClick={() => setShowPaywall(true)}>
-                  <div style={{ filter: "blur(6px)", opacity: .4, pointerEvents: "none", userSelect: "none" }}>
+                  <div style={{ filter: isPaid ? "none" : "blur(6px)", opacity: isPaid ? 1 : .4, pointerEvents: isPaid ? "auto" : "none", userSelect: isPaid ? "auto" : "none" }}>
                     <div style={{ background: W(.013), border: `1px solid ${W(.035)}`, borderRadius: 12, overflow: "hidden" }}>
                       {(r.tools || [{name:"Claude Pro"},{name:"Canva Pro"},{name:"Notion"},{name:"Gumroad"},{name:"Carrd"}]).map((t,i) => (
                         <div key={i} style={{ padding: "11px 14px", borderBottom: i < 4 ? `1px solid ${W(.025)}` : "none", fontSize: 12.5, fontWeight: 600, color: "#fff" }}>{t.name}</div>
@@ -1185,7 +1191,7 @@ Respond ONLY with valid JSON (no markdown, no backticks):
                 {/* BLURRED: Scripts */}
                 <h3 style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: 3.5, color: Gold, marginBottom: 14, marginTop: 24 }}>Copy-Paste Scripts</h3>
                 <div style={{ position: "relative", marginBottom: 12, cursor: "pointer" }} onClick={() => setShowPaywall(true)}>
-                  <div style={{ filter: "blur(6px)", opacity: .4, pointerEvents: "none", userSelect: "none" }}>
+                  <div style={{ filter: isPaid ? "none" : "blur(6px)", opacity: isPaid ? 1 : .4, pointerEvents: isPaid ? "auto" : "none", userSelect: isPaid ? "auto" : "none" }}>
                     {(r.scripts || [{context:"Cold DM on LinkedIn",script:"Hey [Name], I noticed..."},{context:"Follow-up",script:"Hey [Name], just following up..."}]).map((s,i) => (
                       <div key={i} style={{ marginBottom: 9 }}>
                         <div style={{ fontSize: 10.5, fontWeight: 600, color: Gold, marginBottom: 5, textTransform: "uppercase", letterSpacing: 1.5 }}>{s.context}</div>
