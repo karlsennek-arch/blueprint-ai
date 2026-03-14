@@ -316,6 +316,10 @@ export default function LandingPage() {
   const [page, setPage] = useState("landing"); // "landing" or "quiz"
   const [showPaywall, setShowPaywall] = useState(false);
   const [isPaid, setIsPaid] = useState(false);
+  const [reportTab, setReportTab] = useState("blueprint");
+  const [chatMessages, setChatMessages] = useState([]);
+  const [chatInput, setChatInput] = useState("");
+  const [chatLoading, setChatLoading] = useState(false);
   useEffect(() => { setIsPaid(checkPaid()); }, []);
 
   // ─── QUIZ STATE (embedded quiz) ───
@@ -1066,10 +1070,10 @@ Respond ONLY with valid JSON (no markdown, no backticks):
 
                 {/* Tab switcher */}
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 3, marginBottom: 16, background: W(.02), borderRadius: 11, padding: 3 }}>
-                  <button style={{ padding: "9px 6px", borderRadius: 9, background: "rgba(232,200,114,.08)", border: "1px solid rgba(232,200,114,.15)", color: Gold, fontSize: 11, fontWeight: 600 }}>📋 Blueprint</button>
-                  <button onClick={() => { if(!isPaid) setShowPaywall(true); }} style={{ padding: "9px 6px", borderRadius: 9, background: isPaid ? "rgba(232,200,114,.08)" : "transparent", border: isPaid ? "1px solid rgba(232,200,114,.15)" : "1px solid transparent", color: isPaid ? Gold : W(.2), fontSize: 11, fontWeight: 600 }}>{isPaid ? "📊 Tracker" : "🔒 Tracker"}</button>
-                  <button onClick={() => { if(!isPaid) setShowPaywall(true); }} style={{ padding: "9px 6px", borderRadius: 9, background: isPaid ? "rgba(232,200,114,.08)" : "transparent", border: isPaid ? "1px solid rgba(232,200,114,.15)" : "1px solid transparent", color: isPaid ? Gold : W(.2), fontSize: 11, fontWeight: 600 }}>{isPaid ? "💬 Chat" : "🔒 Chat"}</button>
-                  <button onClick={() => { if(!isPaid) setShowPaywall(true); }} style={{ padding: "9px 6px", borderRadius: 9, background: isPaid ? "rgba(232,200,114,.08)" : "transparent", border: isPaid ? "1px solid rgba(232,200,114,.15)" : "1px solid transparent", color: isPaid ? Gold : W(.2), fontSize: 11, fontWeight: 600 }}>{isPaid ? "🔀 Compare" : "🔒 Compare"}</button>
+                  <button onClick={() => setReportTab("blueprint")} style={{ padding: "9px 6px", borderRadius: 9, background: reportTab === "blueprint" ? "rgba(232,200,114,.08)" : "transparent", border: reportTab === "blueprint" ? "1px solid rgba(232,200,114,.15)" : "1px solid transparent", color: reportTab === "blueprint" ? Gold : W(.3), fontSize: 11, fontWeight: 600 }}>📋 Blueprint</button>
+                  <button onClick={() => { if(isPaid) setReportTab("tracker"); else setShowPaywall(true); }} style={{ padding: "9px 6px", borderRadius: 9, background: reportTab === "tracker" ? "rgba(232,200,114,.08)" : "transparent", border: reportTab === "tracker" ? "1px solid rgba(232,200,114,.15)" : "1px solid transparent", color: reportTab === "tracker" ? Gold : isPaid ? W(.3) : W(.2), fontSize: 11, fontWeight: 600 }}>{isPaid ? "📊 Tracker" : "🔒 Tracker"}</button>
+                  <button onClick={() => { if(isPaid) setReportTab("chat"); else setShowPaywall(true); }} style={{ padding: "9px 6px", borderRadius: 9, background: reportTab === "chat" ? "rgba(232,200,114,.08)" : isPaid ? "transparent" : "transparent", border: reportTab === "chat" ? "1px solid rgba(232,200,114,.15)" : "1px solid transparent", color: reportTab === "chat" ? Gold : isPaid ? W(.3) : W(.2), fontSize: 11, fontWeight: 600 }}>{isPaid ? "💬 Chat" : "🔒 Chat"}</button>
+                  <button onClick={() => { if(isPaid) setReportTab("compare"); else setShowPaywall(true); }} style={{ padding: "9px 6px", borderRadius: 9, background: reportTab === "compare" ? "rgba(232,200,114,.08)" : "transparent", border: reportTab === "compare" ? "1px solid rgba(232,200,114,.15)" : "1px solid transparent", color: reportTab === "compare" ? Gold : isPaid ? W(.3) : W(.2), fontSize: 11, fontWeight: 600 }}>{isPaid ? "🔀 Compare" : "🔒 Compare"}</button>
                 </div>
 
                 {/* Action bar */}
@@ -1079,6 +1083,46 @@ Respond ONLY with valid JSON (no markdown, no backticks):
                   <button onClick={startQuiz} style={{ padding: "11px 14px", borderRadius: 10, border: `1px solid ${W(.06)}`, background: "transparent", color: W(.3), fontSize: 12.5, fontWeight: 600 }}>↻ New</button>
                 </div>
 
+                {/* ── TAB CONTENT ── */}
+                {reportTab === "chat" && (
+                  <div style={{ minHeight: 400 }}>
+                    <div style={{ background: W(.02), border: `1px solid ${W(.04)}`, borderRadius: 16, padding: 20, marginBottom: 16 }}>
+                      <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: 2, color: Gold, marginBottom: 12 }}>💬 AI Chat Advisor</div>
+                      <div style={{ maxHeight: 360, overflowY: "auto", marginBottom: 16 }}>
+                        {chatMessages.length === 0 && (
+                          <p style={{ fontSize: 13, color: W(.3), textAlign: "center", padding: "40px 0" }}>Ask anything about your blueprint, strategy, or next steps.</p>
+                        )}
+                        {chatMessages.map((m, i) => (
+                          <div key={i} style={{ display: "flex", justifyContent: m.role === "user" ? "flex-end" : "flex-start", marginBottom: 10 }}>
+                            <div style={{ maxWidth: "80%", padding: "10px 14px", borderRadius: 12, background: m.role === "user" ? "rgba(232,200,114,.1)" : W(.04), border: `1px solid ${m.role === "user" ? "rgba(232,200,114,.15)" : W(.06)}` }}>
+                              <p style={{ fontSize: 13, color: m.role === "user" ? Gold : W(.6), lineHeight: 1.6, whiteSpace: "pre-wrap" }}>{m.content}</p>
+                            </div>
+                          </div>
+                        ))}
+                        {chatLoading && <div style={{ fontSize: 12, color: W(.3), padding: "8px 0" }}>Thinking...</div>}
+                      </div>
+                      <form onSubmit={async (e) => { e.preventDefault(); if(!chatInput.trim() || chatLoading) return; const msg = chatInput.trim(); setChatInput(""); const newMsgs = [...chatMessages, { role: "user", content: msg }]; setChatMessages(newMsgs); setChatLoading(true); try { const ctx = window.__bp ? "User blueprint: " + window.__bp.name + " (" + window.__bp.monthlyRevenue + ")" : ""; const r = await fetch("/api/chat", { method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({ messages: [{ role: "user", content: ctx + "\nUser question: " + msg }] }) }); const d = await r.json(); const reply = d.content?.map(b => b.text || "").join("") || "Sorry, something went wrong."; setChatMessages([...newMsgs, { role: "assistant", content: reply }]); } catch(err) { setChatMessages([...newMsgs, { role: "assistant", content: "Sorry, something went wrong." }]); } setChatLoading(false); }} style={{ display: "flex", gap: 8 }}>
+                        <input value={chatInput} onChange={(e) => setChatInput(e.target.value)} placeholder="Ask about your blueprint..." style={{ flex: 1, padding: "12px 16px", borderRadius: 10, background: W(.03), border: `1px solid ${W(.06)}`, color: "#fff", fontSize: 13, outline: "none" }} />
+                        <button type="submit" style={{ padding: "12px 20px", borderRadius: 10, background: `linear-gradient(135deg,${Gold},#D4A843)`, border: "none", color: Bg, fontSize: 13, fontWeight: 700, cursor: "pointer" }}>Send</button>
+                      </form>
+                    </div>
+                  </div>
+                )}
+                {reportTab === "tracker" && (
+                  <div style={{ textAlign: "center", padding: "60px 0" }}>
+                    <div style={{ fontSize: 32, marginBottom: 12 }}>📊</div>
+                    <p style={{ fontSize: 15, color: W(.4), fontWeight: 600, marginBottom: 6 }}>Progress Tracker</p>
+                    <p style={{ fontSize: 12, color: W(.25) }}>Coming soon</p>
+                  </div>
+                )}
+                {reportTab === "compare" && (
+                  <div style={{ textAlign: "center", padding: "60px 0" }}>
+                    <div style={{ fontSize: 32, marginBottom: 12 }}>🔀</div>
+                    <p style={{ fontSize: 15, color: W(.4), fontWeight: 600, marginBottom: 6 }}>Compare Paths</p>
+                    <p style={{ fontSize: 12, color: W(.25) }}>Coming soon</p>
+                  </div>
+                )}
+                {reportTab === "blueprint" && <>
                 {/* Personal insight */}
                 {report.personalInsight && <div style={{ padding: "16px 18px", marginBottom: 14, background: `linear-gradient(135deg,rgba(232,200,114,.035),rgba(126,232,178,.02))`, border: "1px solid rgba(232,200,114,.08)", borderRadius: 13 }}>
                   <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: 2, color: Gold, marginBottom: 5 }}>💡 Why This Works For You</div>
@@ -1277,6 +1321,7 @@ Respond ONLY with valid JSON (no markdown, no backticks):
                 <div style={{ textAlign: "center", marginTop: 16 }}>
                   <button onClick={startQuiz} style={{ padding: "10px 22px", borderRadius: 10, border: `1px solid ${W(.08)}`, background: "transparent", color: W(.35), fontSize: 12, fontWeight: 600 }}>↻ Generate New Blueprint</button>
                 </div>
+                </>}
               </div>;
             })()}
           </div>
