@@ -6,6 +6,13 @@ const Green = "#7EE8B2";
 const Bg = "#08090C";
 const W = (a) => `rgba(255,255,255,${a})`;
 
+// ─── STRIPE CHECKOUT ──────────────────────────────────────────
+async function handleCheckout() {
+  const res = await fetch("/api/checkout", { method: "POST" });
+  const data = await res.json();
+  if (data.url) window.location.href = data.url;
+}
+
 // ─── LIVE COUNTER ───────────────────────────────────────────────
 function LiveCounter() {
   const [c, setC] = useState(47283);
@@ -119,7 +126,7 @@ function PaywallPopup({ onClose }) {
             <span style={{ fontSize: 14, color: W(.3) }}>one-time</span>
           </div>
           <div style={{ fontSize: 11, color: Green, fontWeight: 600, marginBottom: 14 }}>Launch price — 61% off</div>
-          <button onClick={() => alert("🔓 In production: Stripe Checkout opens here → payment → instant unlock")} style={{ width: "100%", padding: 16, borderRadius: 12, border: "none", background: `linear-gradient(135deg,${Gold},#D4A843)`, color: Bg, fontSize: 15, fontWeight: 700, cursor: "pointer", boxShadow: "0 4px 24px rgba(232,200,114,.2)" }}>🔓 Unlock My Full Blueprint — $19</button>
+          <button onClick={handleCheckout} style={{ width: "100%", padding: 16, borderRadius: 12, border: "none", background: `linear-gradient(135deg,${Gold},#D4A843)`, color: Bg, fontSize: 15, fontWeight: 700, cursor: "pointer", boxShadow: "0 4px 24px rgba(232,200,114,.2)" }}>🔓 Unlock My Full Blueprint — $19</button>
         </div>
 
         <div style={{ display: "flex", justifyContent: "center", gap: 14, marginBottom: 10 }}>
