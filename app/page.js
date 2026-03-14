@@ -1117,20 +1117,20 @@ Respond ONLY with valid JSON (no markdown, no backticks):
 
                 {/* BLURRED: 6-Month Projection */}
                 <h3 style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: 3.5, color: Gold, marginBottom: 14, marginTop: 32 }}>6-Month Projection</h3>
-                <div style={{ position: "relative", marginBottom: 12, cursor: "pointer" }} onClick={() => setShowPaywall(true)}>
+                <div style={{ position: "relative", marginBottom: 12, cursor: isPaid ? "default" : "pointer" }} onClick={() => { if(!isPaid) setShowPaywall(true); }}>
                   <div style={{ filter: isPaid ? "none" : "blur(6px)", opacity: isPaid ? 1 : .4, pointerEvents: isPaid ? "auto" : "none", userSelect: isPaid ? "auto" : "none" }}>
                     <div style={{ background: W(.015), border: `1px solid ${W(.035)}`, borderRadius: 13, padding: "14px 10px 6px", height: 180 }}>
                       <svg width="100%" height="140" viewBox="0 0 320 140"><path d="M0,130 L53,110 L106,85 L159,60 L212,35 L265,15 L320,5" fill="none" stroke={Gold} strokeWidth="2"/><path d="M0,130 L53,120 L106,100 L159,80 L212,60 L265,45 L320,30" fill="none" stroke={Green} strokeWidth="2"/></svg>
                     </div>
                   </div>
-                  <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(8,9,12,.35)", borderRadius: 14 }}>
+                  <div style={{ position: "absolute", inset: 0, display: isPaid ? "none" : "flex", alignItems: "center", justifyContent: "center", background: "rgba(8,9,12,.35)", borderRadius: 14 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 16px", background: "rgba(232,200,114,.08)", border: "1px solid rgba(232,200,114,.15)", borderRadius: 10, fontSize: 12, fontWeight: 600, color: Gold }}>🔒 Revenue projections</div>
                   </div>
                 </div>
 
                 {/* BLURRED: Income Streams */}
                 <h3 style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: 3.5, color: Gold, marginBottom: 14, marginTop: 32 }}>Income Streams</h3>
-                <div style={{ position: "relative", marginBottom: 12, cursor: "pointer" }} onClick={() => setShowPaywall(true)}>
+                <div style={{ position: "relative", marginBottom: 12, cursor: isPaid ? "default" : "pointer" }} onClick={() => { if(!isPaid) setShowPaywall(true); }}>
                   <div style={{ filter: isPaid ? "none" : "blur(6px)", opacity: isPaid ? 1 : .4, pointerEvents: isPaid ? "auto" : "none", userSelect: isPaid ? "auto" : "none" }}>
                     {(r.incomeBreakdown || [{source:"Core service",amount:"$2,000–$4,000"},{source:"Upsells",amount:"$500–$1,500"},{source:"Passive",amount:"$300–$1,000"}]).map((s,i) => (
                       <div key={i} style={{ padding: "13px 16px", background: W(.013), border: `1px solid ${W(.035)}`, borderRadius: 11, marginBottom: 7 }}>
@@ -1138,25 +1138,25 @@ Respond ONLY with valid JSON (no markdown, no backticks):
                       </div>
                     ))}
                   </div>
-                  <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(8,9,12,.35)", borderRadius: 14 }}>
+                  <div style={{ position: "absolute", inset: 0, display: isPaid ? "none" : "flex", alignItems: "center", justifyContent: "center", background: "rgba(8,9,12,.35)", borderRadius: 14 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 16px", background: "rgba(232,200,114,.08)", border: "1px solid rgba(232,200,114,.15)", borderRadius: 10, fontSize: 12, fontWeight: 600, color: Gold }}>🔒 Income breakdown</div>
                   </div>
                 </div>
 
                 {/* URGENCY + CTA */}
-                <CountdownBar />
-                <button onClick={handleCheckout} style={{ width: "100%", padding: 16, borderRadius: 14, background: `linear-gradient(135deg,${Gold},#D4A843)`, color: Bg, fontSize: 15, fontWeight: 700, border: "none", cursor: "pointer", boxShadow: "0 4px 24px rgba(232,200,114,.2)", marginBottom: 6 }}>
+                {!isPaid && <CountdownBar />}
+                <button onClick={handleCheckout} style={{ display: isPaid ? "none" : "block", width: "100%", padding: 16, borderRadius: 14, background: `linear-gradient(135deg,${Gold},#D4A843)`, color: Bg, fontSize: 15, fontWeight: 700, border: "none", cursor: "pointer", boxShadow: "0 4px 24px rgba(232,200,114,.2)", marginBottom: 6 }}>
                   🔓 Unlock Full Blueprint — $19
                 </button>
                 <div style={{ display: "flex", justifyContent: "center", gap: 12, marginBottom: 20 }}>
-                  <span style={{ fontSize: 10, color: W(.2) }}>One-time payment</span><span style={{ fontSize: 10, color: W(.2) }}>•</span>
+                  {!isPaid && <span style={{ fontSize: 10, color: W(.2) }}>One-time payment</span>}<span style={{ fontSize: 10, color: W(.2) }}>•</span>
                   <span style={{ fontSize: 10, color: W(.2) }}>Instant unlock</span><span style={{ fontSize: 10, color: W(.2) }}>•</span>
                   <span style={{ fontSize: 10, color: W(.2) }}>30-day refund</span>
                 </div>
 
                 {/* BLURRED: Daily Schedule */}
                 <h3 style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: 3.5, color: Gold, marginBottom: 14, marginTop: 24 }}>Your Daily Schedule</h3>
-                <div style={{ position: "relative", marginBottom: 12, cursor: "pointer" }} onClick={() => setShowPaywall(true)}>
+                <div style={{ position: "relative", marginBottom: 12, cursor: isPaid ? "default" : "pointer" }} onClick={() => { if(!isPaid) setShowPaywall(true); }}>
                   <div style={{ filter: isPaid ? "none" : "blur(6px)", opacity: isPaid ? 1 : .4, pointerEvents: isPaid ? "auto" : "none", userSelect: isPaid ? "auto" : "none" }}>
                     <div style={{ background: W(.013), border: `1px solid ${W(.035)}`, borderRadius: 13, padding: 16 }}>
                       {(r.dailySchedule?.blocks || [{time:"Morning",task:"Content creation",duration:"30 min"},{time:"Midday",task:"Client outreach",duration:"30 min"},{time:"Afternoon",task:"Deep work",duration:"60 min"},{time:"Evening",task:"Admin & planning",duration:"20 min"}]).map((b,i) => (
@@ -1168,14 +1168,14 @@ Respond ONLY with valid JSON (no markdown, no backticks):
                       ))}
                     </div>
                   </div>
-                  <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(8,9,12,.35)", borderRadius: 14 }}>
+                  <div style={{ position: "absolute", inset: 0, display: isPaid ? "none" : "flex", alignItems: "center", justifyContent: "center", background: "rgba(8,9,12,.35)", borderRadius: 14 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 16px", background: "rgba(232,200,114,.08)", border: "1px solid rgba(232,200,114,.15)", borderRadius: 10, fontSize: 12, fontWeight: 600, color: Gold }}>🔒 Daily schedule</div>
                   </div>
                 </div>
 
                 {/* BLURRED: Tools */}
                 <h3 style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: 3.5, color: Gold, marginBottom: 14, marginTop: 24 }}>Tools</h3>
-                <div style={{ position: "relative", marginBottom: 12, cursor: "pointer" }} onClick={() => setShowPaywall(true)}>
+                <div style={{ position: "relative", marginBottom: 12, cursor: isPaid ? "default" : "pointer" }} onClick={() => { if(!isPaid) setShowPaywall(true); }}>
                   <div style={{ filter: isPaid ? "none" : "blur(6px)", opacity: isPaid ? 1 : .4, pointerEvents: isPaid ? "auto" : "none", userSelect: isPaid ? "auto" : "none" }}>
                     <div style={{ background: W(.013), border: `1px solid ${W(.035)}`, borderRadius: 12, overflow: "hidden" }}>
                       {(r.tools || [{name:"Claude Pro"},{name:"Canva Pro"},{name:"Notion"},{name:"Gumroad"},{name:"Carrd"}]).map((t,i) => (
@@ -1183,14 +1183,14 @@ Respond ONLY with valid JSON (no markdown, no backticks):
                       ))}
                     </div>
                   </div>
-                  <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(8,9,12,.35)", borderRadius: 14 }}>
+                  <div style={{ position: "absolute", inset: 0, display: isPaid ? "none" : "flex", alignItems: "center", justifyContent: "center", background: "rgba(8,9,12,.35)", borderRadius: 14 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 16px", background: "rgba(232,200,114,.08)", border: "1px solid rgba(232,200,114,.15)", borderRadius: 10, fontSize: 12, fontWeight: 600, color: Gold }}>🔒 Tools & pricing</div>
                   </div>
                 </div>
 
                 {/* BLURRED: Scripts */}
                 <h3 style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: 3.5, color: Gold, marginBottom: 14, marginTop: 24 }}>Copy-Paste Scripts</h3>
-                <div style={{ position: "relative", marginBottom: 12, cursor: "pointer" }} onClick={() => setShowPaywall(true)}>
+                <div style={{ position: "relative", marginBottom: 12, cursor: isPaid ? "default" : "pointer" }} onClick={() => { if(!isPaid) setShowPaywall(true); }}>
                   <div style={{ filter: isPaid ? "none" : "blur(6px)", opacity: isPaid ? 1 : .4, pointerEvents: isPaid ? "auto" : "none", userSelect: isPaid ? "auto" : "none" }}>
                     {(r.scripts || [{context:"Cold DM on LinkedIn",script:"Hey [Name], I noticed..."},{context:"Follow-up",script:"Hey [Name], just following up..."}]).map((s,i) => (
                       <div key={i} style={{ marginBottom: 9 }}>
@@ -1199,7 +1199,7 @@ Respond ONLY with valid JSON (no markdown, no backticks):
                       </div>
                     ))}
                   </div>
-                  <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(8,9,12,.35)", borderRadius: 14 }}>
+                  <div style={{ position: "absolute", inset: 0, display: isPaid ? "none" : "flex", alignItems: "center", justifyContent: "center", background: "rgba(8,9,12,.35)", borderRadius: 14 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 16px", background: "rgba(232,200,114,.08)", border: "1px solid rgba(232,200,114,.15)", borderRadius: 10, fontSize: 12, fontWeight: 600, color: Gold }}>🔒 Outreach scripts</div>
                   </div>
                 </div>
