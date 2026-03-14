@@ -19,10 +19,3 @@ export async function POST() {
 
   return NextResponse.json({ url: session.url });
 }
-```
-
-Lagre (`Ctrl + S`) og lukk. Deretter push:
-```
-git add .
-git commit -m "Fix checkout route"
-git push
