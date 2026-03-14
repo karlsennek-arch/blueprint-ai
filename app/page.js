@@ -1067,15 +1067,15 @@ Respond ONLY with valid JSON (no markdown, no backticks):
                 {/* Tab switcher */}
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 3, marginBottom: 16, background: W(.02), borderRadius: 11, padding: 3 }}>
                   <button style={{ padding: "9px 6px", borderRadius: 9, background: "rgba(232,200,114,.08)", border: "1px solid rgba(232,200,114,.15)", color: Gold, fontSize: 11, fontWeight: 600 }}>📋 Blueprint</button>
-                  <button onClick={() => setShowPaywall(true)} style={{ padding: "9px 6px", borderRadius: 9, background: "transparent", border: "1px solid transparent", color: W(.2), fontSize: 11, fontWeight: 600 }}>🔒 Tracker</button>
-                  <button onClick={() => setShowPaywall(true)} style={{ padding: "9px 6px", borderRadius: 9, background: "transparent", border: "1px solid transparent", color: W(.2), fontSize: 11, fontWeight: 600 }}>🔒 Chat</button>
-                  <button onClick={() => setShowPaywall(true)} style={{ padding: "9px 6px", borderRadius: 9, background: "transparent", border: "1px solid transparent", color: W(.2), fontSize: 11, fontWeight: 600 }}>🔒 Compare</button>
+                  <button onClick={() => { if(!isPaid) setShowPaywall(true); }} style={{ padding: "9px 6px", borderRadius: 9, background: isPaid ? "rgba(232,200,114,.08)" : "transparent", border: isPaid ? "1px solid rgba(232,200,114,.15)" : "1px solid transparent", color: isPaid ? Gold : W(.2), fontSize: 11, fontWeight: 600 }}>{isPaid ? "📊 Tracker" : "🔒 Tracker"}</button>
+                  <button onClick={() => { if(!isPaid) setShowPaywall(true); }} style={{ padding: "9px 6px", borderRadius: 9, background: isPaid ? "rgba(232,200,114,.08)" : "transparent", border: isPaid ? "1px solid rgba(232,200,114,.15)" : "1px solid transparent", color: isPaid ? Gold : W(.2), fontSize: 11, fontWeight: 600 }}>{isPaid ? "💬 Chat" : "🔒 Chat"}</button>
+                  <button onClick={() => { if(!isPaid) setShowPaywall(true); }} style={{ padding: "9px 6px", borderRadius: 9, background: isPaid ? "rgba(232,200,114,.08)" : "transparent", border: isPaid ? "1px solid rgba(232,200,114,.15)" : "1px solid transparent", color: isPaid ? Gold : W(.2), fontSize: 11, fontWeight: 600 }}>{isPaid ? "🔀 Compare" : "🔒 Compare"}</button>
                 </div>
 
                 {/* Action bar */}
                 <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
                   <button style={{ flex: 1, padding: "11px", borderRadius: 10, background: "rgba(232,200,114,.06)", border: "1px solid rgba(232,200,114,.12)", color: Gold, fontSize: 12.5, fontWeight: 600 }}>📤 Share</button>
-                  <button onClick={() => setShowPaywall(true)} style={{ flex: 1, padding: "11px", borderRadius: 10, background: W(.03), border: `1px solid ${W(.06)}`, color: W(.25), fontSize: 12.5, fontWeight: 600 }}>🔒 Export PDF</button>
+                  <button onClick={() => { if(!isPaid) setShowPaywall(true); }} style={{ flex: 1, padding: "11px", borderRadius: 10, background: isPaid ? "rgba(232,200,114,.06)" : W(.03), border: isPaid ? "1px solid rgba(232,200,114,.12)" : `1px solid ${W(.06)}`, color: isPaid ? Gold : W(.25), fontSize: 12.5, fontWeight: 600 }}>{isPaid ? "📄 Export PDF" : "🔒 Export PDF"}</button>
                   <button onClick={startQuiz} style={{ padding: "11px 14px", borderRadius: 10, border: `1px solid ${W(.06)}`, background: "transparent", color: W(.3), fontSize: 12.5, fontWeight: 600 }}>↻ New</button>
                 </div>
 
