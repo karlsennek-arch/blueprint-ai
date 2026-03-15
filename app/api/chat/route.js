@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 export const dynamic = "force-dynamic";
 
 export async function POST(req) {
-  const { messages } = await req.json();
+  const { messages, max_tokens: reqMax } = await req.json();
 
   const res = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
@@ -14,7 +14,7 @@ export async function POST(req) {
     },
     body: JSON.stringify({
       model: "claude-sonnet-4-20250514",
-      max_tokens: 1000,
+      max_tokens: reqMax || 4096,
       messages,
     }),
   });

@@ -1,19 +1,149 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
+import { createClient } from "@supabase/supabase-js";
 
 const Gold = "#E8C872";
 const Green = "#7EE8B2";
 const Bg = "#08090C";
 const W = (a) => `rgba(255,255,255,${a})`;
 
+// Supabase browser client (lazy init)
+let _sb = null;
+function getSb() {
+  if (!_sb && typeof window !== "undefined" && process.env.NEXT_PUBLIC_SUPABASE_URL) {
+    _sb = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+  }
+  return _sb;
+}
+
 function checkPaid() {
   if (typeof document === "undefined") return false;
   return document.cookie.includes("ventrix_paid=true");
 }
-async function handleCheckout() {
-  const res = await fetch("/api/checkout", { method: "POST" });
-  const data = await res.json();
-  if (data.url) window.location.href = data.url;
+
+// ─── AUTH MODAL ────────────────────────────────────────────
+function AuthModal({ onAuth, onSkip, lang }) {
+  const [email, setEmail] = useState("");
+  const [sent, setSent] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const labels = {
+    en: { title: "See your blueprint", sub: "Enter your email to save your results and access them anytime.", placeholder: "you@email.com", btn: "Send magic link", sent: "Check your inbox!", sentSub: "We sent a login link to", skip: "Continue without saving", or: "or", google: "Continue with Google", error: "Something went wrong. Try again." },
+    no: { title: "Se din blueprint", sub: "Skriv inn e-posten din for å lagre resultatene og få tilgang når som helst.", placeholder: "deg@epost.no", btn: "Send innloggingslenke", sent: "Sjekk innboksen!", sentSub: "Vi sendte en innloggingslenke til", skip: "Fortsett uten å lagre", or: "eller", google: "Fortsett med Google", error: "Noe gikk galt. Prøv igjen." },
+    es: { title: "Ve tu plan", sub: "Ingresa tu email para guardar tus resultados.", placeholder: "tu@email.com", btn: "Enviar enlace mágico", sent: "¡Revisa tu correo!", sentSub: "Enviamos un enlace a", skip: "Continuar sin guardar", or: "o", google: "Continuar con Google", error: "Algo salió mal." },
+  };
+  const t = labels[lang] || labels.en;
+
+  const handleMagicLink = async () => {
+    if (!email.includes("@")) return;
+    setLoading(true);
+    setError("");
+    try {
+      const sb = getSb();
+      if (!sb) { onSkip(); return; }
+      const { error: authErr } = await sb.auth.signInWithOtp({
+        email,
+        options: { emailRedirectTo: window.location.origin + "/?auth=callback" },
+      });
+      if (authErr) throw authErr;
+      setSent(true);
+    } catch (e) {
+      console.error("Auth error:", e);
+      setError(t.error);
+    }
+    setLoading(false);
+  };
+
+  const handleGoogle = async () => {
+    try {
+      const sb = getSb();
+      if (!sb) { onSkip(); return; }
+      await sb.auth.signInWithOAuth({
+        provider: "google",
+        options: { redirectTo: window.location.origin + "/?auth=callback" },
+      });
+    } catch (e) {
+      console.error("Google auth error:", e);
+      setError(t.error);
+    }
+  };
+
+  return (
+    <div style={{ animation: "su .4s both" }}>
+      <div style={{ textAlign: "center", marginBottom: 24 }}>
+        <div style={{ width: 48, height: 48, borderRadius: 12, background: `linear-gradient(135deg,${Gold},#D4A843)`, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px", fontSize: 20 }}>📧</div>
+        <h2 style={{ fontSize: "clamp(20px,5vw,26px)", fontWeight: 800, lineHeight: 1.2, marginBottom: 6 }}>{t.title}</h2>
+        <p style={{ fontSize: 13, color: W(.3), fontFamily: "'Crimson Pro',serif", fontStyle: "italic", maxWidth: 360, margin: "0 auto" }}>{t.sub}</p>
+      </div>
+
+      {!sent ? (
+        <div style={{ maxWidth: 380, margin: "0 auto" }}>
+          {/* Email input */}
+          <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
+            <input
+              type="email" value={email} onChange={e => setEmail(e.target.value)}
+              placeholder={t.placeholder}
+              onKeyDown={e => e.key === "Enter" && handleMagicLink()}
+              style={{ flex: 1, padding: "14px 16px", borderRadius: 11, background: W(.03), border: `1px solid ${W(.08)}`, color: "#fff", fontSize: 14, outline: "none", fontFamily: "inherit" }}
+            />
+            <button onClick={handleMagicLink} disabled={loading || !email.includes("@")} style={{
+              padding: "14px 20px", borderRadius: 11,
+              background: email.includes("@") ? `linear-gradient(135deg,${Gold},#D4A843)` : W(.04),
+              color: email.includes("@") ? Bg : W(.15), fontSize: 13, fontWeight: 700,
+              cursor: email.includes("@") ? "pointer" : "not-allowed", whiteSpace: "nowrap",
+            }}>
+              {loading ? "..." : t.btn}
+            </button>
+          </div>
+
+          {error && <p style={{ fontSize: 12, color: "#FF8A80", textAlign: "center", marginBottom: 10 }}>{error}</p>}
+
+          {/* Divider */}
+          <div style={{ display: "flex", alignItems: "center", gap: 12, margin: "16px 0" }}>
+            <div style={{ flex: 1, height: 1, background: W(.06) }} />
+            <span style={{ fontSize: 11, color: W(.15), textTransform: "uppercase", letterSpacing: 2 }}>{t.or}</span>
+            <div style={{ flex: 1, height: 1, background: W(.06) }} />
+          </div>
+
+          {/* Google button */}
+          <button onClick={handleGoogle} style={{
+            width: "100%", padding: "13px", borderRadius: 11,
+            background: W(.03), border: `1px solid ${W(.08)}`,
+            color: "#fff", fontSize: 13, fontWeight: 600,
+            display: "flex", alignItems: "center", justifyContent: "center", gap: 10, marginBottom: 16,
+          }}>
+            <svg width="18" height="18" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+            {t.google}
+          </button>
+
+          {/* Skip */}
+          <button onClick={onSkip} style={{
+            width: "100%", padding: "10px", borderRadius: 10,
+            background: "transparent", border: "none",
+            color: W(.2), fontSize: 12, fontWeight: 500,
+          }}>
+            {t.skip} →
+          </button>
+        </div>
+      ) : (
+        <div style={{ textAlign: "center", maxWidth: 380, margin: "0 auto" }}>
+          <div style={{ width: 56, height: 56, borderRadius: 14, background: "rgba(126,232,178,.08)", border: `1px solid rgba(126,232,178,.15)`, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px", fontSize: 24 }}>✉️</div>
+          <h3 style={{ fontSize: 18, fontWeight: 700, color: Green, marginBottom: 6 }}>{t.sent}</h3>
+          <p style={{ fontSize: 13, color: W(.35), marginBottom: 4 }}>{t.sentSub}</p>
+          <p style={{ fontSize: 14, fontWeight: 600, color: "#fff", marginBottom: 20 }}>{email}</p>
+          <p style={{ fontSize: 11, color: W(.2), marginBottom: 16 }}>Click the link in the email to log in. Your blueprint will be waiting.</p>
+          <button onClick={onSkip} style={{
+            padding: "10px 24px", borderRadius: 10,
+            background: W(.03), border: `1px solid ${W(.06)}`,
+            color: W(.3), fontSize: 12, fontWeight: 500,
+          }}>
+            {t.skip} →
+          </button>
+        </div>
+      )}
+    </div>
+  );
 }
 
 // ─── LIVE COUNTER ───────────────────────────────────────────────
@@ -320,7 +450,116 @@ export default function LandingPage() {
   const [chatMessages, setChatMessages] = useState([]);
   const [chatInput, setChatInput] = useState("");
   const [chatLoading, setChatLoading] = useState(false);
-  useEffect(() => { setIsPaid(checkPaid()); }, []);
+  const [wpWeek, setWpWeek] = useState(0);
+  const [trackerChecked, setTrackerChecked] = useState({});
+
+  // ─── AUTH STATE ───
+  const [user, setUser] = useState(null);       // { id, email }
+  const [authChecked, setAuthChecked] = useState(false);
+
+  // Check auth on mount + listen for auth changes
+  useEffect(() => {
+    // Cookie fallback for immediate UI
+    setIsPaid(checkPaid());
+
+    const sb = getSb();
+    if (!sb) { setAuthChecked(true); return; }
+
+    // Check existing session
+    sb.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        setUser({ id: session.user.id, email: session.user.email });
+        checkPaidStatus(session.access_token);
+      }
+      setAuthChecked(true);
+
+      // Handle auth callback (magic link / OAuth redirect)
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("auth") === "callback" && session?.user) {
+        // User just logged in via magic link — go straight to quiz loading
+        setPage("quiz");
+        setScreen("loading");
+        setLp(0);
+        aiRef.current = false;
+        window.__bp = null;
+        // Clean URL
+        window.history.replaceState({}, "", window.location.pathname);
+      }
+    });
+
+    // Listen for auth changes (magic link callback, OAuth redirect)
+    const { data: { subscription } } = sb.auth.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_IN" && session?.user) {
+        setUser({ id: session.user.id, email: session.user.email });
+        checkPaidStatus(session.access_token);
+      } else if (event === "SIGNED_OUT") {
+        setUser(null);
+        setIsPaid(false);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  // Server-side paid check
+  const checkPaidStatus = async (token) => {
+    try {
+      const res = await fetch("/api/auth", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ access_token: token }),
+      });
+      const data = await res.json();
+      if (data.paid) {
+        setIsPaid(true);
+        document.cookie = "ventrix_paid=true;path=/;max-age=31536000;SameSite=Lax";
+      }
+    } catch (e) {
+      console.error("Paid check failed:", e);
+    }
+  };
+
+  // Save blueprint to Supabase
+  const saveBlueprint = async (reportData) => {
+    const sb = getSb();
+    if (!sb || !user) return;
+    try {
+      const { data: { session } } = await sb.auth.getSession();
+      if (!session) return;
+      await fetch("/api/blueprint", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          access_token: session.access_token,
+          answers,
+          report: reportData,
+          language: lang,
+        }),
+      });
+    } catch (e) {
+      console.error("Blueprint save failed:", e);
+    }
+  };
+
+  // Checkout with email
+  const handleCheckout = async () => {
+    const res = await fetch("/api/checkout", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: user?.email || null }),
+    });
+    const data = await res.json();
+    if (data.url) window.location.href = data.url;
+  };
+
+  // Logout
+  const handleLogout = async () => {
+    const sb = getSb();
+    if (sb) await sb.auth.signOut();
+    setUser(null);
+    setIsPaid(false);
+    document.cookie = "ventrix_paid=;path=/;max-age=0";
+  };
 
   // ─── QUIZ STATE (embedded quiz) ───
   const [step, setStep] = useState(-1); // -1 = language select, 0+ = questions
@@ -328,7 +567,7 @@ export default function LandingPage() {
   const [answers, setAnswers] = useState({});
   const [lp, setLp] = useState(0);
   const [report, setReport] = useState(null);
-  const [screen, setScreen] = useState("quiz"); // quiz | loading | report
+  const [screen, setScreen] = useState("quiz"); // quiz | auth | loading | report
   const aiRef = useRef(null);
 
   const LANGS = [
@@ -861,17 +1100,32 @@ export default function LandingPage() {
     quickestWin = "Open Gumroad.com, create a free account. Ask Claude: 'Create a premium AI prompt pack for [your interest] — 50 prompts organized by category.' Design a cover in Canva, list for $19. 30 minutes, product for sale.";
   }
 
+    const sitLabels = { student: "student", fulltime: "working full-time", parttime: "working part-time", freelancer: "freelancing", unemployed: "between jobs", parent: "a stay-at-home parent" };
+    const sitLabel = sitLabels[sit] || sit;
     const skillNote = sk.length>1 && !noSkills ? "Your " + sk.slice(0,2).join(" + ") + " combination is actually rare — most people have one or the other." : noSkills ? "Starting from zero is actually an advantage — you have no bad habits to unlearn and AI levels the playing field completely." : "Your skills give you a real edge that AI amplifies rather than replaces.";
     const timeNote = time==="5" ? "tight but enough to start" : "solid runway for building something real";
     return { primary, secondary, tertiary,
-    personalInsight: "You're a " + sit + " with " + time + " hrs/week — " + timeNote + ". " + skillNote + " The key is speed of execution over perfection.",
+    personalInsight: "You're " + sitLabel + " with " + time + " hrs/week — " + timeNote + ". " + skillNote + " The key is speed of execution over perfection.",
     quickestWin,
     shareCard: {headline:"AI says I can make " + primary.monthlyRevenue + "/mo as a", path:primary.name, match:primary.match, timeframe:"in 3-6 months"},
   };
   };
 
 
-  const startLoading = () => { setScreen("loading"); setLp(0); aiRef.current = false; window.__bp = null; };
+  const startLoading = () => {
+    // If user is already logged in, skip auth and go to loading
+    if (user) {
+      setScreen("loading"); setLp(0); aiRef.current = false; window.__bp = null;
+    } else {
+      // Show auth modal first
+      setScreen("auth");
+    }
+  };
+
+  const handleAuthComplete = () => {
+    // After auth (or skip), start the actual loading
+    setScreen("loading"); setLp(0); aiRef.current = false; window.__bp = null;
+  };
 
   // AI call + loading
   useEffect(() => {
@@ -890,8 +1144,8 @@ Respond ONLY with valid JSON (no markdown, no backticks):
 
           const r = await fetch("/api/chat", {
             method: "POST", headers: { "Content-Type": "application/json" },
-            signal: AbortSignal.timeout(45000),
-            body: JSON.stringify({ messages: [{ role: "user", content: prompt }] }),
+            signal: AbortSignal.timeout(60000),
+            body: JSON.stringify({ messages: [{ role: "user", content: prompt }], max_tokens: 4096 }),
           });
           const d = await r.json();
           const t = d.content?.map(b => b.text || "").join("") || "";
@@ -908,14 +1162,14 @@ Respond ONLY with valid JSON (no markdown, no backticks):
     }
     if (lp >= LOAD_PHASES.length) {
       let w = 0;
-      const i = setInterval(() => { w++; if (window.__bp) { setReport(window.__bp); window.__bp = null; setScreen("report"); clearInterval(i); } else if (w > 80) { setReport(window.__bp || buildFallback()); window.__bp = null; setScreen("report"); clearInterval(i); } }, 250);
+      const i = setInterval(() => { w++; if (window.__bp) { const rpt = window.__bp; setReport(rpt); window.__bp = null; setScreen("report"); clearInterval(i); saveBlueprint(rpt); } else if (w > 80) { const rpt = window.__bp || buildFallback(); setReport(rpt); window.__bp = null; setScreen("report"); clearInterval(i); saveBlueprint(rpt); } }, 250);
       return () => clearInterval(i);
     }
     const t = setTimeout(() => setLp(p => p + 1), 820);
     return () => clearTimeout(t);
   }, [screen, lp]);
 
-  const startQuiz = () => { setPage("quiz"); setScreen("quiz"); setStep(-1); setAnswers({}); setReport(null); window.scrollTo({ top: 0, behavior: "smooth" }); };
+  const startQuiz = () => { setPage("quiz"); setScreen("quiz"); setStep(-1); setAnswers({}); setReport(null); setReportTab("blueprint"); window.scrollTo({ top: 0, behavior: "smooth" }); };
 
   const faqs = [
     { q: "Is this actually free?", a: "Yes! The basic blueprint with your recommended path, match score, and revenue potential is 100% free. The full blueprint with day-by-day plan, scripts, tools, and progress tracker is $19 one-time." },
@@ -959,10 +1213,19 @@ Respond ONLY with valid JSON (no markdown, no backticks):
             <div style={{ width: 28, height: 28, borderRadius: 6, background: `linear-gradient(135deg,${Gold},#D4A843)`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 900, color: Bg }}>V</div>
             <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: 4, textTransform: "uppercase", color: W(.4) }}>VENTRIX</span>
           </div>
-          {page === "landing" && <button onClick={startQuiz} style={{ padding: "8px 18px", borderRadius: 9, background: `linear-gradient(135deg,${Gold},#D4A843)`, color: Bg, fontSize: 12, fontWeight: 700 }}>
-            Get Started — Free
-          </button>}
-          {page === "quiz" && screen === "report" && <button onClick={() => setPage("landing")} style={{ padding: "8px 18px", borderRadius: 9, border: `1px solid ${W(.08)}`, background: "transparent", color: W(.4), fontSize: 12, fontWeight: 600 }}>← Back</button>}
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            {user && (
+              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                <div style={{ width: 24, height: 24, borderRadius: 6, background: isPaid ? "rgba(126,232,178,.1)" : W(.04), border: `1px solid ${isPaid ? "rgba(126,232,178,.15)" : W(.06)}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, color: isPaid ? Green : W(.3) }}>{user.email?.[0]?.toUpperCase() || "?"}</div>
+                <span style={{ fontSize: 11, color: W(.25), maxWidth: 120, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{user.email}</span>
+                <button onClick={handleLogout} style={{ fontSize: 10, color: W(.15), background: "none", border: "none", padding: "2px 6px", cursor: "pointer" }}>Log out</button>
+              </div>
+            )}
+            {page === "landing" && <button onClick={startQuiz} style={{ padding: "8px 18px", borderRadius: 9, background: `linear-gradient(135deg,${Gold},#D4A843)`, color: Bg, fontSize: 12, fontWeight: 700 }}>
+              Get Started — Free
+            </button>}
+            {page === "quiz" && screen === "report" && <button onClick={() => setPage("landing")} style={{ padding: "8px 18px", borderRadius: 9, border: `1px solid ${W(.08)}`, background: "transparent", color: W(.4), fontSize: 12, fontWeight: 600 }}>← Back</button>}
+          </div>
         </div>
 
         {/* ═══════════ QUIZ / LOADING / REPORT ═══════════ */}
@@ -1035,6 +1298,17 @@ Respond ONLY with valid JSON (no markdown, no backticks):
               </div>
             )}
 
+            {/* AUTH GATE */}
+            {screen === "auth" && (
+              <div style={{ paddingTop: 20 }}>
+                <AuthModal
+                  lang={lang}
+                  onAuth={() => handleAuthComplete()}
+                  onSkip={() => handleAuthComplete()}
+                />
+              </div>
+            )}
+
             {/* LOADING */}
             {screen === "loading" && (
               <div style={{ paddingTop: 40, animation: "fi .5s both" }}>
@@ -1078,8 +1352,43 @@ Respond ONLY with valid JSON (no markdown, no backticks):
 
                 {/* Action bar */}
                 <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
-                  <button style={{ flex: 1, padding: "11px", borderRadius: 10, background: "rgba(232,200,114,.06)", border: "1px solid rgba(232,200,114,.12)", color: Gold, fontSize: 12.5, fontWeight: 600 }}>📤 Share</button>
-                  <button onClick={() => { if(!isPaid) setShowPaywall(true); }} style={{ flex: 1, padding: "11px", borderRadius: 10, background: isPaid ? "rgba(232,200,114,.06)" : W(.03), border: isPaid ? "1px solid rgba(232,200,114,.12)" : `1px solid ${W(.06)}`, color: isPaid ? Gold : W(.25), fontSize: 12.5, fontWeight: 600 }}>{isPaid ? "📄 Export PDF" : "🔒 Export PDF"}</button>
+                  <button onClick={() => {
+                    if (navigator.share) {
+                      navigator.share({ title: `Ventrix AI Blueprint: ${r.name}`, text: `AI says I can make ${r.monthlyRevenue}/mo as a ${r.name} (${r.match}% match). Get your free blueprint:`, url: window.location.origin }).catch(() => {});
+                    } else {
+                      navigator.clipboard.writeText(`AI says I can make ${r.monthlyRevenue}/mo as a ${r.name} (${r.match}% match). Get your free blueprint: ${window.location.origin}`).then(() => alert("Link copied!")).catch(() => {});
+                    }
+                  }} style={{ flex: 1, padding: "11px", borderRadius: 10, background: "rgba(232,200,114,.06)", border: "1px solid rgba(232,200,114,.12)", color: Gold, fontSize: 12.5, fontWeight: 600 }}>📤 Share</button>
+                  <button onClick={() => {
+                    if(!isPaid) { setShowPaywall(true); return; }
+                    const el = document.createElement("div");
+                    const projHtml = (r.revenueProjection||[]).length > 0 ? `<h2>6-Month Revenue Projection</h2><table border="1" cellpadding="6" style="border-collapse:collapse;width:100%"><tr><th>Month</th><th>Conservative</th><th>Optimistic</th></tr>${(r.revenueProjection||[]).map(p=>`<tr><td>${p.month}</td><td>$${(p.low||0).toLocaleString()}</td><td>$${(p.high||0).toLocaleString()}</td></tr>`).join("")}</table>` : "";
+                    const schedHtml = (r.dailySchedule?.blocks||[]).length > 0 ? `<h2>Your Daily Schedule</h2><p>${r.dailySchedule?.description||""}</p><table border="1" cellpadding="6" style="border-collapse:collapse;width:100%"><tr><th>Time</th><th>Task</th><th>Duration</th></tr>${(r.dailySchedule.blocks||[]).map(b=>`<tr><td>${b.time}</td><td>${b.task}</td><td>${b.duration}</td></tr>`).join("")}</table>` : "";
+                    const risksHtml = (r.risks||[]).length > 0 ? `<h2>Risks & Solutions</h2>${(r.risks||[]).map((risk,i)=>`<p>⚠️ <strong>${risk}</strong><br/>→ ${(r.mitigations||[])[i]||""}</p>`).join("")}` : "";
+                    el.innerHTML = `<div style="font-family:system-ui;padding:40px;max-width:800px;margin:auto;color:#111">
+                      <div style="text-align:center;margin-bottom:30px;border-bottom:2px solid #B8860B;padding-bottom:20px">
+                        <h1 style="color:#B8860B;margin-bottom:4px">${r.name}</h1>
+                        <p style="color:#666;font-style:italic">${r.tagline||""}</p>
+                        <p><strong>Match:</strong> ${r.match}% | <strong>Revenue:</strong> ${r.monthlyRevenue} | <strong>Time to first $:</strong> ${r.timeToFirstDollar} | <strong>Difficulty:</strong> ${r.difficulty}</p>
+                      </div>
+                      ${r.whyYou ? `<div style="background:#f9f6ee;border-left:3px solid #B8860B;padding:12px 16px;margin-bottom:20px"><strong>Why this works for you:</strong> ${r.whyYou}</div>` : ""}
+                      ${report.quickestWin ? `<div style="background:#eef9f2;border-left:3px solid #2a9d5c;padding:12px 16px;margin-bottom:20px"><strong>⚡ Quickest win:</strong> ${report.quickestWin}</div>` : ""}
+                      <p>${r.description||""}</p>
+                      ${projHtml}
+                      <h2>Income Streams</h2>${(r.incomeBreakdown||[]).map(s=>`<p><strong>${s.source}</strong> — ${s.amount}<br/><em>${s.howItWorks||""}</em></p>`).join("")}
+                      ${schedHtml}
+                      <h2>Tools & Costs</h2><table border="1" cellpadding="6" style="border-collapse:collapse;width:100%"><tr><th>Tool</th><th>Cost</th><th>Purpose</th></tr>${(r.tools||[]).map(t=>`<tr><td>${t.name}</td><td>${t.cost||"Free"}</td><td>${t.purpose||""}</td></tr>`).join("")}</table>
+                      <h2>4-Week Action Plan</h2>${(r.weeklyPlan||[]).map(w=>`<h3>${w.week||""} — ${w.title||""}</h3><p><em>Goal: ${w.goal||""}</em></p>${(w.days||[]).map(d=>`<p><strong>${d.day}:</strong> ${(d.tasks||[]).join(" • ")}</p>`).join("")}`).join("")}
+                      <h2>Copy-Paste Scripts</h2>${(r.scripts||[]).map(s=>`<div style="margin-bottom:12px"><strong>${s.context}:</strong><div style="background:#f5f5f5;padding:12px;border-radius:6px;margin-top:4px;font-style:italic">${s.script}</div></div>`).join("")}
+                      <h2>Milestones</h2><table border="1" cellpadding="6" style="border-collapse:collapse;width:100%"><tr><th>Timeline</th><th>Target</th><th>Milestone</th></tr>${(r.milestones||[]).map(m=>`<tr><td>${m.month}</td><td>${m.target}</td><td>${m.milestone}</td></tr>`).join("")}</table>
+                      ${risksHtml}
+                      <h2>Alternative Paths</h2>${[report.secondary,report.tertiary].filter(Boolean).map(p=>`<p><strong>${p.name}</strong> (${p.match}% match) — ${p.monthlyRevenue}<br/>${p.description||""}<br/><em>Quick win: ${p.quickWin||""}</em></p>`).join("")}
+                      <hr/><p style="color:#999;font-size:12px;text-align:center">Generated by Ventrix AI — ventrixai.com</p></div>`;
+                    const w2 = window.open("", "_blank");
+                    w2.document.write("<html><head><title>Ventrix Blueprint - " + r.name + "</title></head><body>" + el.innerHTML + "</body></html>");
+                    w2.document.close();
+                    setTimeout(() => w2.print(), 500);
+                  }} style={{ flex: 1, padding: "11px", borderRadius: 10, background: isPaid ? "rgba(232,200,114,.06)" : W(.03), border: isPaid ? "1px solid rgba(232,200,114,.12)" : `1px solid ${W(.06)}`, color: isPaid ? Gold : W(.25), fontSize: 12.5, fontWeight: 600 }}>{isPaid ? "📄 Export PDF" : "🔒 Export PDF"}</button>
                   <button onClick={startQuiz} style={{ padding: "11px 14px", borderRadius: 10, border: `1px solid ${W(.06)}`, background: "transparent", color: W(.3), fontSize: 12.5, fontWeight: 600 }}>↻ New</button>
                 </div>
 
@@ -1101,7 +1410,34 @@ Respond ONLY with valid JSON (no markdown, no backticks):
                         ))}
                         {chatLoading && <div style={{ fontSize: 12, color: W(.3), padding: "8px 0" }}>Thinking...</div>}
                       </div>
-                      <form onSubmit={async (e) => { e.preventDefault(); if(!chatInput.trim() || chatLoading) return; const msg = chatInput.trim(); setChatInput(""); const newMsgs = [...chatMessages, { role: "user", content: msg }]; setChatMessages(newMsgs); setChatLoading(true); try { const ctx = window.__bp ? "User blueprint: " + window.__bp.name + " (" + window.__bp.monthlyRevenue + ")" : ""; const r = await fetch("/api/chat", { method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({ messages: [{ role: "user", content: ctx + "\nUser question: " + msg }] }) }); const d = await r.json(); const reply = d.content?.map(b => b.text || "").join("") || "Sorry, something went wrong."; setChatMessages([...newMsgs, { role: "assistant", content: reply }]); } catch(err) { setChatMessages([...newMsgs, { role: "assistant", content: "Sorry, something went wrong." }]); } setChatLoading(false); }} style={{ display: "flex", gap: 8 }}>
+                      <form onSubmit={async (e) => { e.preventDefault(); if(!chatInput.trim() || chatLoading) return; const msg = chatInput.trim(); setChatInput(""); const newMsgs = [...chatMessages, { role: "user", content: msg }]; setChatMessages(newMsgs); setChatLoading(true); try { const bp = report?.primary || {}; const ctx = `You are Ventrix AI, a business strategy advisor. You are helping a user who completed a quiz and received a personalized blueprint. Here is their full context:
+
+QUIZ ANSWERS:
+- Situation: ${answers.situation || "unknown"}
+- Skills: ${(answers.skills||[]).join(", ") || "none specified"}
+- Interests: ${(answers.interests||[]).join(", ") || "none specified"}
+- Hours/week: ${answers.time || "unknown"}
+- Budget: $${answers.budget || "0"}
+- Income goal: $${answers.goal || "unknown"}/mo
+
+THEIR PRIMARY BLUEPRINT:
+- Path: ${bp.name || "unknown"} (${bp.match || "?"}% match)
+- Tagline: ${bp.tagline || ""}
+- Revenue target: ${bp.monthlyRevenue || "unknown"}
+- Time to first dollar: ${bp.timeToFirstDollar || "unknown"}
+- Difficulty: ${bp.difficulty || "unknown"}
+- Description: ${bp.description || ""}
+- Why it fits them: ${bp.whyYou || ""}
+
+INCOME STREAMS: ${(bp.incomeBreakdown||[]).map(s => s.source + " (" + s.amount + "): " + (s.howItWorks||"")).join(" | ")}
+
+TOOLS: ${(bp.tools||[]).map(t => t.name + " (" + (t.cost||"free") + ")").join(", ")}
+
+WEEKLY PLAN SUMMARY: ${(bp.weeklyPlan||[]).map(w => (w.week||"") + " - " + (w.title||"") + ": " + (w.goal||"")).join(" | ")}
+
+ALTERNATIVE PATHS: ${report?.secondary?.name || "none"} (${report?.secondary?.match||"?"}%), ${report?.tertiary?.name || "none"} (${report?.tertiary?.match||"?"}%)
+
+Answer their questions with specific, actionable advice tailored to their exact situation, skills, and plan. Reference specific parts of their blueprint. Be encouraging but realistic. Keep responses concise and practical.`; const r2 = await fetch("/api/chat", { method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({ messages: [{ role: "user", content: ctx + "\n\nUser question: " + msg }] }) }); const d = await r2.json(); const reply = d.content?.map(b => b.text || "").join("") || "Sorry, something went wrong."; setChatMessages([...newMsgs, { role: "assistant", content: reply }]); } catch(err) { setChatMessages([...newMsgs, { role: "assistant", content: "Sorry, something went wrong." }]); } setChatLoading(false); }} style={{ display: "flex", gap: 8 }}>
                         <input value={chatInput} onChange={(e) => setChatInput(e.target.value)} placeholder="Ask about your blueprint..." style={{ flex: 1, padding: "12px 16px", borderRadius: 10, background: W(.03), border: `1px solid ${W(.06)}`, color: "#fff", fontSize: 13, outline: "none" }} />
                         <button type="submit" style={{ padding: "12px 20px", borderRadius: 10, background: `linear-gradient(135deg,${Gold},#D4A843)`, border: "none", color: Bg, fontSize: 13, fontWeight: 700, cursor: "pointer" }}>Send</button>
                       </form>
@@ -1109,20 +1445,121 @@ Respond ONLY with valid JSON (no markdown, no backticks):
                   </div>
                 )}
                 {reportTab === "tracker" && (
-                  <div style={{ textAlign: "center", padding: "60px 0" }}>
-                    <div style={{ fontSize: 32, marginBottom: 12 }}>📊</div>
-                    <p style={{ fontSize: 15, color: W(.4), fontWeight: 600, marginBottom: 6 }}>Progress Tracker</p>
-                    <p style={{ fontSize: 12, color: W(.25) }}>Coming soon</p>
+                  <div>
+                    <div style={{ background: W(.02), border: `1px solid ${W(.04)}`, borderRadius: 16, padding: 20, marginBottom: 16 }}>
+                      <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: 2, color: Gold, marginBottom: 12 }}>📊 Progress Tracker</div>
+                      {/* Progress bar */}
+                      {(() => {
+                        const plan = r.weeklyPlan || [];
+                        const totalTasks = plan.reduce((s,w) => s + (w.days||[]).reduce((s2,d) => s2 + (d.tasks||[]).length, 0), 0);
+                        const doneTasks = Object.values(trackerChecked).filter(Boolean).length;
+                        const pct = totalTasks > 0 ? Math.round((doneTasks/totalTasks)*100) : 0;
+                        return <div style={{ marginBottom: 20 }}>
+                          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
+                            <span style={{ fontSize: 12, color: W(.4) }}>{doneTasks}/{totalTasks} tasks completed</span>
+                            <span style={{ fontSize: 12, fontWeight: 700, color: pct === 100 ? Green : Gold }}>{pct}%</span>
+                          </div>
+                          <div style={{ height: 6, background: W(.04), borderRadius: 3, overflow: "hidden" }}>
+                            <div style={{ height: "100%", width: `${pct}%`, background: `linear-gradient(90deg, ${Gold}, ${Green})`, borderRadius: 3, transition: "width .4s ease" }}/>
+                          </div>
+                        </div>;
+                      })()}
+                      {/* Week-by-week checklist */}
+                      {(r.weeklyPlan || []).map((week, wi) => (
+                        <div key={wi} style={{ marginBottom: 16 }}>
+                          <div style={{ fontSize: 12, fontWeight: 700, color: Gold, marginBottom: 8, padding: "8px 12px", background: "rgba(232,200,114,.03)", borderRadius: 8 }}>
+                            {week.week || `Week ${wi+1}`} — {week.title || ""}
+                            {week.goal && <span style={{ fontSize: 11, color: W(.25), fontWeight: 400, marginLeft: 8 }}>Goal: {week.goal}</span>}
+                          </div>
+                          {(week.days || []).map((day, di) => (
+                            <div key={di} style={{ marginBottom: 4 }}>
+                              <div style={{ fontSize: 10, fontWeight: 600, color: W(.25), textTransform: "uppercase", letterSpacing: 1, padding: "4px 0 2px 12px" }}>{day.day}</div>
+                              {(day.tasks || []).map((task, ti) => {
+                                const key = `${wi}-${di}-${ti}`;
+                                const done = trackerChecked[key] || false;
+                                return <div key={ti} onClick={() => setTrackerChecked(prev => ({...prev, [key]: !prev[key]}))} style={{
+                                  display: "flex", alignItems: "flex-start", gap: 10, padding: "7px 12px", cursor: "pointer",
+                                  borderRadius: 8, transition: "background .15s",
+                                  background: done ? "rgba(126,232,178,.03)" : "transparent",
+                                }}>
+                                  <div style={{
+                                    width: 18, height: 18, borderRadius: 5, flexShrink: 0, marginTop: 1,
+                                    border: done ? `1.5px solid ${Green}` : `1.5px solid ${W(.1)}`,
+                                    background: done ? "rgba(126,232,178,.1)" : "transparent",
+                                    display: "flex", alignItems: "center", justifyContent: "center",
+                                    fontSize: 10, color: Green, transition: "all .2s",
+                                  }}>{done ? "✓" : ""}</div>
+                                  <span style={{ fontSize: 12, color: done ? W(.25) : W(.45), textDecoration: done ? "line-through" : "none", lineHeight: 1.5, transition: "all .2s" }}>{task}</span>
+                                </div>;
+                              })}
+                            </div>
+                          ))}
+                        </div>
+                      ))}
+                      {(r.weeklyPlan || []).length === 0 && <p style={{ fontSize: 13, color: W(.3), textAlign: "center", padding: "40px 0" }}>No weekly plan available for tracking.</p>}
+                    </div>
                   </div>
                 )}
                 {reportTab === "compare" && (
-                  <div style={{ textAlign: "center", padding: "60px 0" }}>
-                    <div style={{ fontSize: 32, marginBottom: 12 }}>🔀</div>
-                    <p style={{ fontSize: 15, color: W(.4), fontWeight: 600, marginBottom: 6 }}>Compare Paths</p>
-                    <p style={{ fontSize: 12, color: W(.25) }}>Coming soon</p>
+                  <div>
+                    <div style={{ background: W(.02), border: `1px solid ${W(.04)}`, borderRadius: 16, padding: 20, marginBottom: 16 }}>
+                      <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: 2, color: Gold, marginBottom: 16 }}>🔀 Compare Your Paths</div>
+                      <div className="mob-col" style={{ display: "flex", gap: 10 }}>
+                        {[
+                          { ...r, label: "Primary", color: Gold, bg: "rgba(232,200,114,.03)", border: "rgba(232,200,114,.12)" },
+                          ...(report.secondary ? [{ ...report.secondary, label: "Alternative", color: "#8BB8E8", bg: "rgba(139,184,232,.03)", border: "rgba(139,184,232,.12)" }] : []),
+                          ...(report.tertiary ? [{ ...report.tertiary, label: "Alternative 2", color: "#C49ADE", bg: "rgba(196,154,222,.03)", border: "rgba(196,154,222,.12)" }] : []),
+                        ].map((path, pi) => (
+                          <div key={pi} style={{ flex: 1, padding: "16px 14px", background: path.bg, border: `1px solid ${path.border}`, borderRadius: 13, minWidth: 0 }}>
+                            <div style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: 2, color: path.color, marginBottom: 8 }}>{path.label}</div>
+                            <div style={{ fontSize: 15, fontWeight: 800, color: path.color, marginBottom: 4, lineHeight: 1.2 }}>{path.name}</div>
+                            {path.tagline && <p style={{ fontSize: 11, color: W(.3), marginBottom: 10, lineHeight: 1.4, fontStyle: "italic" }}>{path.tagline}</p>}
+                            <div style={{ borderTop: `1px solid ${W(.04)}`, paddingTop: 10 }}>
+                              {[
+                                ["Match", `${path.match}%`, path.color],
+                                ["Revenue", path.monthlyRevenue, Gold],
+                                ["First $", path.timeToFirstDollar, Green],
+                                ["Difficulty", path.difficulty, "#fff"],
+                              ].map(([label, val, col], ri) => (
+                                <div key={ri} style={{ display: "flex", justifyContent: "space-between", padding: "5px 0", borderBottom: ri < 3 ? `1px solid ${W(.025)}` : "none" }}>
+                                  <span style={{ fontSize: 10, color: W(.25), textTransform: "uppercase", letterSpacing: 1 }}>{label}</span>
+                                  <span style={{ fontSize: 11, fontWeight: 700, color: col }}>{val}</span>
+                                </div>
+                              ))}
+                            </div>
+                            {path.quickWin && <div style={{ marginTop: 10, padding: "8px 10px", background: "rgba(126,232,178,.03)", border: "1px solid rgba(126,232,178,.06)", borderRadius: 8 }}>
+                              <span style={{ fontSize: 9, fontWeight: 700, color: Green, textTransform: "uppercase", letterSpacing: 1 }}>Quick win</span>
+                              <p style={{ fontSize: 10.5, color: W(.32), lineHeight: 1.4, marginTop: 3 }}>{path.quickWin}</p>
+                            </div>}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
                   </div>
                 )}
                 {reportTab === "blueprint" && <>
+                {/* ═══ START TODAY — paid users see this first ═══ */}
+                {isPaid && <div style={{ padding: "20px 18px", marginBottom: 14, background: "linear-gradient(135deg, rgba(126,232,178,.04), rgba(232,200,114,.03))", border: "1px solid rgba(126,232,178,.12)", borderRadius: 16, position: "relative", overflow: "hidden" }}>
+                  <div style={{ position: "absolute", top: 0, left: "10%", right: "10%", height: 2, background: `linear-gradient(90deg, transparent, ${Green}, transparent)`, borderRadius: 2 }} />
+                  <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: 2, color: Green, marginBottom: 10 }}>⚡ Start right now — your first 3 moves</div>
+                  {(() => {
+                    const wp = r.weeklyPlan || [];
+                    const firstDay = wp[0]?.days?.[0];
+                    const tasks = firstDay?.tasks || [];
+                    const topTasks = tasks.length > 0 ? tasks.slice(0, 3) : ["Set up your workspace and accounts", "Create your first sample or portfolio piece", "Send 5 outreach messages"];
+                    return topTasks.map((task, ti) => (
+                      <div key={ti} style={{ display: "flex", alignItems: "flex-start", gap: 10, padding: "8px 0", borderBottom: ti < topTasks.length - 1 ? `1px solid rgba(126,232,178,.06)` : "none" }}>
+                        <div style={{ width: 22, height: 22, borderRadius: 6, background: "rgba(126,232,178,.1)", border: `1.5px solid ${Green}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 700, color: Green, flexShrink: 0 }}>{ti + 1}</div>
+                        <span style={{ fontSize: 13, color: W(.55), lineHeight: 1.5 }}>{task}</span>
+                      </div>
+                    ));
+                  })()}
+                  <div style={{ marginTop: 12, padding: "8px 12px", background: W(.02), borderRadius: 8, display: "flex", alignItems: "center", gap: 8 }}>
+                    <span style={{ fontSize: 12 }}>💡</span>
+                    <span style={{ fontSize: 11.5, color: W(.35), lineHeight: 1.4 }}>Complete these 3 tasks today. Scroll down for your full 4-week plan.</span>
+                  </div>
+                </div>}
+
                 {/* Personal insight */}
                 {report.personalInsight && <div style={{ padding: "16px 18px", marginBottom: 14, background: `linear-gradient(135deg,rgba(232,200,114,.035),rgba(126,232,178,.02))`, border: "1px solid rgba(232,200,114,.08)", borderRadius: 13 }}>
                   <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: 2, color: Gold, marginBottom: 5 }}>💡 Why This Works For You</div>
@@ -1163,8 +1600,38 @@ Respond ONLY with valid JSON (no markdown, no backticks):
                 <h3 style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: 3.5, color: Gold, marginBottom: 14, marginTop: 32 }}>6-Month Projection</h3>
                 <div style={{ position: "relative", marginBottom: 12, cursor: isPaid ? "default" : "pointer" }} onClick={() => { if(!isPaid) setShowPaywall(true); }}>
                   <div style={{ filter: isPaid ? "none" : "blur(6px)", opacity: isPaid ? 1 : .4, pointerEvents: isPaid ? "auto" : "none", userSelect: isPaid ? "auto" : "none" }}>
-                    <div style={{ background: W(.015), border: `1px solid ${W(.035)}`, borderRadius: 13, padding: "14px 10px 6px", height: 180 }}>
-                      <svg width="100%" height="140" viewBox="0 0 320 140"><path d="M0,130 L53,110 L106,85 L159,60 L212,35 L265,15 L320,5" fill="none" stroke={Gold} strokeWidth="2"/><path d="M0,130 L53,120 L106,100 L159,80 L212,60 L265,45 L320,30" fill="none" stroke={Green} strokeWidth="2"/></svg>
+                    <div style={{ background: W(.015), border: `1px solid ${W(.035)}`, borderRadius: 13, padding: "14px 10px 6px" }}>
+                      {(() => {
+                        const proj = r.revenueProjection || [{month:"Mo 1",low:200,high:500},{month:"Mo 2",low:500,high:1200},{month:"Mo 3",low:1000,high:2500},{month:"Mo 4",low:1800,high:4000},{month:"Mo 5",low:2500,high:5500},{month:"Mo 6",low:3500,high:8000}];
+                        const maxVal = Math.max(...proj.map(p => p.high));
+                        const W_SVG = 320, H_SVG = 160, PAD_L = 40, PAD_R = 10, PAD_T = 10, PAD_B = 30;
+                        const cw = W_SVG - PAD_L - PAD_R, ch = H_SVG - PAD_T - PAD_B;
+                        const pts = proj.map((p,i) => ({ x: PAD_L + (i/(proj.length-1)) * cw, yH: PAD_T + (1 - p.high/maxVal) * ch, yL: PAD_T + (1 - p.low/maxVal) * ch, ...p }));
+                        const pathH = pts.map((p,i) => `${i===0?"M":"L"}${p.x.toFixed(1)} ${p.yH.toFixed(1)}`).join(" ");
+                        const pathL = pts.map((p,i) => `${i===0?"M":"L"}${p.x.toFixed(1)} ${p.yL.toFixed(1)}`).join(" ");
+                        const areaPath = pathH + " " + [...pts].reverse().map((p,i) => `${i===0?"L":"L"}${p.x.toFixed(1)} ${p.yL.toFixed(1)}`).join(" ") + " Z";
+                        return <svg width="100%" height="160" viewBox={`0 0 ${W_SVG} ${H_SVG}`}>
+                          <defs><linearGradient id="projFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={Gold} stopOpacity="0.15"/><stop offset="100%" stopColor={Gold} stopOpacity="0.02"/></linearGradient></defs>
+                          {/* Grid lines */}
+                          {[0, 0.25, 0.5, 0.75, 1].map((f,i) => { const y = PAD_T + (1-f)*ch; const val = Math.round(maxVal*f); return <g key={i}><line x1={PAD_L} y1={y} x2={PAD_L+cw} y2={y} stroke="rgba(255,255,255,0.04)" strokeWidth="1"/><text x={PAD_L-4} y={y+3} textAnchor="end" fill="rgba(255,255,255,0.2)" fontSize="8">${val>=1000?(val/1000).toFixed(1)+"k":val}</text></g>; })}
+                          {/* Area fill */}
+                          <path d={areaPath} fill="url(#projFill)"/>
+                          {/* Lines */}
+                          <path d={pathH} fill="none" stroke={Gold} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          <path d={pathL} fill="none" stroke={Green} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          {/* Dots + labels */}
+                          {pts.map((p,i) => <g key={i}>
+                            <circle cx={p.x} cy={p.yH} r="3" fill={Gold}/>
+                            <circle cx={p.x} cy={p.yL} r="3" fill={Green}/>
+                            <text x={p.x} y={H_SVG-6} textAnchor="middle" fill="rgba(255,255,255,0.3)" fontSize="8">{p.month}</text>
+                          </g>)}
+                        </svg>;
+                      })()}
+                      {/* Legend */}
+                      <div style={{ display: "flex", justifyContent: "center", gap: 16, paddingBottom: 8 }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 5 }}><div style={{ width: 12, height: 2, background: Gold, borderRadius: 1 }}/><span style={{ fontSize: 10, color: W(.25) }}>Optimistic</span></div>
+                        <div style={{ display: "flex", alignItems: "center", gap: 5 }}><div style={{ width: 12, height: 2, background: Green, borderRadius: 1 }}/><span style={{ fontSize: 10, color: W(.25) }}>Conservative</span></div>
+                      </div>
                     </div>
                   </div>
                   <div style={{ position: "absolute", inset: 0, display: isPaid ? "none" : "flex", alignItems: "center", justifyContent: "center", background: "rgba(8,9,12,.35)", borderRadius: 14 }}>
@@ -1176,27 +1643,49 @@ Respond ONLY with valid JSON (no markdown, no backticks):
                 <h3 style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: 3.5, color: Gold, marginBottom: 14, marginTop: 32 }}>Income Streams</h3>
                 <div style={{ position: "relative", marginBottom: 12, cursor: isPaid ? "default" : "pointer" }} onClick={() => { if(!isPaid) setShowPaywall(true); }}>
                   <div style={{ filter: isPaid ? "none" : "blur(6px)", opacity: isPaid ? 1 : .4, pointerEvents: isPaid ? "auto" : "none", userSelect: isPaid ? "auto" : "none" }}>
-                    {(r.incomeBreakdown || [{source:"Core service",amount:"$2,000–$4,000"},{source:"Upsells",amount:"$500–$1,500"},{source:"Passive",amount:"$300–$1,000"}]).map((s,i) => (
-                      <div key={i} style={{ padding: "13px 16px", background: W(.013), border: `1px solid ${W(.035)}`, borderRadius: 11, marginBottom: 7 }}>
-                        <div style={{ display: "flex", justifyContent: "space-between" }}><span style={{ fontSize: 13, fontWeight: 600, color: "#fff" }}>{s.source}</span><span style={{ fontSize: 13, fontWeight: 700, color: Gold }}>{s.amount}</span></div>
-                      </div>
-                    ))}
+                    {(() => {
+                      const streams = r.incomeBreakdown || [{source:"Core service",amount:"$2,000–$4,000",howItWorks:"Your primary revenue driver."},{source:"Upsells",amount:"$500–$1,500",howItWorks:"Add-on services for existing clients."},{source:"Passive",amount:"$300–$1,000",howItWorks:"Templates, products, recurring."}];
+                      const extractMax = (amt) => { const m = (amt||"").match(/[\d,]+/g); return m ? Math.max(...m.map(n => parseInt(n.replace(/,/g,"")))) : 1000; };
+                      const maxAmount = Math.max(...streams.map(s => extractMax(s.amount)));
+                      const barColors = [Gold, Green, "#8BB8E8", "#C49ADE", "#FF8A80"];
+                      return streams.map((s,i) => {
+                        const pct = Math.round((extractMax(s.amount) / maxAmount) * 100);
+                        return <div key={i} style={{ padding: "14px 16px", background: W(.013), border: `1px solid ${W(.035)}`, borderRadius: 11, marginBottom: 7 }}>
+                          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
+                            <span style={{ fontSize: 13, fontWeight: 600, color: "#fff" }}>{s.source}</span>
+                            <span style={{ fontSize: 13, fontWeight: 700, color: barColors[i % barColors.length] }}>{s.amount}</span>
+                          </div>
+                          {/* Visual bar */}
+                          <div style={{ height: 4, background: W(.04), borderRadius: 2, marginBottom: s.howItWorks ? 8 : 0, overflow: "hidden" }}>
+                            <div style={{ height: "100%", width: `${pct}%`, background: barColors[i % barColors.length], borderRadius: 2, opacity: .6, transition: "width 1s ease-out" }} />
+                          </div>
+                          {s.howItWorks && <p style={{ fontSize: 11.5, color: W(.32), lineHeight: 1.5 }}>{s.howItWorks}</p>}
+                        </div>;
+                      });
+                    })()}
+                    {/* Total potential */}
+                    {r.incomeBreakdown && <div style={{ padding: "10px 16px", background: "rgba(232,200,114,.03)", border: `1px solid rgba(232,200,114,.08)`, borderRadius: 10, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <span style={{ fontSize: 12, fontWeight: 600, color: W(.4) }}>Combined potential</span>
+                      <span style={{ fontSize: 14, fontWeight: 800, color: Gold }}>{r.monthlyRevenue}</span>
+                    </div>}
                   </div>
                   <div style={{ position: "absolute", inset: 0, display: isPaid ? "none" : "flex", alignItems: "center", justifyContent: "center", background: "rgba(8,9,12,.35)", borderRadius: 14 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 16px", background: "rgba(232,200,114,.08)", border: "1px solid rgba(232,200,114,.15)", borderRadius: 10, fontSize: 12, fontWeight: 600, color: Gold }}>🔒 Income breakdown</div>
                   </div>
                 </div>
 
-                {/* URGENCY + CTA */}
-                {!isPaid && <CountdownBar />}
-                <button onClick={handleCheckout} style={{ display: isPaid ? "none" : "block", width: "100%", padding: 16, borderRadius: 14, background: `linear-gradient(135deg,${Gold},#D4A843)`, color: Bg, fontSize: 15, fontWeight: 700, border: "none", cursor: "pointer", boxShadow: "0 4px 24px rgba(232,200,114,.2)", marginBottom: 6 }}>
-                  🔓 Unlock Full Blueprint — $19
-                </button>
-                <div style={{ display: "flex", justifyContent: "center", gap: 12, marginBottom: 20 }}>
-                  {!isPaid && <span style={{ fontSize: 10, color: W(.2) }}>One-time payment</span>}<span style={{ fontSize: 10, color: W(.2) }}>•</span>
-                  <span style={{ fontSize: 10, color: W(.2) }}>Instant unlock</span><span style={{ fontSize: 10, color: W(.2) }}>•</span>
-                  <span style={{ fontSize: 10, color: W(.2) }}>30-day refund</span>
-                </div>
+                {/* URGENCY + CTA — only for non-paid */}
+                {!isPaid && <>
+                  <CountdownBar />
+                  <button onClick={handleCheckout} style={{ display: "block", width: "100%", padding: 16, borderRadius: 14, background: `linear-gradient(135deg,${Gold},#D4A843)`, color: Bg, fontSize: 15, fontWeight: 700, border: "none", cursor: "pointer", boxShadow: "0 4px 24px rgba(232,200,114,.2)", marginBottom: 6 }}>
+                    🔓 Unlock Full Blueprint — $19
+                  </button>
+                  <div style={{ display: "flex", justifyContent: "center", gap: 12, marginBottom: 20 }}>
+                    <span style={{ fontSize: 10, color: W(.2) }}>One-time payment</span><span style={{ fontSize: 10, color: W(.2) }}>•</span>
+                    <span style={{ fontSize: 10, color: W(.2) }}>Instant unlock</span><span style={{ fontSize: 10, color: W(.2) }}>•</span>
+                    <span style={{ fontSize: 10, color: W(.2) }}>30-day refund</span>
+                  </div>
+                </>}
 
                 {/* BLURRED: Daily Schedule */}
                 <h3 style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: 3.5, color: Gold, marginBottom: 14, marginTop: 24 }}>Your Daily Schedule</h3>
@@ -1218,13 +1707,29 @@ Respond ONLY with valid JSON (no markdown, no backticks):
                 </div>
 
                 {/* BLURRED: Tools */}
-                <h3 style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: 3.5, color: Gold, marginBottom: 14, marginTop: 24 }}>Tools</h3>
+                <h3 style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: 3.5, color: Gold, marginBottom: 14, marginTop: 24 }}>Tools & Costs</h3>
                 <div style={{ position: "relative", marginBottom: 12, cursor: isPaid ? "default" : "pointer" }} onClick={() => { if(!isPaid) setShowPaywall(true); }}>
                   <div style={{ filter: isPaid ? "none" : "blur(6px)", opacity: isPaid ? 1 : .4, pointerEvents: isPaid ? "auto" : "none", userSelect: isPaid ? "auto" : "none" }}>
                     <div style={{ background: W(.013), border: `1px solid ${W(.035)}`, borderRadius: 12, overflow: "hidden" }}>
-                      {(r.tools || [{name:"Claude Pro"},{name:"Canva Pro"},{name:"Notion"},{name:"Gumroad"},{name:"Carrd"}]).map((t,i) => (
-                        <div key={i} style={{ padding: "11px 14px", borderBottom: i < 4 ? `1px solid ${W(.025)}` : "none", fontSize: 12.5, fontWeight: 600, color: "#fff" }}>{t.name}</div>
+                      {/* Table header */}
+                      <div style={{ display: "grid", gridTemplateColumns: "1.2fr 0.8fr 1fr", padding: "10px 14px", borderBottom: `1px solid ${W(.04)}`, background: W(.02) }}>
+                        <span style={{ fontSize: 10, fontWeight: 700, color: W(.3), textTransform: "uppercase", letterSpacing: 1.5 }}>Tool</span>
+                        <span style={{ fontSize: 10, fontWeight: 700, color: W(.3), textTransform: "uppercase", letterSpacing: 1.5 }}>Cost</span>
+                        <span style={{ fontSize: 10, fontWeight: 700, color: W(.3), textTransform: "uppercase", letterSpacing: 1.5 }}>Purpose</span>
+                      </div>
+                      {(r.tools || [{name:"Claude Pro",cost:"$20/mo",purpose:"AI"},{name:"Canva Pro",cost:"$13/mo",purpose:"Design"},{name:"Notion",cost:"Free",purpose:"Mgmt"},{name:"Gumroad",cost:"Free",purpose:"Sales"},{name:"Carrd",cost:"Free",purpose:"Site"}]).map((t,i,arr) => (
+                        <div key={i} style={{ display: "grid", gridTemplateColumns: "1.2fr 0.8fr 1fr", padding: "11px 14px", borderBottom: i < arr.length-1 ? `1px solid ${W(.025)}` : "none", alignItems: "center" }}>
+                          <span style={{ fontSize: 12.5, fontWeight: 600, color: "#fff" }}>{t.name}</span>
+                          <span style={{ fontSize: 12, fontWeight: 600, color: (t.cost||"").toLowerCase().includes("free") ? Green : Gold }}>{t.cost || "—"}</span>
+                          <span style={{ fontSize: 11.5, color: W(.35) }}>{t.purpose || "—"}</span>
+                        </div>
                       ))}
+                      {/* Total cost row */}
+                      {r.tools && <div style={{ display: "grid", gridTemplateColumns: "1.2fr 0.8fr 1fr", padding: "11px 14px", borderTop: `1px solid ${W(.06)}`, background: W(.015) }}>
+                        <span style={{ fontSize: 12, fontWeight: 700, color: Gold }}>Total startup cost</span>
+                        <span style={{ fontSize: 12, fontWeight: 700, color: Gold }}>{(() => { const total = (r.tools||[]).reduce((s,t) => { const m = (t.cost||"").match(/\$(\d+)/); return s + (m ? parseInt(m[1]) : 0); }, 0); return total === 0 ? "Free" : `~$${total}/mo`; })()}</span>
+                        <span style={{ fontSize: 11, color: W(.25) }}>Monthly estimate</span>
+                      </div>}
                     </div>
                   </div>
                   <div style={{ position: "absolute", inset: 0, display: isPaid ? "none" : "flex", alignItems: "center", justifyContent: "center", background: "rgba(8,9,12,.35)", borderRadius: 14 }}>
@@ -1238,7 +1743,10 @@ Respond ONLY with valid JSON (no markdown, no backticks):
                   <div style={{ filter: isPaid ? "none" : "blur(6px)", opacity: isPaid ? 1 : .4, pointerEvents: isPaid ? "auto" : "none", userSelect: isPaid ? "auto" : "none" }}>
                     {(r.scripts || [{context:"Cold DM on LinkedIn",script:"Hey [Name], I noticed..."},{context:"Follow-up",script:"Hey [Name], just following up..."}]).map((s,i) => (
                       <div key={i} style={{ marginBottom: 9 }}>
-                        <div style={{ fontSize: 10.5, fontWeight: 600, color: Gold, marginBottom: 5, textTransform: "uppercase", letterSpacing: 1.5 }}>{s.context}</div>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 5 }}>
+                          <div style={{ fontSize: 10.5, fontWeight: 600, color: Gold, textTransform: "uppercase", letterSpacing: 1.5 }}>{s.context}</div>
+                          {isPaid && <button onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(s.script).then(() => { const btn = e.currentTarget; btn.textContent = "✓ Copied"; setTimeout(() => { btn.textContent = "Copy"; }, 1500); }); }} style={{ padding: "3px 10px", borderRadius: 6, background: W(.04), border: `1px solid ${W(.06)}`, color: W(.35), fontSize: 10, fontWeight: 600, cursor: "pointer" }}>Copy</button>}
+                        </div>
                         <div style={{ padding: "12px 14px", background: W(.02), border: `1px solid ${W(.05)}`, borderRadius: 10, fontSize: 12, color: W(.45), lineHeight: 1.6 }}>{s.script}</div>
                       </div>
                     ))}
@@ -1250,6 +1758,60 @@ Respond ONLY with valid JSON (no markdown, no backticks):
 
                 {/* Milestones (visible) */}
                 <h3 style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: 3.5, color: Gold, marginBottom: 14, marginTop: 24 }}>Milestones</h3>
+
+                {/* ═══ WEEKLY PLAN — THE BIG NEW SECTION ═══ */}
+                <h3 style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: 3.5, color: Gold, marginBottom: 14, marginTop: 24 }}>📅 4-Week Action Plan</h3>
+                <div style={{ position: "relative", marginBottom: 12, cursor: isPaid ? "default" : "pointer" }} onClick={() => { if(!isPaid) setShowPaywall(true); }}>
+                  <div style={{ filter: isPaid ? "none" : "blur(6px)", opacity: isPaid ? 1 : .4, pointerEvents: isPaid ? "auto" : "none", userSelect: isPaid ? "auto" : "none" }}>
+                    {/* Week tabs */}
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 4, marginBottom: 14, background: W(.015), borderRadius: 10, padding: 3 }}>
+                      {(r.weeklyPlan || []).map((w, wi) => (
+                        <button key={wi} onClick={(e) => { e.stopPropagation(); if(isPaid) setWpWeek(wi); }} style={{
+                          padding: "9px 4px", borderRadius: 8, fontSize: 11, fontWeight: 600, border: "none",
+                          background: wpWeek === wi ? "rgba(232,200,114,.08)" : "transparent",
+                          borderWidth: 1, borderStyle: "solid",
+                          borderColor: wpWeek === wi ? "rgba(232,200,114,.15)" : "transparent",
+                          color: wpWeek === wi ? Gold : W(.3),
+                        }}>{w.week || `Week ${wi+1}`}</button>
+                      ))}
+                    </div>
+
+                    {/* Active week content */}
+                    {(() => {
+                      const week = (r.weeklyPlan || [])[wpWeek];
+                      if (!week) return <div style={{ padding: 20, textAlign: "center", color: W(.2), fontSize: 12 }}>No weekly plan data</div>;
+                      return <div style={{ background: W(.013), border: `1px solid ${W(.035)}`, borderRadius: 13, overflow: "hidden" }}>
+                        {/* Week header */}
+                        <div style={{ padding: "14px 16px", background: "rgba(232,200,114,.03)", borderBottom: `1px solid ${W(.04)}` }}>
+                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 6 }}>
+                            <div>
+                              <div style={{ fontSize: 14, fontWeight: 700, color: Gold }}>{week.title || week.week}</div>
+                              {week.goal && <div style={{ fontSize: 11.5, color: W(.35), marginTop: 2 }}>Goal: {week.goal}</div>}
+                            </div>
+                            <span style={{ fontSize: 10, fontWeight: 600, color: W(.2), padding: "3px 8px", background: W(.02), borderRadius: 5 }}>{week.week || `Week ${wpWeek+1}`}</span>
+                          </div>
+                        </div>
+                        {/* Days */}
+                        {(week.days || []).map((day, di) => (
+                          <div key={di} style={{ padding: "12px 16px", borderBottom: di < (week.days||[]).length - 1 ? `1px solid ${W(.025)}` : "none" }}>
+                            <div style={{ fontSize: 11, fontWeight: 700, color: Gold, marginBottom: 6, textTransform: "uppercase", letterSpacing: 1.5 }}>{day.day}</div>
+                            {(day.tasks || []).map((task, ti) => (
+                              <div key={ti} style={{ display: "flex", alignItems: "flex-start", gap: 8, padding: "3px 0" }}>
+                                <span style={{ color: Green, fontSize: 9, marginTop: 3, flexShrink: 0 }}>▸</span>
+                                <span style={{ fontSize: 12, color: W(.45), lineHeight: 1.5 }}>{task}</span>
+                              </div>
+                            ))}
+                          </div>
+                        ))}
+                      </div>;
+                    })()}
+                  </div>
+                  <div style={{ position: "absolute", inset: 0, display: isPaid ? "none" : "flex", alignItems: "center", justifyContent: "center", background: "rgba(8,9,12,.35)", borderRadius: 14 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 16px", background: "rgba(232,200,114,.08)", border: "1px solid rgba(232,200,114,.15)", borderRadius: 10, fontSize: 12, fontWeight: 600, color: Gold }}>🔒 4-Week action plan</div>
+                  </div>
+                </div>
+
+                {/* Milestones continued */}
                 <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 16 }}>
                   {(r.milestones || [{month:"Month 1",target:"$500",milestone:"First clients"},{month:"Month 3",target:"$2,500",milestone:"5+ recurring"},{month:"Month 6",target:"$5,000+",milestone:"Full pipeline"}]).map((m,i) => (
                     <div key={i} style={{ flex: "1 1 140px", padding: "14px 16px", background: W(.013), border: `1px solid ${W(.035)}`, borderRadius: 11 }}>

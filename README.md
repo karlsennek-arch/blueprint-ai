@@ -1,36 +1,78 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Ventrix AI — Project Files
 
-## Getting Started
-
-First, run the development server:
-
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## File Structure
+```
+app/
+  page.js                  — Main landing page + quiz + report + chat
+  globals.css              — Global styles
+  success/page.js          — Success page after Stripe payment
+  lib/supabase.js          — Supabase client helpers
+  api/
+    checkout/route.js      — Stripe checkout session creator
+    chat/route.js          — AI chat API route (proxies to Anthropic)
+    webhook/route.js       — Stripe webhook (marks user as paid)
+    auth/route.js          — Auth check (returns user + paid status)
+    blueprint/route.js     — Save/load blueprints to Supabase
+supabase/
+  migration.sql            — Database schema (run in Supabase SQL Editor)
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Setup Guide
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+### 1. Supabase Setup
+1. Create project at supabase.com (EU West region)
+2. Go to SQL Editor → paste and run `supabase/migration.sql`
+3. Go to Authentication → Providers:
+   - Enable **Email** (magic link, no password)
+   - Enable **Google** OAuth (optional, needs Google Cloud credentials)
+4. Go to Authentication → URL Configuration:
+   - Site URL: `https://ventrixai.com`
+   - Redirect URLs: `https://ventrixai.com/**`
+5. Copy your keys from Project Settings → API:
+   - `NEXT_PUBLIC_SUPABASE_URL`
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+   - `SUPABASE_SERVICE_ROLE_KEY` (keep secret!)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 2. Stripe Webhook Setup
+1. Go to Stripe Dashboard → Developers → Webhooks
+2. Add endpoint: `https://ventrixai.com/api/webhook`
+3. Select event: `checkout.session.completed`
+4. Copy the webhook signing secret → `STRIPE_WEBHOOK_SECRET`
 
-## Learn More
+### 3. Environment Variables (Vercel)
+```
+STRIPE_SECRET_KEY=sk_live_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+NEXT_PUBLIC_URL=https://ventrixai.com
+ANTHROPIC_API_KEY=sk-ant-...
+NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ...
+SUPABASE_SERVICE_ROLE_KEY=eyJ...
+```
 
-To learn more about Next.js, take a look at the following resources:
+### 4. Install Dependencies
+```bash
+npm install @supabase/supabase-js stripe
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## How Payment Verification Works
+1. User clicks "Unlock $19" → Stripe Checkout opens
+2. User pays → Stripe fires `checkout.session.completed` webhook
+3. Webhook route (`/api/webhook`) receives event, matches email, sets `paid=true` in Supabase
+4. User redirects to `/success?session_id=xxx`
+5. Frontend checks auth status via `/api/auth` → sees `paid: true`
+6. Cookie is set as immediate fallback, but DB is source of truth
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## How Auth Works
+- Quiz is open to everyone (no login)
+- After quiz, user enters email to see results
+- Supabase creates account + sends magic link (or Google OAuth)
+- Profile auto-created via DB trigger
+- Blueprint saved to `blueprints` table
+- User can log back in anytime to see their blueprints
 
-## Deploy on Vercel
+## Domain
+ventrixai.com (via Vercel)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## GitHub
+github.com/karlsennek-arch/blueprint-ai
