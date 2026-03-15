@@ -571,83 +571,70 @@ export default function LandingPage() {
   const aiRef = useRef(null);
 
   const LANGS = [
-    { code: "en", label: "English", flag: "🇬🇧" },
-    { code: "es", label: "Español", flag: "🇪🇸" },
-    { code: "pt", label: "Português", flag: "🇧🇷" },
-    { code: "de", label: "Deutsch", flag: "🇩🇪" },
-    { code: "fr", label: "Français", flag: "🇫🇷" },
-    { code: "no", label: "Norsk", flag: "🇳🇴" },
-    { code: "nl", label: "Nederlands", flag: "🇳🇱" },
-    { code: "sv", label: "Svenska", flag: "🇸🇪" },
-    { code: "it", label: "Italiano", flag: "🇮🇹" },
-    { code: "ar", label: "العربية", flag: "🇸🇦" },
+    { code: "en", label: "English", flag: "EN" },
+    { code: "es", label: "Español", flag: "ES" },
+    { code: "pt", label: "Português", flag: "PT" },
+    { code: "fr", label: "Français", flag: "FR" },
+    { code: "de", label: "Deutsch", flag: "DE" },
+    { code: "ar", label: "العربية", flag: "AR" },
+    { code: "it", label: "Italiano", flag: "IT" },
+    { code: "nl", label: "Nederlands", flag: "NL" },
+    { code: "sv", label: "Svenska", flag: "SV" },
+    { code: "no", label: "Norsk", flag: "NO" },
   ];
 
   const langName = LANGS.find(l => l.code === lang)?.label || "English";
 
-  const QUESTIONS = [
-    { id: "situation", label: "What's your current situation?", sub: "This shapes everything — your timeline, strategy, and expectations.",
-      options: [
-        { value: "student", label: "Student", icon: "🎓", desc: "Flexible hours, tight budget" },
-        { value: "fulltime", label: "Full-Time Job", icon: "💼", desc: "Evenings & weekends available" },
-        { value: "parttime", label: "Part-Time Job", icon: "⏰", desc: "Some flexibility, need more" },
-        { value: "freelancer", label: "Freelancer", icon: "🎯", desc: "Flexible but inconsistent" },
-        { value: "unemployed", label: "Between Jobs", icon: "🔄", desc: "Full availability, need income now" },
-        { value: "parent", label: "Stay-at-Home Parent", icon: "🏠", desc: "Must work around family" },
-      ],
+  // ─── Translated quiz content ───
+  const T = {
+    en: {
+      situation: { label: "What's your current situation?", sub: "This shapes everything — your timeline, strategy, and expectations.", opts: [{v:"student",l:"Student",d:"Flexible hours, tight budget"},{v:"fulltime",l:"Full-Time Job",d:"Evenings & weekends available"},{v:"parttime",l:"Part-Time Job",d:"Some flexibility, need more"},{v:"freelancer",l:"Freelancer",d:"Flexible but inconsistent"},{v:"unemployed",l:"Between Jobs",d:"Full availability, need income now"},{v:"parent",l:"Stay-at-Home Parent",d:"Must work around family"}] },
+      skills: { label: "What skills do you bring?", sub: "Pick all that apply — even ones you're decent at.", opts: [{v:"writing",l:"Writing & Copy"},{v:"design",l:"Design & Visual"},{v:"coding",l:"Coding & Tech"},{v:"marketing",l:"Marketing & Ads"},{v:"sales",l:"Sales & People"},{v:"video",l:"Video & Content"},{v:"teaching",l:"Teaching"},{v:"analytics",l:"Data & Research"},{v:"none",l:"Starting from zero"}] },
+      interests: { label: "What industries excite you?", sub: "Passion fuels persistence. Pick what you'd enjoy.", opts: [{v:"tech",l:"Tech & AI"},{v:"health",l:"Health & Fitness"},{v:"finance",l:"Finance & Investing"},{v:"ecommerce",l:"E-Commerce"},{v:"education",l:"Education & Coaching"},{v:"creative",l:"Creative & Media"},{v:"realestate",l:"Real Estate"},{v:"beauty",l:"Beauty & Lifestyle"}] },
+      time: { label: "Weekly hours you can commit?", sub: "Be honest — a realistic plan beats an ambitious one you quit.", opts: [{v:"5",l:"Under 5 hours",d:"Micro-hustle pace"},{v:"10",l:"5–10 hours",d:"Solid side project"},{v:"20",l:"10–20 hours",d:"Serious commitment"},{v:"40",l:"20+ hours",d:"Full-time grind"}] },
+      budget: { label: "Starting investment?", sub: "Many paths need $0. But knowing helps us be precise.", opts: [{v:"0",l:"$0 — Zero",d:"Pure hustle, no capital"},{v:"100",l:"Under $100",d:"Minimal tools budget"},{v:"500",l:"$100–$500",d:"Room for tools & ads"},{v:"1000",l:"$500+",d:"Ready to invest"}] },
+      goal: { label: "Monthly income target?", sub: "Your first milestone — we reverse-engineer how to hit it.", opts: [{v:"1000",l:"$1K/mo",d:"Breathing room"},{v:"3000",l:"$3K/mo",d:"Real side income"},{v:"5000",l:"$5K/mo",d:"Replace your job"},{v:"10000",l:"$10K+/mo",d:"Build wealth"}] },
+      loading: ["Mapping your profile", "Scanning 1,400+ models", "Matching interests", "Projecting revenue", "Building your plan", "Writing blueprint"],
+      generate: "Generate Blueprint →", continue: "Continue →", selectLang: "Select Language", chooseLang: "Choose your language", langSub: "Your entire blueprint will be generated in this language.", building: "Building your blueprint", analyzing: "Analyzing 1,400+ income paths...",
     },
-    { id: "skills", label: "What skills do you bring?", sub: "Pick all that apply — even ones you're decent at.", multi: true,
-      options: [
-        { value: "writing", label: "Writing & Copy", icon: "✍️" },
-        { value: "design", label: "Design & Visual", icon: "🎨" },
-        { value: "coding", label: "Coding & Tech", icon: "💻" },
-        { value: "marketing", label: "Marketing & Ads", icon: "📢" },
-        { value: "sales", label: "Sales & People", icon: "🤝" },
-        { value: "video", label: "Video & Content", icon: "🎬" },
-        { value: "teaching", label: "Teaching", icon: "📚" },
-        { value: "analytics", label: "Data & Research", icon: "📊" },
-        { value: "none", label: "Starting from zero", icon: "🌱" },
-      ],
+    no: {
+      situation: { label: "Hva er situasjonen din?", sub: "Dette former alt — tidslinje, strategi og forventninger.", opts: [{v:"student",l:"Student",d:"Fleksible timer, stramt budsjett"},{v:"fulltime",l:"Fulltidsjobb",d:"Kvelder og helger tilgjengelig"},{v:"parttime",l:"Deltidsjobb",d:"Noe fleksibilitet, trenger mer"},{v:"freelancer",l:"Frilanser",d:"Fleksibelt men uforutsigbart"},{v:"unemployed",l:"Mellom jobber",d:"Full tilgjengelighet, trenger inntekt nå"},{v:"parent",l:"Hjemmeforelder",d:"Må jobbe rundt familien"}] },
+      skills: { label: "Hvilke ferdigheter har du?", sub: "Velg alle som passer — selv de du er ok på.", opts: [{v:"writing",l:"Skriving & Tekst"},{v:"design",l:"Design & Visuelt"},{v:"coding",l:"Koding & Teknologi"},{v:"marketing",l:"Markedsføring & Annonser"},{v:"sales",l:"Salg & Mennesker"},{v:"video",l:"Video & Innhold"},{v:"teaching",l:"Undervisning"},{v:"analytics",l:"Data & Research"},{v:"none",l:"Starter fra null"}] },
+      interests: { label: "Hvilke bransjer interesserer deg?", sub: "Lidenskap gir utholdenhet. Velg det du liker.", opts: [{v:"tech",l:"Tech & AI"},{v:"health",l:"Helse & Fitness"},{v:"finance",l:"Finans & Investering"},{v:"ecommerce",l:"Netthandel"},{v:"education",l:"Utdanning & Coaching"},{v:"creative",l:"Kreativ & Media"},{v:"realestate",l:"Eiendom"},{v:"beauty",l:"Skjønnhet & Livsstil"}] },
+      time: { label: "Timer per uke du kan bruke?", sub: "Vær ærlig — en realistisk plan slår en ambisiøs du gir opp.", opts: [{v:"5",l:"Under 5 timer",d:"Mikro-tempo"},{v:"10",l:"5–10 timer",d:"Solid sideprosjekt"},{v:"20",l:"10–20 timer",d:"Seriøs satsing"},{v:"40",l:"20+ timer",d:"Fulltid"}] },
+      budget: { label: "Startbudsjett?", sub: "Mange veier trenger kr 0. Men det hjelper oss å vite.", opts: [{v:"0",l:"kr 0 — Null",d:"Bare innsats, ingen kapital"},{v:"100",l:"Under kr 1000",d:"Minimalt verktøybudsjett"},{v:"500",l:"kr 1000–5000",d:"Plass til verktøy og annonser"},{v:"1000",l:"kr 5000+",d:"Klar til å investere"}] },
+      goal: { label: "Månedlig inntektsmål?", sub: "Din første milepæl — vi reverserer planen for å nå det.", opts: [{v:"1000",l:"kr 10K/mnd",d:"Pustrom"},{v:"3000",l:"kr 30K/mnd",d:"Skikkelig sideinntekt"},{v:"5000",l:"kr 50K/mnd",d:"Erstatt jobben"},{v:"10000",l:"kr 100K+/mnd",d:"Bygg rikdom"}] },
+      loading: ["Kartlegger profilen din", "Skanner 1 400+ modeller", "Matcher interesser", "Beregner inntekt", "Bygger planen din", "Skriver blueprint"],
+      generate: "Generer Blueprint →", continue: "Fortsett →", selectLang: "Velg språk", chooseLang: "Velg ditt språk", langSub: "Hele blueprinten din blir generert på dette språket.", building: "Bygger din blueprint", analyzing: "Analyserer 1 400+ inntektsveier...",
     },
-    { id: "interests", label: "What industries excite you?", sub: "Passion fuels persistence. Pick what you'd enjoy.", multi: true,
-      options: [
-        { value: "tech", label: "Tech & AI", icon: "🤖" },
-        { value: "health", label: "Health & Fitness", icon: "💪" },
-        { value: "finance", label: "Finance & Investing", icon: "💹" },
-        { value: "ecommerce", label: "E-Commerce", icon: "🛒" },
-        { value: "education", label: "Education & Coaching", icon: "🎓" },
-        { value: "creative", label: "Creative & Media", icon: "🎭" },
-        { value: "realestate", label: "Real Estate", icon: "🏗️" },
-        { value: "beauty", label: "Beauty & Lifestyle", icon: "✨" },
-      ],
+    es: {
+      situation: { label: "¿Cuál es tu situación actual?", sub: "Esto define todo — tu cronograma, estrategia y expectativas.", opts: [{v:"student",l:"Estudiante",d:"Horarios flexibles, presupuesto ajustado"},{v:"fulltime",l:"Trabajo de tiempo completo",d:"Noches y fines de semana disponibles"},{v:"parttime",l:"Trabajo de medio tiempo",d:"Algo de flexibilidad"},{v:"freelancer",l:"Freelancer",d:"Flexible pero inconsistente"},{v:"unemployed",l:"Entre trabajos",d:"Disponibilidad total"},{v:"parent",l:"Padre/Madre en casa",d:"Trabajar alrededor de la familia"}] },
+      skills: { label: "¿Qué habilidades tienes?", sub: "Selecciona todas las que apliquen.", opts: [{v:"writing",l:"Escritura"},{v:"design",l:"Diseño"},{v:"coding",l:"Programación"},{v:"marketing",l:"Marketing"},{v:"sales",l:"Ventas"},{v:"video",l:"Video y contenido"},{v:"teaching",l:"Enseñanza"},{v:"analytics",l:"Datos e investigación"},{v:"none",l:"Empezando de cero"}] },
+      interests: { label: "¿Qué industrias te emocionan?", sub: "La pasión impulsa la persistencia.", opts: [{v:"tech",l:"Tech & IA"},{v:"health",l:"Salud & Fitness"},{v:"finance",l:"Finanzas"},{v:"ecommerce",l:"E-Commerce"},{v:"education",l:"Educación"},{v:"creative",l:"Creativo & Media"},{v:"realestate",l:"Bienes raíces"},{v:"beauty",l:"Belleza & Estilo de vida"}] },
+      time: { label: "¿Horas semanales disponibles?", sub: "Sé honesto — un plan realista gana.", opts: [{v:"5",l:"Menos de 5 horas",d:"Ritmo micro"},{v:"10",l:"5–10 horas",d:"Proyecto sólido"},{v:"20",l:"10–20 horas",d:"Compromiso serio"},{v:"40",l:"20+ horas",d:"Tiempo completo"}] },
+      budget: { label: "¿Inversión inicial?", sub: "Muchos caminos necesitan $0.", opts: [{v:"0",l:"$0",d:"Solo esfuerzo"},{v:"100",l:"Menos de $100",d:"Herramientas mínimas"},{v:"500",l:"$100–$500",d:"Herramientas y anuncios"},{v:"1000",l:"$500+",d:"Listo para invertir"}] },
+      goal: { label: "¿Meta de ingresos mensuales?", sub: "Tu primer hito.", opts: [{v:"1000",l:"$1K/mes",d:"Respiro"},{v:"3000",l:"$3K/mes",d:"Ingreso real"},{v:"5000",l:"$5K/mes",d:"Reemplazar tu trabajo"},{v:"10000",l:"$10K+/mes",d:"Construir riqueza"}] },
+      loading: ["Mapeando tu perfil", "Escaneando 1.400+ modelos", "Combinando intereses", "Proyectando ingresos", "Construyendo tu plan", "Escribiendo blueprint"],
+      generate: "Generar Blueprint →", continue: "Continuar →", selectLang: "Seleccionar idioma", chooseLang: "Elige tu idioma", langSub: "Tu blueprint completo se generará en este idioma.", building: "Construyendo tu blueprint", analyzing: "Analizando 1.400+ rutas de ingresos...",
     },
-    { id: "time", label: "Weekly hours you can commit?", sub: "Be honest — a realistic plan beats an ambitious one you quit.",
-      options: [
-        { value: "5", label: "Under 5 hours", icon: "⏰", desc: "Micro-hustle pace" },
-        { value: "10", label: "5–10 hours", icon: "🕐", desc: "Solid side project" },
-        { value: "20", label: "10–20 hours", icon: "🕑", desc: "Serious commitment" },
-        { value: "40", label: "20+ hours", icon: "🔥", desc: "Full-time grind" },
-      ],
-    },
-    { id: "budget", label: "Starting investment?", sub: "Many paths need $0. But knowing helps us be precise.",
-      options: [
-        { value: "0", label: "$0 — Zero", icon: "🆓", desc: "Pure hustle, no capital" },
-        { value: "100", label: "Under $100", icon: "💵", desc: "Minimal tools budget" },
-        { value: "500", label: "$100–$500", icon: "💰", desc: "Room for tools & ads" },
-        { value: "1000", label: "$500+", icon: "🏦", desc: "Ready to invest" },
-      ],
-    },
-    { id: "goal", label: "Monthly income target?", sub: "Your first milestone — we reverse-engineer how to hit it.",
-      options: [
-        { value: "1000", label: "$1K/mo", icon: "🎯", desc: "Breathing room" },
-        { value: "3000", label: "$3K/mo", icon: "📈", desc: "Real side income" },
-        { value: "5000", label: "$5K/mo", icon: "🚀", desc: "Replace your job" },
-        { value: "10000", label: "$10K+/mo", icon: "💎", desc: "Build wealth" },
-      ],
-    },
-  ];
+  };
 
-  const LOAD_PHASES = ["Mapping your profile", "Scanning 1,400+ models", "Matching interests", "Projecting revenue", "Building your plan", "Writing blueprint"];
+  // Get translated content — fallback to English
+  const tr = T[lang] || T.en;
+  const ICONS = { situation: ["🎓","💼","⏰","🎯","🔄","🏠"], skills: ["✍️","🎨","💻","📢","🤝","🎬","📚","📊","🌱"], interests: ["🤖","💪","💹","🛒","🎓","🎭","🏗️","✨"], time: ["⏰","🕐","🕑","🔥"], budget: ["🆓","💵","💰","🏦"], goal: ["🎯","📈","🚀","💎"] };
+  const Q_IDS = ["situation","skills","interests","time","budget","goal"];
+  const Q_MULTI = { skills: true, interests: true };
+
+  const QUESTIONS = Q_IDS.map(id => {
+    const q = tr[id] || T.en[id];
+    const icons = ICONS[id] || [];
+    return {
+      id, label: q.label, sub: q.sub, multi: !!Q_MULTI[id],
+      options: q.opts.map((o, i) => ({ value: o.v, label: o.l, icon: icons[i] || "•", desc: o.d })),
+    };
+  });
+
+  const LOAD_PHASES = tr.loading || T.en.loading;
 
   const cQ = QUESTIONS[step];
   const canGo = cQ?.multi ? (answers[cQ?.id]?.length > 0) : !!answers[cQ?.id];
@@ -1239,9 +1226,9 @@ Respond ONLY with valid JSON (no markdown, no backticks):
             {screen === "quiz" && step === -1 && (
               <div style={{ animation: "su .4s both" }}>
                 <div style={{ textAlign: "center", marginBottom: 28 }}>
-                  <div style={{ fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: 3, color: Gold, marginBottom: 8 }}>🌍 Select Language</div>
-                  <h2 style={{ fontSize: "clamp(20px,5vw,24px)", fontWeight: 800, lineHeight: 1.2, marginBottom: 4 }}>Choose your language</h2>
-                  <p style={{ fontSize: 13, color: W(.28), fontFamily: "'Crimson Pro',serif", fontStyle: "italic" }}>Your entire blueprint will be generated in this language.</p>
+                  <div style={{ fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: 3, color: Gold, marginBottom: 8 }}>🌍 {tr.selectLang || "Select Language"}</div>
+                  <h2 style={{ fontSize: "clamp(20px,5vw,24px)", fontWeight: 800, lineHeight: 1.2, marginBottom: 4 }}>{tr.chooseLang || "Choose your language"}</h2>
+                  <p style={{ fontSize: 13, color: W(.28), fontFamily: "'Crimson Pro',serif", fontStyle: "italic" }}>{tr.langSub || "Your entire blueprint will be generated in this language."}</p>
                 </div>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 8 }}>
                   {LANGS.map((l) => (
@@ -1251,7 +1238,7 @@ Respond ONLY with valid JSON (no markdown, no backticks):
                       border: `1px solid ${lang === l.code ? "rgba(232,200,114,.25)" : W(.05)}`,
                       display: "flex", alignItems: "center", gap: 10, color: "#fff", transition: "all .2s",
                     }}>
-                      <span style={{ fontSize: 22 }}>{l.flag}</span>
+                      <span style={{ fontSize: 11, fontWeight: 700, width: 28, height: 28, borderRadius: 6, background: W(.04), display: "flex", alignItems: "center", justifyContent: "center", color: lang === l.code ? Gold : W(.4), letterSpacing: 1 }}>{l.flag}</span>
                       <span style={{ fontSize: 14, fontWeight: 600, color: lang === l.code ? Gold : "#fff" }}>{l.label}</span>
                     </button>
                   ))}
@@ -1295,7 +1282,7 @@ Respond ONLY with valid JSON (no markdown, no backticks):
                   {step > 0 && <button onClick={() => setStep(s => s-1)} style={{ padding: "12px 18px", borderRadius: 10, border: `1px solid ${W(.06)}`, background: "transparent", color: W(.35), fontSize: 13, fontWeight: 600 }}>←</button>}
                   {step === 0 && <button onClick={() => setStep(-1)} style={{ padding: "12px 18px", borderRadius: 10, border: `1px solid ${W(.06)}`, background: "transparent", color: W(.35), fontSize: 13, fontWeight: 600 }}>← Language</button>}
                   {cQ.multi && <button onClick={() => canGo && (step < QUESTIONS.length-1 ? setStep(s => s+1) : startLoading())} disabled={!canGo} style={{ flex: 1, padding: "12px", borderRadius: 10, background: canGo ? `linear-gradient(135deg,${Gold},#D4A843)` : W(.03), color: canGo ? Bg : W(.12), fontSize: 13, fontWeight: 700, cursor: canGo ? "pointer" : "not-allowed" }}>
-                    {step === QUESTIONS.length-1 ? "Generate Blueprint →" : "Continue →"}
+                    {step === QUESTIONS.length-1 ? (tr.generate || "Generate Blueprint →") : (tr.continue || "Continue →")}
                   </button>}
                 </div>
               </div>
@@ -1316,8 +1303,8 @@ Respond ONLY with valid JSON (no markdown, no backticks):
             {screen === "loading" && (
               <div style={{ paddingTop: 40, animation: "fi .5s both" }}>
                 <div style={{ textAlign: "center", marginBottom: 36 }}>
-                  <h2 style={{ fontSize: 20, fontWeight: 800, marginBottom: 5 }}>Building your blueprint</h2>
-                  <p style={{ fontSize: 13, color: W(.25), fontFamily: "'Crimson Pro',serif", fontStyle: "italic" }}>Analyzing 1,400+ income paths...</p>
+                  <h2 style={{ fontSize: 20, fontWeight: 800, marginBottom: 5 }}>{tr.building || "Building your blueprint"}</h2>
+                  <p style={{ fontSize: 13, color: W(.25), fontFamily: "'Crimson Pro',serif", fontStyle: "italic" }}>{tr.analyzing || "Analyzing 1,400+ income paths..."}</p>
                 </div>
                 <div style={{ maxWidth: 340, margin: "0 auto" }}>
                   {LOAD_PHASES.map((t,i) => (
