@@ -291,6 +291,60 @@ function DashboardMockup() {
   );
 }
 
+// ─── ANIMATED QUIZ DEMO (cycles through 6 steps) ───────────────
+function QuizDemo() {
+  const [step, setStep] = useState(0);
+  useEffect(() => {
+    const i = setInterval(() => setStep(s => (s + 1) % 6), 2800);
+    return () => clearInterval(i);
+  }, []);
+
+  const steps = [
+    { label: "What's your current situation?", opts: ["Student 🎓", "Full-Time Job 💼", "Freelancer 🎯"], sel: 1 },
+    { label: "What skills do you bring?", opts: ["Writing ✍️", "Coding 💻", "Marketing 📢"], sel: 1 },
+    { label: "What industries excite you?", opts: ["Tech & AI 🤖", "E-Commerce 🛒", "Finance 💹"], sel: 0 },
+    { label: "Weekly hours you can commit?", opts: ["Under 5 hours ⏰", "5–10 hours 🕐", "20+ hours 🔥"], sel: 2 },
+    { label: "Starting investment?", opts: ["$0 — Zero 🆓", "Under $100 💵", "$500+ 🏦"], sel: 0 },
+    { label: "Monthly income target?", opts: ["$1K/mo 🎯", "$3K/mo 📈", "$10K+/mo 💎"], sel: 1 },
+  ];
+
+  const q = steps[step];
+  return (
+    <div style={{ background: "linear-gradient(145deg, rgba(17,19,24,.9), rgba(13,14,18,.9))", border: `1px solid ${W(.08)}`, borderRadius: 16, padding: "18px 16px", maxWidth: 280, minHeight: 210, position: "relative", overflow: "hidden" }}>
+      <div style={{ fontSize: 9, color: W(.2), textTransform: "uppercase", letterSpacing: 2, marginBottom: 8 }}>Step {step + 1} of 6</div>
+      <div key={step} style={{ animation: "su .3s both" }}>
+        <div style={{ fontSize: 13, fontWeight: 700, color: "#fff", marginBottom: 10 }}>{q.label}</div>
+        {q.opts.map((o, i) => (
+          <div key={i} style={{
+            padding: "8px 10px", marginBottom: 4, borderRadius: 7,
+            background: i === q.sel ? "rgba(126,232,178,.06)" : W(.01),
+            border: `1px solid ${i === q.sel ? "rgba(126,232,178,.25)" : W(.04)}`,
+            fontSize: 11, color: i === q.sel ? Green : W(.4),
+            transition: "all .3s",
+          }}>{o} {i === q.sel && <span style={{ float: "right", fontSize: 9, color: Green }}>✓</span>}</div>
+        ))}
+      </div>
+      {/* Bottom stats */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 4, marginTop: 10 }}>
+        <div style={{ padding: "8px", background: W(.02), borderRadius: 6, border: `1px solid rgba(126,232,178,.15)` }}>
+          <div style={{ fontSize: 8, color: W(.2), textTransform: "uppercase", letterSpacing: 1 }}>Monthly Value</div>
+          <div style={{ fontSize: 14, fontWeight: 800, color: Green }}>$32,500</div>
+        </div>
+        <div style={{ padding: "8px", background: W(.02), borderRadius: 6, border: `1px solid rgba(126,232,178,.15)` }}>
+          <div style={{ fontSize: 8, color: W(.2), textTransform: "uppercase", letterSpacing: 1 }}>ROI Year 1</div>
+          <div style={{ fontSize: 14, fontWeight: 800, color: Green }}>13x</div>
+        </div>
+      </div>
+      {/* Step dots */}
+      <div style={{ display: "flex", justifyContent: "center", gap: 5, marginTop: 12 }}>
+        {[0,1,2,3,4,5].map(i => (
+          <div key={i} style={{ width: i === step ? 16 : 5, height: 5, borderRadius: 3, background: i === step ? Green : W(.08), transition: "all .4s" }} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // ─── FAQ ITEM ───────────────────────────────────────────────────
 function FAQ({ q, a, open, onClick }) {
   return (
@@ -2074,28 +2128,7 @@ Answer their questions with specific, actionable advice tailored to their exact 
         <div style={{ marginBottom: 72, animation: "su .5s .3s both" }}>
           {[
             { n: "01", tag: "PROFILE", icon: "📝", title: "Answer 6\nSimple Questions", accent: Gold, desc: "Tell us about your skills, schedule, budget, interests, and income goal. Our AI needs just 60 seconds to understand your unique situation and constraints.", visual: (
-              <div style={{ background: "linear-gradient(145deg, rgba(17,19,24,.9), rgba(13,14,18,.9))", border: `1px solid ${W(.08)}`, borderRadius: 16, padding: "18px 16px", maxWidth: 280 }}>
-                <div style={{ fontSize: 9, color: W(.2), textTransform: "uppercase", letterSpacing: 2, marginBottom: 8 }}>Step 3 of 6</div>
-                <div style={{ fontSize: 13, fontWeight: 700, color: "#fff", marginBottom: 10 }}>What skills do you have?</div>
-                {["Writing ✍️", "Coding 💻", "Marketing 📢"].map((s, i) => (
-                  <div key={i} style={{
-                    padding: "8px 10px", marginBottom: 4, borderRadius: 7,
-                    background: i === 1 ? "rgba(126,232,178,.06)" : W(.01),
-                    border: `1px solid ${i === 1 ? "rgba(126,232,178,.25)" : W(.04)}`,
-                    fontSize: 11, color: i === 1 ? Gold : W(.4),
-                  }}>{s} {i === 1 && <span style={{ float: "right", fontSize: 9, color: Gold }}>✓</span>}</div>
-                ))}
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 4, marginTop: 10 }}>
-                  <div style={{ padding: "8px", background: W(.02), borderRadius: 6, border: `1px solid rgba(126,232,178,.15)` }}>
-                    <div style={{ fontSize: 8, color: W(.2), textTransform: "uppercase", letterSpacing: 1 }}>Monthly Value</div>
-                    <div style={{ fontSize: 14, fontWeight: 800, color: Gold }}>$32,500</div>
-                  </div>
-                  <div style={{ padding: "8px", background: W(.02), borderRadius: 6, border: `1px solid rgba(126,232,178,.15)` }}>
-                    <div style={{ fontSize: 8, color: W(.2), textTransform: "uppercase", letterSpacing: 1 }}>ROI Year 1</div>
-                    <div style={{ fontSize: 14, fontWeight: 800, color: Green }}>13x</div>
-                  </div>
-                </div>
-              </div>
+              <QuizDemo />
             )},
             { n: "02", tag: "AI ANALYSIS", icon: "🤖", title: "AI Builds Your\nPersonalized Plan", accent: Green, desc: "Our engine analyzes 1,400+ proven income models and matches the best path to your unique profile. It considers your skills, time constraints, budget, and income goals to find your highest-probability path.", visual: (
               <div style={{ background: "linear-gradient(145deg, rgba(17,19,24,.9), rgba(13,14,18,.9))", border: `1px solid ${W(.08)}`, borderRadius: 16, padding: "18px 16px", maxWidth: 280 }}>
