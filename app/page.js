@@ -1,7 +1,6 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import { createClient } from "@supabase/supabase-js";
-import { Analytics } from "@vercel/analytics/react";
 
 const Gold = "#7EE8B2"; // Was yellow, now green for all UI elements
 const StarGold = "#FFD166"; // ONLY for star ratings
@@ -2747,7 +2746,6 @@ Answer their questions with specific, actionable advice tailored to their exact 
           <div style={{ fontSize: 10, color: W(.1) }}>Ventrix AI © 2026 • ventrixai.com</div>
         </div>
       </div>
-      <Analytics />
     </>
   );
 }
