@@ -2,8 +2,12 @@
 import { useState, useEffect, useRef } from "react";
 import { createClient } from "@supabase/supabase-js";
 
-const Gold = "#E8C872";
+const Gold = "#7EE8B2"; // Was yellow, now green for all UI elements
+const StarGold = "#FFD166"; // ONLY for star ratings
 const Green = "#7EE8B2";
+const Purple = "#C084FC";
+const Blue = "#8BB8E8";
+const Pink = "#EC4899";
 const Bg = "#08090C";
 const W = (a) => `rgba(255,255,255,${a})`;
 
@@ -72,7 +76,7 @@ function AuthModal({ onAuth, onSkip, lang }) {
   return (
     <div style={{ animation: "su .4s both" }}>
       <div style={{ textAlign: "center", marginBottom: 24 }}>
-        <div style={{ width: 48, height: 48, borderRadius: 12, background: `linear-gradient(135deg,${Gold},#D4A843)`, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px", fontSize: 20 }}>📧</div>
+        <div style={{ width: 48, height: 48, borderRadius: 12, background: `linear-gradient(135deg,${Gold},#5EC99A)`, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px", fontSize: 20 }}>📧</div>
         <h2 style={{ fontSize: "clamp(20px,5vw,26px)", fontWeight: 800, lineHeight: 1.2, marginBottom: 6 }}>{t.title}</h2>
         <p style={{ fontSize: 13, color: W(.3), fontFamily: "'Crimson Pro',serif", fontStyle: "italic", maxWidth: 360, margin: "0 auto" }}>{t.sub}</p>
       </div>
@@ -89,7 +93,7 @@ function AuthModal({ onAuth, onSkip, lang }) {
             />
             <button onClick={handleMagicLink} disabled={loading || !email.includes("@")} style={{
               padding: "14px 20px", borderRadius: 11,
-              background: email.includes("@") ? `linear-gradient(135deg,${Gold},#D4A843)` : W(.04),
+              background: email.includes("@") ? `linear-gradient(135deg,${Gold},#5EC99A)` : W(.04),
               color: email.includes("@") ? Bg : W(.15), fontSize: 13, fontWeight: 700,
               cursor: email.includes("@") ? "pointer" : "not-allowed", whiteSpace: "nowrap",
             }}>
@@ -159,6 +163,188 @@ function LiveCounter() {
   );
 }
 
+// ─── ANIMATED STARFIELD BACKGROUND ──────────────────────────────
+function StarField() {
+  const canvasRef = useRef(null);
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    let animId;
+    let stars = [];
+    const resize = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = document.documentElement.scrollHeight || window.innerHeight * 3;
+    };
+    const init = () => {
+      resize();
+      stars = [];
+      const count = Math.floor((canvas.width * canvas.height) / 8000);
+      for (let i = 0; i < count; i++) {
+        stars.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          r: Math.random() * 1.3 + 0.3,
+          speed: Math.random() * 0.15 + 0.03,
+          opacity: Math.random(),
+          blinkSpeed: Math.random() * 0.008 + 0.002,
+          blinkDir: Math.random() > 0.5 ? 1 : -1,
+        });
+      }
+    };
+    const draw = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (const s of stars) {
+        s.y -= s.speed;
+        if (s.y < -2) { s.y = canvas.height + 2; s.x = Math.random() * canvas.width; }
+        s.opacity += s.blinkSpeed * s.blinkDir;
+        if (s.opacity >= 1) { s.opacity = 1; s.blinkDir = -1; }
+        if (s.opacity <= 0.1) { s.opacity = 0.1; s.blinkDir = 1; }
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255,255,255,${s.opacity * 0.6})`;
+        ctx.fill();
+      }
+      animId = requestAnimationFrame(draw);
+    };
+    init();
+    draw();
+    const ro = new ResizeObserver(() => { resize(); });
+    ro.observe(document.documentElement);
+    return () => { cancelAnimationFrame(animId); ro.disconnect(); };
+  }, []);
+  return <canvas ref={canvasRef} style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 0 }} />;
+}
+
+// ─── DASHBOARD MOCKUP (Hero section) ───────────────────────────
+function DashboardMockup() {
+  const [counter, setCounter] = useState(47283);
+  useEffect(() => { const i = setInterval(() => setCounter(c => c + Math.floor(Math.random() * 3)), 3000); return () => clearInterval(i); }, []);
+  const bars = [38, 52, 45, 62, 58, 72, 68, 85];
+  return (
+    <div style={{ background: "linear-gradient(145deg, rgba(17,19,24,.95), rgba(13,14,18,.95))", border: `1px solid ${W(.08)}`, borderRadius: 20, padding: "20px 22px 18px", maxWidth: 620, margin: "0 auto", boxShadow: "0 24px 80px rgba(0,0,0,.5), 0 0 40px rgba(126,232,178,.04)", position: "relative", backdropFilter: "blur(12px)" }}>
+      {/* Top bar with dots */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
+        <div style={{ display: "flex", gap: 6 }}>
+          <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#FF5F57" }} />
+          <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#FFBD2E" }} />
+          <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#28CA42" }} />
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          <span style={{ width: 6, height: 6, borderRadius: "50%", background: Green, animation: "pulse 2s infinite" }} />
+          <span style={{ fontSize: 10, color: W(.3), letterSpacing: 1 }}>Live AI Dashboard</span>
+        </div>
+      </div>
+      {/* Stats row */}
+      <div className="dash-stats" style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr 1fr 1fr", gap: 10, marginBottom: 14 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <div style={{ width: 34, height: 34, borderRadius: 10, background: `linear-gradient(135deg,${Gold},#5EC99A)`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 900, color: Bg }}>V</div>
+          <div>
+            <div style={{ fontSize: 12, fontWeight: 700, color: "#fff" }}>Ventrix AI</div>
+            <div style={{ fontSize: 9, color: W(.25) }}>Blueprint Engine</div>
+          </div>
+        </div>
+        {[
+          ["BLUEPRINTS", counter.toLocaleString(), `▲ 12%`, Gold],
+          ["PATHS MATCHED", "1,400+", "▲ 8%", Green],
+          ["SUCCESS RATE", "94%", "▲ 24%", "#8BB8E8"],
+        ].map(([label, val, change, color], i) => (
+          <div key={i} style={{ padding: "8px 10px", background: W(.03), borderRadius: 10, border: `1px solid ${W(.05)}` }}>
+            <div style={{ fontSize: 8, fontWeight: 600, letterSpacing: 1.5, textTransform: "uppercase", color: W(.2), marginBottom: 3 }}>{label}</div>
+            <div style={{ fontSize: 15, fontWeight: 800, color: "#fff" }}>{val}</div>
+            <div style={{ fontSize: 8, color, fontWeight: 600, marginTop: 1 }}>{change} vs last month</div>
+          </div>
+        ))}
+      </div>
+      {/* Bottom row: chart + number */}
+      <div className="dash-bottom" style={{ display: "grid", gridTemplateColumns: "1fr 1.6fr", gap: 10 }}>
+        <div style={{ padding: "12px 14px", background: W(.02), border: `1px solid ${W(.05)}`, borderRadius: 12 }}>
+          <div style={{ fontSize: 32, fontWeight: 900, color: "#fff", lineHeight: 1 }}>{counter.toLocaleString()}</div>
+          <div style={{ fontSize: 9, fontWeight: 600, letterSpacing: 1.5, textTransform: "uppercase", color: W(.2), marginTop: 4 }}>AI BLUEPRINTS DEPLOYED</div>
+          <div style={{ display: "flex", alignItems: "flex-end", gap: 3, marginTop: 10, height: 40 }}>
+            {bars.map((h, i) => (
+              <div key={i} style={{ flex: 1, height: `${h}%`, background: `linear-gradient(to top, ${Gold}, rgba(126,232,178,.3))`, borderRadius: 3, opacity: 0.7 + i * 0.04 }} />
+            ))}
+          </div>
+        </div>
+        <div style={{ padding: "12px 14px", background: W(.02), border: `1px solid ${W(.05)}`, borderRadius: 12 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+            <div>
+              <div style={{ fontSize: 8, fontWeight: 600, letterSpacing: 1.5, textTransform: "uppercase", color: W(.2) }}>WEEKLY GROWTH</div>
+              <div style={{ fontSize: 22, fontWeight: 900, color: "#fff" }}>+24.5%</div>
+            </div>
+            <div style={{ width: 28, height: 28, borderRadius: 8, background: "rgba(126,232,178,.1)", border: "1px solid rgba(126,232,178,.15)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12 }}>📈</div>
+          </div>
+          <svg width="100%" height="50" viewBox="0 0 200 50" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor={Green} stopOpacity="0.3" />
+                <stop offset="100%" stopColor={Green} stopOpacity="0.02" />
+              </linearGradient>
+            </defs>
+            <path d="M0 45 Q20 42 40 38 T80 30 T120 22 T160 15 T200 8" fill="none" stroke={Green} strokeWidth="2" />
+            <path d="M0 45 Q20 42 40 38 T80 30 T120 22 T160 15 T200 8 L200 50 L0 50 Z" fill="url(#chartGrad)" />
+          </svg>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── ANIMATED QUIZ DEMO (cycles through 6 steps) ───────────────
+function QuizDemo() {
+  const [step, setStep] = useState(0);
+  useEffect(() => {
+    const i = setInterval(() => setStep(s => (s + 1) % 6), 2800);
+    return () => clearInterval(i);
+  }, []);
+
+  const steps = [
+    { label: "What's your current situation?", opts: ["Student 🎓", "Full-Time Job 💼", "Freelancer 🎯"], sel: 1 },
+    { label: "What skills do you bring?", opts: ["Writing ✍️", "Coding 💻", "Marketing 📢"], sel: 1 },
+    { label: "What industries excite you?", opts: ["Tech & AI 🤖", "E-Commerce 🛒", "Finance 💹"], sel: 0 },
+    { label: "Weekly hours you can commit?", opts: ["Under 5 hours ⏰", "5–10 hours 🕐", "20+ hours 🔥"], sel: 2 },
+    { label: "Starting investment?", opts: ["$0 — Zero 🆓", "Under $100 💵", "$500+ 🏦"], sel: 0 },
+    { label: "Monthly income target?", opts: ["$1K/mo 🎯", "$3K/mo 📈", "$10K+/mo 💎"], sel: 1 },
+  ];
+
+  const q = steps[step];
+  return (
+    <div style={{ background: "linear-gradient(145deg, rgba(17,19,24,.9), rgba(13,14,18,.9))", border: `1px solid ${W(.08)}`, borderRadius: 16, padding: "18px 16px", maxWidth: 280, minHeight: 210, position: "relative", overflow: "hidden" }}>
+      <div style={{ fontSize: 9, color: W(.2), textTransform: "uppercase", letterSpacing: 2, marginBottom: 8 }}>Step {step + 1} of 6</div>
+      <div key={step} style={{ animation: "su .3s both" }}>
+        <div style={{ fontSize: 13, fontWeight: 700, color: "#fff", marginBottom: 10 }}>{q.label}</div>
+        {q.opts.map((o, i) => (
+          <div key={i} style={{
+            padding: "8px 10px", marginBottom: 4, borderRadius: 7,
+            background: i === q.sel ? "rgba(126,232,178,.06)" : W(.01),
+            border: `1px solid ${i === q.sel ? "rgba(126,232,178,.25)" : W(.04)}`,
+            fontSize: 11, color: i === q.sel ? Green : W(.4),
+            transition: "all .3s",
+          }}>{o} {i === q.sel && <span style={{ float: "right", fontSize: 9, color: Green }}>✓</span>}</div>
+        ))}
+      </div>
+      {/* Bottom stats */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 4, marginTop: 10 }}>
+        <div style={{ padding: "8px", background: W(.02), borderRadius: 6, border: `1px solid rgba(126,232,178,.15)` }}>
+          <div style={{ fontSize: 8, color: W(.2), textTransform: "uppercase", letterSpacing: 1 }}>Monthly Value</div>
+          <div style={{ fontSize: 14, fontWeight: 800, color: Green }}>$32,500</div>
+        </div>
+        <div style={{ padding: "8px", background: W(.02), borderRadius: 6, border: `1px solid rgba(126,232,178,.15)` }}>
+          <div style={{ fontSize: 8, color: W(.2), textTransform: "uppercase", letterSpacing: 1 }}>ROI Year 1</div>
+          <div style={{ fontSize: 14, fontWeight: 800, color: Green }}>13x</div>
+        </div>
+      </div>
+      {/* Step dots */}
+      <div style={{ display: "flex", justifyContent: "center", gap: 5, marginTop: 12 }}>
+        {[0,1,2,3,4,5].map(i => (
+          <div key={i} style={{ width: i === step ? 16 : 5, height: 5, borderRadius: 3, background: i === step ? Green : W(.08), transition: "all .4s" }} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // ─── FAQ ITEM ───────────────────────────────────────────────────
 function FAQ({ q, a, open, onClick }) {
   return (
@@ -220,7 +406,7 @@ function PaywallPopup({ onClose }) {
 
   return (
     <div style={{ position: "fixed", inset: 0, zIndex: 200, display: "flex", alignItems: "center", justifyContent: "center", padding: 16, background: "rgba(0,0,0,.85)", backdropFilter: "blur(12px)", animation: "fi .3s both" }} onClick={onClose}>
-      <div onClick={e => e.stopPropagation()} style={{ width: "100%", maxWidth: 420, maxHeight: "90vh", overflowY: "auto", background: "linear-gradient(145deg,#13151A,#0D0E12)", border: "1px solid rgba(232,200,114,.1)", borderRadius: 24, padding: "32px 24px", position: "relative" }}>
+      <div onClick={e => e.stopPropagation()} style={{ width: "100%", maxWidth: 420, maxHeight: "90vh", overflowY: "auto", background: "linear-gradient(145deg,#13151A,#0D0E12)", border: "1px solid rgba(126,232,178,.1)", borderRadius: 24, padding: "32px 24px", position: "relative" }}>
         <div style={{ position: "absolute", top: 0, left: "15%", right: "15%", height: 2, background: `linear-gradient(90deg,transparent,${Gold},transparent)`, borderRadius: 2 }} />
         <button onClick={onClose} style={{ position: "absolute", top: 16, right: 16, width: 28, height: 28, borderRadius: 8, background: W(.04), border: `1px solid ${W(.06)}`, color: W(.3), fontSize: 14, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>×</button>
 
@@ -252,14 +438,14 @@ function PaywallPopup({ onClose }) {
           <span style={{ fontSize: 11, color: W(.35), lineHeight: 1.4 }}>You can see your blurred blueprint above — unlock to reveal full details.</span>
         </div>
 
-        <div style={{ background: "rgba(232,200,114,.04)", border: "1px solid rgba(232,200,114,.1)", borderRadius: 16, padding: 20, textAlign: "center", marginBottom: 14 }}>
+        <div style={{ background: "rgba(126,232,178,.04)", border: "1px solid rgba(126,232,178,.1)", borderRadius: 16, padding: 20, textAlign: "center", marginBottom: 14 }}>
           <div style={{ display: "flex", alignItems: "baseline", justifyContent: "center", gap: 4, marginBottom: 2 }}>
             <span style={{ fontSize: 15, color: W(.25), textDecoration: "line-through" }}>$49</span>
             <span style={{ fontSize: 36, fontWeight: 900, color: "#fff" }}>$19</span>
             <span style={{ fontSize: 14, color: W(.3) }}>one-time</span>
           </div>
           <div style={{ fontSize: 11, color: Green, fontWeight: 600, marginBottom: 14 }}>Launch price — 61% off</div>
-          <button onClick={handleCheckout} style={{ width: "100%", padding: 16, borderRadius: 12, border: "none", background: `linear-gradient(135deg,${Gold},#D4A843)`, color: Bg, fontSize: 15, fontWeight: 700, cursor: "pointer", boxShadow: "0 4px 24px rgba(232,200,114,.2)" }}>🔓 Unlock My Full Blueprint — $19</button>
+          <button onClick={handleCheckout} style={{ width: "100%", padding: 16, borderRadius: 12, border: "none", background: `linear-gradient(135deg,${Gold},#5EC99A)`, color: Bg, fontSize: 15, fontWeight: 700, cursor: "pointer", boxShadow: "0 4px 24px rgba(126,232,178,.2)" }}>🔓 Unlock My Full Blueprint — $19</button>
         </div>
 
         <div style={{ display: "flex", justifyContent: "center", gap: 14, marginBottom: 10 }}>
@@ -290,8 +476,8 @@ function DemoMockup() {
         {["Writing ✍️", "Coding 💻", "Marketing 📢"].map((s, i) => (
           <div key={i} style={{
             padding: "8px 10px", marginBottom: 4, borderRadius: 7,
-            background: i === 1 ? "rgba(232,200,114,.06)" : W(.01),
-            border: `1px solid ${i === 1 ? "rgba(232,200,114,.25)" : W(.04)}`,
+            background: i === 1 ? "rgba(126,232,178,.06)" : W(.01),
+            border: `1px solid ${i === 1 ? "rgba(126,232,178,.25)" : W(.04)}`,
             fontSize: 11, color: i === 1 ? Gold : W(.4),
           }}>{s} {i === 1 && <span style={{ float: "right", fontSize: 9, color: Gold }}>✓</span>}</div>
         ))}
@@ -302,7 +488,7 @@ function DemoMockup() {
         <div style={{ fontSize: 11, fontWeight: 600, color: "#fff", marginBottom: 12, textAlign: "center" }}>Analyzing...</div>
         {["Scanning 1,400+ models", "Matching skills", "Building plan"].map((t, i) => (
           <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, padding: "6px 0", opacity: i <= 1 ? 1 : .3 }}>
-            <div style={{ width: 18, height: 18, borderRadius: 5, background: i < 1 ? "rgba(232,200,114,.08)" : W(.02), border: `1px solid ${i < 1 ? "rgba(232,200,114,.18)" : W(.04)}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 8, color: Gold }}>{i < 1 ? "✓" : ""}</div>
+            <div style={{ width: 18, height: 18, borderRadius: 5, background: i < 1 ? "rgba(126,232,178,.08)" : W(.02), border: `1px solid ${i < 1 ? "rgba(126,232,178,.18)" : W(.04)}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 8, color: Gold }}>{i < 1 ? "✓" : ""}</div>
             <span style={{ fontSize: 10, color: i <= 1 ? W(.6) : W(.2) }}>{t}</span>
           </div>
         ))}
@@ -312,7 +498,7 @@ function DemoMockup() {
       <div style={{ textAlign: "center" }}>
         <div style={{ fontSize: 9, color: Gold, fontWeight: 600, letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 6 }}>Your #1 Path</div>
         <div style={{ fontSize: 15, fontWeight: 800, color: Gold, marginBottom: 4 }}>AI Content Agency</div>
-        <div style={{ display: "inline-block", padding: "2px 7px", borderRadius: 5, background: "rgba(232,200,114,.1)", border: "1px solid rgba(232,200,114,.2)", fontSize: 9, fontWeight: 700, color: Gold, marginBottom: 10 }}>93% match</div>
+        <div style={{ display: "inline-block", padding: "2px 7px", borderRadius: 5, background: "rgba(126,232,178,.1)", border: "1px solid rgba(126,232,178,.2)", fontSize: 9, fontWeight: 700, color: Gold, marginBottom: 10 }}>93% match</div>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 4 }}>
           {[["$3-8K/mo", Gold], ["2-3 wks", Green]].map(([v, c], i) => (
             <div key={i} style={{ padding: "6px", background: W(.02), borderRadius: 6, fontSize: 11, fontWeight: 700, color: c }}>{v}</div>
@@ -325,7 +511,7 @@ function DemoMockup() {
         <div style={{ fontSize: 9, color: Gold, fontWeight: 600, letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 8 }}>Week 1 — Monday</div>
         {["Set up portfolio site", "Create 3 AI samples", "Send 10 outreach DMs"].map((t, i) => (
           <div key={i} style={{ display: "flex", alignItems: "center", gap: 7, padding: "5px 0" }}>
-            <div style={{ width: 15, height: 15, borderRadius: 4, border: `1.5px solid ${i < 2 ? Gold : W(.1)}`, background: i < 2 ? "rgba(232,200,114,.1)" : "transparent", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 7, color: Gold }}>{i < 2 ? "✓" : ""}</div>
+            <div style={{ width: 15, height: 15, borderRadius: 4, border: `1.5px solid ${i < 2 ? Gold : W(.1)}`, background: i < 2 ? "rgba(126,232,178,.1)" : "transparent", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 7, color: Gold }}>{i < 2 ? "✓" : ""}</div>
             <span style={{ fontSize: 10, color: i < 2 ? W(.3) : W(.5), textDecoration: i < 2 ? "line-through" : "none" }}>{t}</span>
           </div>
         ))}
@@ -337,7 +523,7 @@ function DemoMockup() {
         <div style={{ padding: "7px 10px", background: W(.02), border: `1px solid ${W(.04)}`, borderRadius: "8px 8px 8px 3px", marginBottom: 5, fontSize: 9.5, color: W(.45), lineHeight: 1.4 }}>
           <span style={{ fontSize: 8, color: Gold, fontWeight: 700 }}>Ventrix AI</span><br/>I recommend starting with LinkedIn outreach. Here's a specific approach for your situation...
         </div>
-        <div style={{ padding: "7px 10px", background: "rgba(232,200,114,.06)", border: "1px solid rgba(232,200,114,.15)", borderRadius: "8px 8px 3px 8px", marginBottom: 5, fontSize: 9.5, color: W(.6), textAlign: "right" }}>
+        <div style={{ padding: "7px 10px", background: "rgba(126,232,178,.06)", border: "1px solid rgba(126,232,178,.15)", borderRadius: "8px 8px 3px 8px", marginBottom: 5, fontSize: 9.5, color: W(.6), textAlign: "right" }}>
           What if I only have 2 hours a day?
         </div>
         <div style={{ padding: "7px 10px", background: W(.02), border: `1px solid ${W(.04)}`, borderRadius: "8px 8px 8px 3px", fontSize: 9.5, color: W(.45), lineHeight: 1.4 }}>
@@ -349,7 +535,7 @@ function DemoMockup() {
       <div>
         <div style={{ fontSize: 9, color: "#8BB8E8", fontWeight: 600, letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 8 }}>🔀 Compare Mode</div>
         <div style={{ display: "flex", gap: 5 }}>
-          <div style={{ flex: 1, padding: "8px 7px", background: "rgba(232,200,114,.03)", border: "1px solid rgba(232,200,114,.1)", borderRadius: 7 }}>
+          <div style={{ flex: 1, padding: "8px 7px", background: "rgba(126,232,178,.03)", border: "1px solid rgba(126,232,178,.1)", borderRadius: 7 }}>
             <div style={{ fontSize: 7, color: Gold, fontWeight: 700, marginBottom: 3 }}>CURRENT</div>
             <div style={{ fontSize: 10, fontWeight: 700, color: Gold }}>Content Agency</div>
             <div style={{ fontSize: 9, color: W(.3), marginTop: 2 }}>$3-8K/mo</div>
@@ -371,7 +557,7 @@ function DemoMockup() {
         background: "linear-gradient(145deg, #111318, #0D0E12)",
         border: "1px solid rgba(255,255,255,.06)",
         borderRadius: 20, padding: "28px 18px 22px", position: "relative",
-        boxShadow: "0 20px 60px rgba(0,0,0,.4), 0 0 30px rgba(232,200,114,.03)",
+        boxShadow: "0 20px 60px rgba(0,0,0,.4), 0 0 30px rgba(126,232,178,.03)",
         minHeight: 220,
       }}>
         {/* Notch */}
@@ -394,45 +580,111 @@ function DemoMockup() {
   );
 }
 
-// ─── SAMPLE BLUEPRINT PREVIEW (blurred) ─────────────────────────
+// ─── SAMPLE BLUEPRINT PREVIEW (rich teaser) ─────────────────────
 function BlueprintPreview({ isPaid = false }) {
   return (
-    <div style={{ background: W(.015), border: `1px solid ${W(.04)}`, borderRadius: 18, padding: "24px 20px", position: "relative", overflow: "hidden" }}>
-      {/* Visible part */}
-      <div style={{ marginBottom: 16 }}>
-        <div style={{ fontSize: 10, fontWeight: 600, letterSpacing: 2, textTransform: "uppercase", color: W(.2), marginBottom: 8 }}>Primary Recommendation</div>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 6, marginBottom: 6 }}>
-          <div style={{ fontSize: 20, fontWeight: 800, color: Gold }}>AI Content Agency</div>
-          <span style={{ padding: "3px 9px", borderRadius: 6, background: "rgba(232,200,114,.1)", border: "1px solid rgba(232,200,114,.2)", fontSize: 11, fontWeight: 700, color: Gold }}>93% match</span>
+    <div style={{ background: W(.015), border: `1px solid ${W(.04)}`, borderRadius: 18, padding: "28px 24px", position: "relative", overflow: "hidden" }}>
+      {/* Fully visible: Primary recommendation */}
+      <div style={{ marginBottom: 20 }}>
+        <div style={{ fontSize: 10, fontWeight: 600, letterSpacing: 2, textTransform: "uppercase", color: W(.2), marginBottom: 10 }}>Primary Recommendation</div>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 6, marginBottom: 8 }}>
+          <div style={{ fontSize: 22, fontWeight: 800, color: "#fff" }}>AI Content Agency</div>
+          <span style={{ padding: "4px 12px", borderRadius: 8, background: "rgba(126,232,178,.08)", border: "1px solid rgba(126,232,178,.18)", fontSize: 12, fontWeight: 700, color: Green }}>93% match</span>
         </div>
-        <p style={{ fontSize: 12.5, color: W(.4), lineHeight: 1.5 }}>Use AI tools to deliver premium content to businesses at 3x speed. You become the bridge between AI and businesses who need content.</p>
+        <p style={{ fontSize: 13, color: W(.4), lineHeight: 1.6 }}>Use AI tools to deliver premium content to businesses at 3x speed. You become the bridge between AI and businesses who need content.</p>
       </div>
 
-      {/* Metrics - visible */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 16 }}>
-        {[["💰 Revenue", "$3K–$8K/mo", Gold], ["⏱ First $", "2-3 weeks", Green], ["📊 Difficulty", "Medium", "#fff"], ["🎯 Match", "93%", Gold]].map(([l, v, c], i) => (
-          <div key={i} style={{ padding: "10px 12px", background: W(.015), border: `1px solid ${W(.035)}`, borderRadius: 10 }}>
-            <div style={{ fontSize: 9, color: W(.2), textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 4 }}>{l}</div>
-            <div style={{ fontSize: 15, fontWeight: 700, color: c }}>{v}</div>
+      {/* Fully visible: Metrics */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 24 }}>
+        {[["💰 REVENUE", "$3K–$8K/mo", "#fff"], ["⏱ FIRST $", "2-3 weeks", Green], ["📊 DIFFICULTY", "Medium", "#fff"], ["🎯 MATCH", "93%", Green]].map(([l, v, c], i) => (
+          <div key={i} style={{ padding: "14px 16px", background: W(.02), border: `1px solid ${W(.05)}`, borderRadius: 12 }}>
+            <div style={{ fontSize: 9, color: W(.25), textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 6 }}>{l}</div>
+            <div style={{ fontSize: 18, fontWeight: 800, color: c }}>{v}</div>
           </div>
         ))}
       </div>
 
-      {/* Blurred sections */}
-      <div style={{ filter: isPaid ? "none" : "blur(5px)", opacity: isPaid ? 1 : .4, pointerEvents: isPaid ? "auto" : "none", userSelect: isPaid ? "auto" : "none" }}>
-        <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: 3, color: Gold, marginBottom: 10 }}>Income Streams</div>
-        {["Core service — $2,000–$4,000", "Upsells — $500–$1,500", "Passive — $300–$1,000"].map((t, i) => (
-          <div key={i} style={{ padding: "10px 12px", background: W(.013), border: `1px solid ${W(.03)}`, borderRadius: 8, marginBottom: 5, fontSize: 12, color: W(.5) }}>{t}</div>
-        ))}
-        <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: 3, color: Gold, margin: "14px 0 10px" }}>Week 1 — Day by Day</div>
-        {["Mon: Set up portfolio, create samples", "Tue: Upwork + Fiverr profiles", "Wed: Research 20 clients"].map((t, i) => (
-          <div key={i} style={{ padding: "8px 12px", background: W(.013), border: `1px solid ${W(.03)}`, borderRadius: 8, marginBottom: 4, fontSize: 11, color: W(.45) }}>{t}</div>
+      {/* Fully visible: Income Streams header + first item clear, rest fading */}
+      <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: 3, color: W(.3), marginBottom: 10 }}>Income Streams</div>
+      <div style={{ padding: "12px 16px", background: W(.02), border: `1px solid ${W(.04)}`, borderRadius: 10, marginBottom: 6 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <span style={{ fontSize: 13, color: W(.5), fontWeight: 600 }}>Core service delivery</span>
+          <span style={{ fontSize: 13, fontWeight: 700, color: Green }}>$2,000–$4,000</span>
+        </div>
+        <div style={{ fontSize: 11, color: W(.25), marginTop: 4 }}>Monthly retainer clients paying for AI-powered content packages</div>
+      </div>
+      <div style={{ padding: "12px 16px", background: W(.02), border: `1px solid ${W(.04)}`, borderRadius: 10, marginBottom: 6 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <span style={{ fontSize: 13, color: W(.5), fontWeight: 600 }}>Upsell services</span>
+          <span style={{ fontSize: 13, fontWeight: 700, color: Green }}>$500–$1,500</span>
+        </div>
+        <div style={{ fontSize: 11, color: W(.25), marginTop: 4 }}>Email sequences, ad copy, social media management add-ons</div>
+      </div>
+      <div style={{ padding: "12px 16px", background: W(.02), border: `1px solid ${W(.04)}`, borderRadius: 10, marginBottom: 20, opacity: .6 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <span style={{ fontSize: 13, color: W(.5), fontWeight: 600 }}>Passive income</span>
+          <span style={{ fontSize: 13, fontWeight: 700, color: Green }}>$300–$1,000</span>
+        </div>
+        <div style={{ fontSize: 11, color: W(.25), marginTop: 4 }}>Templates, prompt packs, and digital products sold on autopilot</div>
+      </div>
+
+      {/* Visible: Tools preview — clear */}
+      <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: 3, color: W(.3), marginBottom: 10 }}>Recommended Tools</div>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 6, marginBottom: 20 }}>
+        {[["Claude Pro", "$20/mo", "AI backbone"], ["Canva Pro", "$13/mo", "Design"], ["Notion", "Free", "Manage"]].map(([n, c, p], i) => (
+          <div key={i} style={{ padding: "10px", background: W(.02), border: `1px solid ${W(.04)}`, borderRadius: 8, textAlign: "center" }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: "#fff", marginBottom: 2 }}>{n}</div>
+            <div style={{ fontSize: 10, fontWeight: 600, color: c === "Free" ? Green : W(.4) }}>{c}</div>
+            <div style={{ fontSize: 9, color: W(.2), marginTop: 2 }}>{p}</div>
+          </div>
         ))}
       </div>
 
-      {/* Overlay CTA */}
-      <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 140, background: "linear-gradient(transparent, rgba(8,9,12,.95))", display: "flex", alignItems: "flex-end", justifyContent: "center", paddingBottom: 20, pointerEvents: "none" }}>
-        <div style={{ padding: "10px 24px", borderRadius: 10, background: `linear-gradient(135deg, ${Gold}, #D4A843)`, color: Bg, fontSize: 13, fontWeight: 700, boxShadow: "0 4px 20px rgba(232,200,114,.25)", pointerEvents: "auto" }}>
+      {/* Semi-visible: Week 1 plan — first 2 days clear, rest blurring */}
+      <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: 3, color: W(.3), marginBottom: 10 }}>Week 1 — Day by Day Plan</div>
+      <div style={{ padding: "10px 16px", background: W(.02), border: `1px solid ${W(.04)}`, borderRadius: 10, marginBottom: 5 }}>
+        <div style={{ fontSize: 11, fontWeight: 700, color: Green, marginBottom: 3 }}>Monday</div>
+        <div style={{ fontSize: 12, color: W(.45) }}>Set up portfolio site on Carrd ($0) • Create 3 AI-powered writing samples</div>
+      </div>
+      <div style={{ padding: "10px 16px", background: W(.02), border: `1px solid ${W(.04)}`, borderRadius: 10, marginBottom: 5 }}>
+        <div style={{ fontSize: 11, fontWeight: 700, color: Green, marginBottom: 3 }}>Tuesday</div>
+        <div style={{ fontSize: 12, color: W(.45) }}>Create Upwork + Fiverr profiles • Apply to 5 content gigs using AI proposals</div>
+      </div>
+      {/* Blurring from here */}
+      <div style={{ filter: isPaid ? "none" : "blur(3px)", opacity: isPaid ? 1 : .5 }}>
+        <div style={{ padding: "10px 16px", background: W(.02), border: `1px solid ${W(.04)}`, borderRadius: 10, marginBottom: 5 }}>
+          <div style={{ fontSize: 11, fontWeight: 700, color: Green, marginBottom: 3 }}>Wednesday</div>
+          <div style={{ fontSize: 12, color: W(.45) }}>Research 20 potential clients • Send personalized outreach to 10</div>
+        </div>
+      </div>
+      <div style={{ filter: isPaid ? "none" : "blur(5px)", opacity: isPaid ? 1 : .35 }}>
+        <div style={{ padding: "10px 16px", background: W(.02), border: `1px solid ${W(.04)}`, borderRadius: 10, marginBottom: 5 }}>
+          <div style={{ fontSize: 11, fontWeight: 700, color: Green, marginBottom: 3 }}>Thursday</div>
+          <div style={{ fontSize: 12, color: W(.45) }}>Follow up all conversations • Book 2 discovery calls</div>
+        </div>
+        <div style={{ padding: "10px 16px", background: W(.02), border: `1px solid ${W(.04)}`, borderRadius: 10, marginBottom: 5 }}>
+          <div style={{ fontSize: 11, fontWeight: 700, color: Green, marginBottom: 3 }}>Friday</div>
+          <div style={{ fontSize: 12, color: W(.45) }}>Send proposals within 24hrs • Ask contacts for referrals</div>
+        </div>
+      </div>
+
+      {/* Heavily blurred: Scripts + Weeks 2-4 tease */}
+      <div style={{ filter: isPaid ? "none" : "blur(6px)", opacity: isPaid ? 1 : .25, pointerEvents: isPaid ? "auto" : "none" }}>
+        <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: 3, color: W(.3), margin: "16px 0 10px" }}>Copy-Paste Outreach Scripts</div>
+        <div style={{ padding: "12px 16px", background: W(.02), border: `1px solid ${W(.04)}`, borderRadius: 10, marginBottom: 5, fontSize: 12, color: W(.4) }}>
+          "Hey [Name], I checked out [business] and noticed you're still [doing X manually]. I built something similar for [type] that saved them [X hours/week]..."
+        </div>
+        <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: 3, color: W(.3), margin: "16px 0 10px" }}>Weeks 2–4 Action Plans</div>
+        <div style={{ padding: "10px 16px", background: W(.02), border: `1px solid ${W(.04)}`, borderRadius: 10, marginBottom: 5, fontSize: 12, color: W(.4) }}>Week 2: Client Outreach — Goal: 3 discovery calls booked</div>
+        <div style={{ padding: "10px 16px", background: W(.02), border: `1px solid ${W(.04)}`, borderRadius: 10, marginBottom: 5, fontSize: 12, color: W(.4) }}>Week 3: First Delivery — Goal: First paid project completed</div>
+        <div style={{ padding: "10px 16px", background: W(.02), border: `1px solid ${W(.04)}`, borderRadius: 10, marginBottom: 5, fontSize: 12, color: W(.4) }}>Week 4: Scale & Systemize — Goal: Pipeline of 3+ projects</div>
+        <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: 3, color: W(.3), margin: "16px 0 10px" }}>6-Month Revenue Projection</div>
+        <div style={{ padding: "10px 16px", background: W(.02), border: `1px solid ${W(.04)}`, borderRadius: 10, marginBottom: 5, fontSize: 12, color: W(.4) }}>Month 1: $500–$2,000 • Month 3: $2,500–$6,000 • Month 6: $6,000–$12,000</div>
+      </div>
+
+      {/* Gradient overlay + CTA */}
+      <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 160, background: "linear-gradient(transparent, rgba(8,9,12,.97))", display: "flex", alignItems: "flex-end", justifyContent: "center", paddingBottom: 24 }}>
+        <div style={{ padding: "12px 28px", borderRadius: 50, background: `linear-gradient(135deg, ${Green}, #5EC99A)`, color: Bg, fontSize: 14, fontWeight: 700, boxShadow: "0 4px 20px rgba(126,232,178,.25)", cursor: "pointer" }}>
           🔓 Unlock Full Blueprint
         </div>
       </div>
@@ -452,6 +704,7 @@ export default function LandingPage() {
   const [chatLoading, setChatLoading] = useState(false);
   const [wpWeek, setWpWeek] = useState(0);
   const [trackerChecked, setTrackerChecked] = useState({});
+
 
   // ─── AUTH STATE ───
   const [user, setUser] = useState(null);       // { id, email }
@@ -1183,25 +1436,46 @@ Respond ONLY with valid JSON (no markdown, no backticks):
         @keyframes su{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
         @keyframes fi{from{opacity:0}to{opacity:1}}
         @keyframes pulse{0%,100%{opacity:.4}50%{opacity:1}}
-        @keyframes glow{0%,100%{box-shadow:0 0 20px rgba(232,200,114,.15)}50%{box-shadow:0 0 40px rgba(232,200,114,.25)}}
-        .bgG{position:fixed;inset:0;pointer-events:none;z-index:0;background-image:linear-gradient(rgba(232,200,114,.02) 1px,transparent 1px),linear-gradient(90deg,rgba(232,200,114,.02) 1px,transparent 1px);background-size:64px 64px}
-        .gl1{position:fixed;top:-15%;right:-15%;width:600px;height:600px;border-radius:50%;pointer-events:none;z-index:0;background:radial-gradient(circle,rgba(232,200,114,.04),transparent 65%)}
+        @keyframes glow{0%,100%{box-shadow:0 0 20px rgba(126,232,178,.15)}50%{box-shadow:0 0 40px rgba(126,232,178,.25)}}
+        .bgG{display:none}
+        .gl1{position:fixed;top:-15%;right:-15%;width:600px;height:600px;border-radius:50%;pointer-events:none;z-index:0;background:radial-gradient(circle,rgba(126,232,178,.04),transparent 65%)}
+        .gl2{position:fixed;bottom:-10%;left:-10%;width:500px;height:500px;border-radius:50%;pointer-events:none;z-index:0;background:radial-gradient(circle,rgba(126,232,178,.03),transparent 65%)}
         @keyframes scan{0%{transform:translateX(-100%)}100%{transform:translateX(250%)}}
-        @media(max-width:600px){.mob-col{flex-direction:column!important}.mob-full{width:100%!important}.hero-grid{flex-direction:column-reverse!important}}
+        @media(max-width:600px){
+          .mob-col{flex-direction:column!important}
+          .mob-full{width:100%!important}
+          .hero-grid{flex-direction:column-reverse!important}
+        }
+        @media(max-width:768px){
+          .mob-col{flex-direction:column!important}
+          .dash-stats{grid-template-columns:1fr 1fr!important}
+          .dash-bottom{grid-template-columns:1fr!important}
+          .section-wrap{flex-direction:column!important}
+          .section-wrap>div{max-width:100%!important;flex:1 1 100%!important}
+          .section-visual{justify-content:center!important}
+          .stats-4{grid-template-columns:1fr 1fr!important}
+          .pricing-flex{flex-direction:column!important}
+          .testi-flex{flex-direction:column!important}
+          .proof-bar{gap:16px!important}
+          .proof-bar>div{min-width:40%!important}
+          .compare-flex{flex-direction:column!important}
+          .tab-grid{grid-template-columns:repeat(2,1fr)!important}
+          .metrics-2{grid-template-columns:1fr!important}
+        }
         input:focus{outline:none}
         input::placeholder{color:${W(.15)}}
       `}</style>
 
-      <div className="bgG" /><div className="gl1" />
+      <div className="bgG" /><div className="gl1" /><div className="gl2" />
+      <StarField />
       {showPaywall && <PaywallPopup onClose={() => setShowPaywall(false)} />}
 
-      <div style={{ position: "relative", zIndex: 1, maxWidth: 800, margin: "0 auto", padding: "24px 20px 80px" }}>
+      <div style={{ position: "relative", zIndex: 1, maxWidth: 900, margin: "0 auto", padding: "24px 20px 80px" }}>
 
         {/* NAV */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: page === "landing" ? 56 : 36, animation: "fi .5s both" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer" }} onClick={() => setPage("landing")}>
-            <div style={{ width: 28, height: 28, borderRadius: 6, background: `linear-gradient(135deg,${Gold},#D4A843)`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 900, color: Bg }}>V</div>
-            <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: 4, textTransform: "uppercase", color: W(.4) }}>VENTRIX</span>
+            <span style={{ fontSize: 14, fontWeight: 800, letterSpacing: 5, textTransform: "uppercase", background: "linear-gradient(90deg,#7B8ADE,#A78BFA,#C084FC,#E879A8,#F0ABAB)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>VENTRIX AI</span>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             {user && (
@@ -1211,7 +1485,7 @@ Respond ONLY with valid JSON (no markdown, no backticks):
                 <button onClick={handleLogout} style={{ fontSize: 10, color: W(.15), background: "none", border: "none", padding: "2px 6px", cursor: "pointer" }}>Log out</button>
               </div>
             )}
-            {page === "landing" && <button onClick={startQuiz} style={{ padding: "8px 18px", borderRadius: 9, background: `linear-gradient(135deg,${Gold},#D4A843)`, color: Bg, fontSize: 12, fontWeight: 700 }}>
+            {page === "landing" && <button onClick={startQuiz} style={{ padding: "8px 20px", borderRadius: 50, background: "transparent", border: "1px solid rgba(255,255,255,.15)", color: "#fff", fontSize: 12, fontWeight: 600 }}>
               Get Started — Free
             </button>}
             {page === "quiz" && screen === "report" && <button onClick={() => setPage("landing")} style={{ padding: "8px 18px", borderRadius: 9, border: `1px solid ${W(.08)}`, background: "transparent", color: W(.4), fontSize: 12, fontWeight: 600 }}>← Back</button>}
@@ -1234,8 +1508,8 @@ Respond ONLY with valid JSON (no markdown, no backticks):
                   {LANGS.map((l) => (
                     <button key={l.code} onClick={() => { setLang(l.code); setStep(0); }} style={{
                       padding: "14px 16px", borderRadius: 12, textAlign: "left",
-                      background: lang === l.code ? "rgba(232,200,114,.06)" : W(.012),
-                      border: `1px solid ${lang === l.code ? "rgba(232,200,114,.25)" : W(.05)}`,
+                      background: lang === l.code ? "rgba(126,232,178,.06)" : W(.012),
+                      border: `1px solid ${lang === l.code ? "rgba(126,232,178,.25)" : W(.05)}`,
                       display: "flex", alignItems: "center", gap: 10, color: "#fff", transition: "all .2s",
                     }}>
                       <span style={{ fontSize: 11, fontWeight: 700, width: 28, height: 28, borderRadius: 6, background: W(.04), display: "flex", alignItems: "center", justifyContent: "center", color: lang === l.code ? Gold : W(.4), letterSpacing: 1 }}>{l.flag}</span>
@@ -1249,7 +1523,7 @@ Respond ONLY with valid JSON (no markdown, no backticks):
             {screen === "quiz" && step >= 0 && (
               <div key={step} style={{ animation: "su .4s both" }}>
                 <div style={{ display: "flex", gap: 5, marginBottom: 36 }}>
-                  {QUESTIONS.map((_,i) => <div key={i} style={{ flex: 1, height: 3, borderRadius: 2, background: i <= step ? `linear-gradient(90deg,#C9A84C,${Gold})` : W(.04), transition: "all .6s", boxShadow: i === step ? "0 0 14px rgba(232,200,114,.25)" : "none" }} />)}
+                  {QUESTIONS.map((_,i) => <div key={i} style={{ flex: 1, height: 3, borderRadius: 2, background: i <= step ? `linear-gradient(90deg,#5EC99A,${Gold})` : W(.04), transition: "all .6s", boxShadow: i === step ? "0 0 14px rgba(126,232,178,.25)" : "none" }} />)}
                 </div>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
                   <div style={{ fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: 3, color: W(.18) }}>Step {step+1}/{QUESTIONS.length}</div>
@@ -1263,8 +1537,8 @@ Respond ONLY with valid JSON (no markdown, no backticks):
                     const sel = cQ.multi ? answers[cQ.id]?.includes(o.value) : answers[cQ.id] === o.value;
                     return <button key={o.value} onClick={() => handleSelect(o.value)} style={{
                       width: "100%", textAlign: "left", padding: o.desc ? "13px 15px" : "11px 15px",
-                      background: sel ? "rgba(232,200,114,.05)" : W(.012),
-                      border: `1px solid ${sel ? "rgba(232,200,114,.3)" : W(.05)}`,
+                      background: sel ? "rgba(126,232,178,.05)" : W(.012),
+                      border: `1px solid ${sel ? "rgba(126,232,178,.3)" : W(.05)}`,
                       borderRadius: 11, display: "flex", alignItems: "center", gap: 11, color: "#fff",
                       animation: `su .3s ${i*.03}s both`, transition: "all .2s",
                     }}>
@@ -1273,7 +1547,7 @@ Respond ONLY with valid JSON (no markdown, no backticks):
                         <div style={{ fontSize: 13, fontWeight: 600, color: sel ? Gold : "#fff" }}>{o.label}</div>
                         {o.desc && <div style={{ fontSize: 11, color: W(.22), marginTop: 1 }}>{o.desc}</div>}
                       </div>
-                      {sel && <div style={{ width: 18, height: 18, borderRadius: 5, background: "rgba(232,200,114,.12)", border: "1px solid rgba(232,200,114,.25)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 9, color: Gold }}>✓</div>}
+                      {sel && <div style={{ width: 18, height: 18, borderRadius: 5, background: "rgba(126,232,178,.12)", border: "1px solid rgba(126,232,178,.25)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 9, color: Gold }}>✓</div>}
                     </button>;
                   })}
                 </div>
@@ -1281,7 +1555,7 @@ Respond ONLY with valid JSON (no markdown, no backticks):
                 <div style={{ display: "flex", gap: 8 }}>
                   {step > 0 && <button onClick={() => setStep(s => s-1)} style={{ padding: "12px 18px", borderRadius: 10, border: `1px solid ${W(.06)}`, background: "transparent", color: W(.35), fontSize: 13, fontWeight: 600 }}>←</button>}
                   {step === 0 && <button onClick={() => setStep(-1)} style={{ padding: "12px 18px", borderRadius: 10, border: `1px solid ${W(.06)}`, background: "transparent", color: W(.35), fontSize: 13, fontWeight: 600 }}>← Language</button>}
-                  {cQ.multi && <button onClick={() => canGo && (step < QUESTIONS.length-1 ? setStep(s => s+1) : startLoading())} disabled={!canGo} style={{ flex: 1, padding: "12px", borderRadius: 10, background: canGo ? `linear-gradient(135deg,${Gold},#D4A843)` : W(.03), color: canGo ? Bg : W(.12), fontSize: 13, fontWeight: 700, cursor: canGo ? "pointer" : "not-allowed" }}>
+                  {cQ.multi && <button onClick={() => canGo && (step < QUESTIONS.length-1 ? setStep(s => s+1) : startLoading())} disabled={!canGo} style={{ flex: 1, padding: "12px", borderRadius: 10, background: canGo ? `linear-gradient(135deg,${Gold},#5EC99A)` : W(.03), color: canGo ? Bg : W(.12), fontSize: 13, fontWeight: 700, cursor: canGo ? "pointer" : "not-allowed" }}>
                     {step === QUESTIONS.length-1 ? (tr.generate || "Generate Blueprint →") : (tr.continue || "Continue →")}
                   </button>}
                 </div>
@@ -1309,7 +1583,7 @@ Respond ONLY with valid JSON (no markdown, no backticks):
                 <div style={{ maxWidth: 340, margin: "0 auto" }}>
                   {LOAD_PHASES.map((t,i) => (
                     <div key={i} style={{ display: "flex", alignItems: "center", gap: 11, padding: "10px 0", opacity: i <= lp ? 1 : .1, transition: "opacity .5s", borderBottom: i < LOAD_PHASES.length-1 ? `1px solid ${W(.02)}` : "none" }}>
-                      <div style={{ width: 28, height: 28, borderRadius: 7, flexShrink: 0, background: i < lp ? "rgba(232,200,114,.07)" : W(.015), border: `1px solid ${i < lp ? "rgba(232,200,114,.18)" : W(.03)}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10.5, color: i < lp ? Gold : W(.2) }}>
+                      <div style={{ width: 28, height: 28, borderRadius: 7, flexShrink: 0, background: i < lp ? "rgba(126,232,178,.07)" : W(.015), border: `1px solid ${i < lp ? "rgba(126,232,178,.18)" : W(.03)}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10.5, color: i < lp ? Gold : W(.2) }}>
                         {i < lp ? "✓" : i+1}
                       </div>
                       <span style={{ fontSize: 12.5, fontWeight: 500, color: i <= lp ? W(.6) : W(.15), flex: 1 }}>{t}</span>
@@ -1318,7 +1592,7 @@ Respond ONLY with valid JSON (no markdown, no backticks):
                   ))}
                 </div>
                 {lp >= LOAD_PHASES.length && <div style={{ textAlign: "center", marginTop: 24 }}>
-                  <div style={{ display: "inline-block", padding: "7px 14px", borderRadius: 8, background: "rgba(232,200,114,.06)", border: "1px solid rgba(232,200,114,.12)", fontSize: 12, color: Gold, fontWeight: 600, animation: "pulse 1.5s infinite" }}>Almost done...</div>
+                  <div style={{ display: "inline-block", padding: "7px 14px", borderRadius: 8, background: "rgba(126,232,178,.06)", border: "1px solid rgba(126,232,178,.12)", fontSize: 12, color: Gold, fontWeight: 600, animation: "pulse 1.5s infinite" }}>Almost done...</div>
                 </div>}
               </div>
             )}
@@ -1328,16 +1602,16 @@ Respond ONLY with valid JSON (no markdown, no backticks):
               const r = report.primary;
               return <div style={{ animation: "su .5s both" }}>
                 <div style={{ textAlign: "center", marginBottom: 24 }}>
-                  <div style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "3px 11px", borderRadius: 7, background: "rgba(232,200,114,.07)", border: "1px solid rgba(232,200,114,.12)", fontSize: 10, fontWeight: 600, letterSpacing: 2, textTransform: "uppercase", color: Gold, marginBottom: 16 }}>✨ Blueprint Ready</div>
+                  <div style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "3px 11px", borderRadius: 7, background: "rgba(126,232,178,.07)", border: "1px solid rgba(126,232,178,.12)", fontSize: 10, fontWeight: 600, letterSpacing: 2, textTransform: "uppercase", color: Gold, marginBottom: 16 }}>✨ Blueprint Ready</div>
                   <h1 style={{ fontSize: "clamp(22px,5vw,34px)", fontWeight: 900, lineHeight: 1.1 }}>Your Income Path</h1>
                 </div>
 
                 {/* Tab switcher */}
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 3, marginBottom: 16, background: W(.02), borderRadius: 11, padding: 3 }}>
-                  <button onClick={() => setReportTab("blueprint")} style={{ padding: "9px 6px", borderRadius: 9, background: reportTab === "blueprint" ? "rgba(232,200,114,.08)" : "transparent", border: reportTab === "blueprint" ? "1px solid rgba(232,200,114,.15)" : "1px solid transparent", color: reportTab === "blueprint" ? Gold : W(.3), fontSize: 11, fontWeight: 600 }}>📋 Blueprint</button>
-                  <button onClick={() => { if(isPaid) setReportTab("tracker"); else setShowPaywall(true); }} style={{ padding: "9px 6px", borderRadius: 9, background: reportTab === "tracker" ? "rgba(232,200,114,.08)" : "transparent", border: reportTab === "tracker" ? "1px solid rgba(232,200,114,.15)" : "1px solid transparent", color: reportTab === "tracker" ? Gold : isPaid ? W(.3) : W(.2), fontSize: 11, fontWeight: 600 }}>{isPaid ? "📊 Tracker" : "🔒 Tracker"}</button>
-                  <button onClick={() => { if(isPaid) setReportTab("chat"); else setShowPaywall(true); }} style={{ padding: "9px 6px", borderRadius: 9, background: reportTab === "chat" ? "rgba(232,200,114,.08)" : isPaid ? "transparent" : "transparent", border: reportTab === "chat" ? "1px solid rgba(232,200,114,.15)" : "1px solid transparent", color: reportTab === "chat" ? Gold : isPaid ? W(.3) : W(.2), fontSize: 11, fontWeight: 600 }}>{isPaid ? "💬 Chat" : "🔒 Chat"}</button>
-                  <button onClick={() => { if(isPaid) setReportTab("compare"); else setShowPaywall(true); }} style={{ padding: "9px 6px", borderRadius: 9, background: reportTab === "compare" ? "rgba(232,200,114,.08)" : "transparent", border: reportTab === "compare" ? "1px solid rgba(232,200,114,.15)" : "1px solid transparent", color: reportTab === "compare" ? Gold : isPaid ? W(.3) : W(.2), fontSize: 11, fontWeight: 600 }}>{isPaid ? "🔀 Compare" : "🔒 Compare"}</button>
+                <div className="tab-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 3, marginBottom: 16, background: W(.02), borderRadius: 11, padding: 3 }}>
+                  <button onClick={() => setReportTab("blueprint")} style={{ padding: "9px 6px", borderRadius: 9, background: reportTab === "blueprint" ? "rgba(126,232,178,.08)" : "transparent", border: reportTab === "blueprint" ? "1px solid rgba(126,232,178,.15)" : "1px solid transparent", color: reportTab === "blueprint" ? Gold : W(.3), fontSize: 11, fontWeight: 600 }}>📋 Blueprint</button>
+                  <button onClick={() => { if(isPaid) setReportTab("tracker"); else setShowPaywall(true); }} style={{ padding: "9px 6px", borderRadius: 9, background: reportTab === "tracker" ? "rgba(126,232,178,.08)" : "transparent", border: reportTab === "tracker" ? "1px solid rgba(126,232,178,.15)" : "1px solid transparent", color: reportTab === "tracker" ? Gold : isPaid ? W(.3) : W(.2), fontSize: 11, fontWeight: 600 }}>{isPaid ? "📊 Tracker" : "🔒 Tracker"}</button>
+                  <button onClick={() => { if(isPaid) setReportTab("chat"); else setShowPaywall(true); }} style={{ padding: "9px 6px", borderRadius: 9, background: reportTab === "chat" ? "rgba(126,232,178,.08)" : isPaid ? "transparent" : "transparent", border: reportTab === "chat" ? "1px solid rgba(126,232,178,.15)" : "1px solid transparent", color: reportTab === "chat" ? Gold : isPaid ? W(.3) : W(.2), fontSize: 11, fontWeight: 600 }}>{isPaid ? "💬 Chat" : "🔒 Chat"}</button>
+                  <button onClick={() => { if(isPaid) setReportTab("compare"); else setShowPaywall(true); }} style={{ padding: "9px 6px", borderRadius: 9, background: reportTab === "compare" ? "rgba(126,232,178,.08)" : "transparent", border: reportTab === "compare" ? "1px solid rgba(126,232,178,.15)" : "1px solid transparent", color: reportTab === "compare" ? Gold : isPaid ? W(.3) : W(.2), fontSize: 11, fontWeight: 600 }}>{isPaid ? "🔀 Compare" : "🔒 Compare"}</button>
                 </div>
 
                 {/* Action bar */}
@@ -1348,7 +1622,7 @@ Respond ONLY with valid JSON (no markdown, no backticks):
                     } else {
                       navigator.clipboard.writeText(`AI says I can make ${r.monthlyRevenue}/mo as a ${r.name} (${r.match}% match). Get your free blueprint: ${window.location.origin}`).then(() => alert("Link copied!")).catch(() => {});
                     }
-                  }} style={{ flex: 1, padding: "11px", borderRadius: 10, background: "rgba(232,200,114,.06)", border: "1px solid rgba(232,200,114,.12)", color: Gold, fontSize: 12.5, fontWeight: 600 }}>📤 Share</button>
+                  }} style={{ flex: 1, padding: "11px", borderRadius: 10, background: "rgba(126,232,178,.06)", border: "1px solid rgba(126,232,178,.12)", color: Gold, fontSize: 12.5, fontWeight: 600 }}>📤 Share</button>
                   <button onClick={() => {
                     if(!isPaid) { setShowPaywall(true); return; }
                     const el = document.createElement("div");
@@ -1378,7 +1652,7 @@ Respond ONLY with valid JSON (no markdown, no backticks):
                     w2.document.write("<html><head><title>Ventrix Blueprint - " + r.name + "</title></head><body>" + el.innerHTML + "</body></html>");
                     w2.document.close();
                     setTimeout(() => w2.print(), 500);
-                  }} style={{ flex: 1, padding: "11px", borderRadius: 10, background: isPaid ? "rgba(232,200,114,.06)" : W(.03), border: isPaid ? "1px solid rgba(232,200,114,.12)" : `1px solid ${W(.06)}`, color: isPaid ? Gold : W(.25), fontSize: 12.5, fontWeight: 600 }}>{isPaid ? "📄 Export PDF" : "🔒 Export PDF"}</button>
+                  }} style={{ flex: 1, padding: "11px", borderRadius: 10, background: isPaid ? "rgba(126,232,178,.06)" : W(.03), border: isPaid ? "1px solid rgba(126,232,178,.12)" : `1px solid ${W(.06)}`, color: isPaid ? Gold : W(.25), fontSize: 12.5, fontWeight: 600 }}>{isPaid ? "📄 Export PDF" : "🔒 Export PDF"}</button>
                   <button onClick={startQuiz} style={{ padding: "11px 14px", borderRadius: 10, border: `1px solid ${W(.06)}`, background: "transparent", color: W(.3), fontSize: 12.5, fontWeight: 600 }}>↻ New</button>
                 </div>
 
@@ -1393,7 +1667,7 @@ Respond ONLY with valid JSON (no markdown, no backticks):
                         )}
                         {chatMessages.map((m, i) => (
                           <div key={i} style={{ display: "flex", justifyContent: m.role === "user" ? "flex-end" : "flex-start", marginBottom: 10 }}>
-                            <div style={{ maxWidth: "80%", padding: "10px 14px", borderRadius: 12, background: m.role === "user" ? "rgba(232,200,114,.1)" : W(.04), border: `1px solid ${m.role === "user" ? "rgba(232,200,114,.15)" : W(.06)}` }}>
+                            <div style={{ maxWidth: "80%", padding: "10px 14px", borderRadius: 12, background: m.role === "user" ? "rgba(126,232,178,.1)" : W(.04), border: `1px solid ${m.role === "user" ? "rgba(126,232,178,.15)" : W(.06)}` }}>
                               <p style={{ fontSize: 13, color: m.role === "user" ? Gold : W(.6), lineHeight: 1.6, whiteSpace: "pre-wrap" }}>{m.content}</p>
                             </div>
                           </div>
@@ -1429,7 +1703,7 @@ ALTERNATIVE PATHS: ${report?.secondary?.name || "none"} (${report?.secondary?.ma
 
 Answer their questions with specific, actionable advice tailored to their exact situation, skills, and plan. Reference specific parts of their blueprint. Be encouraging but realistic. Keep responses concise and practical.`; const r2 = await fetch("/api/chat", { method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({ messages: [{ role: "user", content: ctx + "\n\nUser question: " + msg }] }) }); const d = await r2.json(); const reply = d.content?.map(b => b.text || "").join("") || "Sorry, something went wrong."; setChatMessages([...newMsgs, { role: "assistant", content: reply }]); } catch(err) { setChatMessages([...newMsgs, { role: "assistant", content: "Sorry, something went wrong." }]); } setChatLoading(false); }} style={{ display: "flex", gap: 8 }}>
                         <input value={chatInput} onChange={(e) => setChatInput(e.target.value)} placeholder="Ask about your blueprint..." style={{ flex: 1, padding: "12px 16px", borderRadius: 10, background: W(.03), border: `1px solid ${W(.06)}`, color: "#fff", fontSize: 13, outline: "none" }} />
-                        <button type="submit" style={{ padding: "12px 20px", borderRadius: 10, background: `linear-gradient(135deg,${Gold},#D4A843)`, border: "none", color: Bg, fontSize: 13, fontWeight: 700, cursor: "pointer" }}>Send</button>
+                        <button type="submit" style={{ padding: "12px 20px", borderRadius: 10, background: `linear-gradient(135deg,${Gold},#5EC99A)`, border: "none", color: Bg, fontSize: 13, fontWeight: 700, cursor: "pointer" }}>Send</button>
                       </form>
                     </div>
                   </div>
@@ -1457,7 +1731,7 @@ Answer their questions with specific, actionable advice tailored to their exact 
                       {/* Week-by-week checklist */}
                       {(r.weeklyPlan || []).map((week, wi) => (
                         <div key={wi} style={{ marginBottom: 16 }}>
-                          <div style={{ fontSize: 12, fontWeight: 700, color: Gold, marginBottom: 8, padding: "8px 12px", background: "rgba(232,200,114,.03)", borderRadius: 8 }}>
+                          <div style={{ fontSize: 12, fontWeight: 700, color: Gold, marginBottom: 8, padding: "8px 12px", background: "rgba(126,232,178,.03)", borderRadius: 8 }}>
                             {week.week || `Week ${wi+1}`} — {week.title || ""}
                             {week.goal && <span style={{ fontSize: 11, color: W(.25), fontWeight: 400, marginLeft: 8 }}>Goal: {week.goal}</span>}
                           </div>
@@ -1494,9 +1768,9 @@ Answer their questions with specific, actionable advice tailored to their exact 
                   <div>
                     <div style={{ background: W(.02), border: `1px solid ${W(.04)}`, borderRadius: 16, padding: 20, marginBottom: 16 }}>
                       <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: 2, color: Gold, marginBottom: 16 }}>🔀 Compare Your Paths</div>
-                      <div className="mob-col" style={{ display: "flex", gap: 10 }}>
+                      <div className="mob-col compare-flex" style={{ display: "flex", gap: 10 }}>
                         {[
-                          { ...r, label: "Primary", color: Gold, bg: "rgba(232,200,114,.03)", border: "rgba(232,200,114,.12)" },
+                          { ...r, label: "Primary", color: Gold, bg: "rgba(126,232,178,.03)", border: "rgba(126,232,178,.12)" },
                           ...(report.secondary ? [{ ...report.secondary, label: "Alternative", color: "#8BB8E8", bg: "rgba(139,184,232,.03)", border: "rgba(139,184,232,.12)" }] : []),
                           ...(report.tertiary ? [{ ...report.tertiary, label: "Alternative 2", color: "#C49ADE", bg: "rgba(196,154,222,.03)", border: "rgba(196,154,222,.12)" }] : []),
                         ].map((path, pi) => (
@@ -1529,7 +1803,7 @@ Answer their questions with specific, actionable advice tailored to their exact 
                 )}
                 {reportTab === "blueprint" && <>
                 {/* ═══ START TODAY — paid users see this first ═══ */}
-                {isPaid && <div style={{ padding: "20px 18px", marginBottom: 14, background: "linear-gradient(135deg, rgba(126,232,178,.04), rgba(232,200,114,.03))", border: "1px solid rgba(126,232,178,.12)", borderRadius: 16, position: "relative", overflow: "hidden" }}>
+                {isPaid && <div style={{ padding: "20px 18px", marginBottom: 14, background: "linear-gradient(135deg, rgba(126,232,178,.04), rgba(126,232,178,.03))", border: "1px solid rgba(126,232,178,.12)", borderRadius: 16, position: "relative", overflow: "hidden" }}>
                   <div style={{ position: "absolute", top: 0, left: "10%", right: "10%", height: 2, background: `linear-gradient(90deg, transparent, ${Green}, transparent)`, borderRadius: 2 }} />
                   <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: 2, color: Green, marginBottom: 10 }}>⚡ Start right now — your first 3 moves</div>
                   {(() => {
@@ -1551,7 +1825,7 @@ Answer their questions with specific, actionable advice tailored to their exact 
                 </div>}
 
                 {/* Personal insight */}
-                {report.personalInsight && <div style={{ padding: "16px 18px", marginBottom: 14, background: `linear-gradient(135deg,rgba(232,200,114,.035),rgba(126,232,178,.02))`, border: "1px solid rgba(232,200,114,.08)", borderRadius: 13 }}>
+                {report.personalInsight && <div style={{ padding: "16px 18px", marginBottom: 14, background: `linear-gradient(135deg,rgba(126,232,178,.035),rgba(126,232,178,.02))`, border: "1px solid rgba(126,232,178,.08)", borderRadius: 13 }}>
                   <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: 2, color: Gold, marginBottom: 5 }}>💡 Why This Works For You</div>
                   <p style={{ fontSize: 13.5, lineHeight: 1.6, color: W(.5), fontFamily: "'Crimson Pro',serif" }}>{report.personalInsight}</p>
                 </div>}
@@ -1563,15 +1837,15 @@ Answer their questions with specific, actionable advice tailored to their exact 
                 </div>}
 
                 {/* Primary path card */}
-                <div style={{ background: "rgba(232,200,114,.02)", border: "1px solid rgba(232,200,114,.08)", borderRadius: 16, padding: "22px 18px", marginBottom: 14 }}>
+                <div style={{ background: "rgba(126,232,178,.02)", border: "1px solid rgba(126,232,178,.08)", borderRadius: 16, padding: "22px 18px", marginBottom: 14 }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 10, flexWrap: "wrap", gap: 6 }}>
                     <div style={{ fontSize: 10, fontWeight: 600, letterSpacing: 2, textTransform: "uppercase", color: W(.2) }}>Primary Path</div>
-                    <span style={{ padding: "3px 9px", borderRadius: 6, background: "rgba(232,200,114,.1)", border: "1px solid rgba(232,200,114,.2)", fontSize: 11, fontWeight: 700, color: Gold }}>{r.match}% match</span>
+                    <span style={{ padding: "3px 9px", borderRadius: 6, background: "rgba(126,232,178,.1)", border: "1px solid rgba(126,232,178,.2)", fontSize: 11, fontWeight: 700, color: Gold }}>{r.match}% match</span>
                   </div>
                   <h2 style={{ fontSize: "clamp(18px,4vw,21px)", fontWeight: 800, color: Gold, marginBottom: 3 }}>{r.name}</h2>
                   {r.tagline && <p style={{ fontSize: 13, color: W(.35), marginBottom: 10, fontFamily: "'Crimson Pro',serif", fontStyle: "italic" }}>{r.tagline}</p>}
                   <p style={{ fontSize: 13.5, lineHeight: 1.6, color: W(.4) }}>{r.description}</p>
-                  {r.whyYou && <div style={{ marginTop: 12, padding: "10px 14px", background: W(.018), borderRadius: 10, borderLeft: "2px solid rgba(232,200,114,.3)" }}>
+                  {r.whyYou && <div style={{ marginTop: 12, padding: "10px 14px", background: W(.018), borderRadius: 10, borderLeft: "2px solid rgba(126,232,178,.3)" }}>
                     <p style={{ fontSize: 12, color: W(.4), lineHeight: 1.5 }}>{r.whyYou}</p>
                   </div>}
                 </div>
@@ -1625,7 +1899,7 @@ Answer their questions with specific, actionable advice tailored to their exact 
                     </div>
                   </div>
                   <div style={{ position: "absolute", inset: 0, display: isPaid ? "none" : "flex", alignItems: "center", justifyContent: "center", background: "rgba(8,9,12,.35)", borderRadius: 14 }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 16px", background: "rgba(232,200,114,.08)", border: "1px solid rgba(232,200,114,.15)", borderRadius: 10, fontSize: 12, fontWeight: 600, color: Gold }}>🔒 Revenue projections</div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 16px", background: "rgba(126,232,178,.08)", border: "1px solid rgba(126,232,178,.15)", borderRadius: 10, fontSize: 12, fontWeight: 600, color: Gold }}>🔒 Revenue projections</div>
                   </div>
                 </div>
 
@@ -1654,20 +1928,20 @@ Answer their questions with specific, actionable advice tailored to their exact 
                       });
                     })()}
                     {/* Total potential */}
-                    {r.incomeBreakdown && <div style={{ padding: "10px 16px", background: "rgba(232,200,114,.03)", border: `1px solid rgba(232,200,114,.08)`, borderRadius: 10, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    {r.incomeBreakdown && <div style={{ padding: "10px 16px", background: "rgba(126,232,178,.03)", border: `1px solid rgba(126,232,178,.08)`, borderRadius: 10, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                       <span style={{ fontSize: 12, fontWeight: 600, color: W(.4) }}>Combined potential</span>
                       <span style={{ fontSize: 14, fontWeight: 800, color: Gold }}>{r.monthlyRevenue}</span>
                     </div>}
                   </div>
                   <div style={{ position: "absolute", inset: 0, display: isPaid ? "none" : "flex", alignItems: "center", justifyContent: "center", background: "rgba(8,9,12,.35)", borderRadius: 14 }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 16px", background: "rgba(232,200,114,.08)", border: "1px solid rgba(232,200,114,.15)", borderRadius: 10, fontSize: 12, fontWeight: 600, color: Gold }}>🔒 Income breakdown</div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 16px", background: "rgba(126,232,178,.08)", border: "1px solid rgba(126,232,178,.15)", borderRadius: 10, fontSize: 12, fontWeight: 600, color: Gold }}>🔒 Income breakdown</div>
                   </div>
                 </div>
 
                 {/* URGENCY + CTA — only for non-paid */}
                 {!isPaid && <>
                   <CountdownBar />
-                  <button onClick={handleCheckout} style={{ display: "block", width: "100%", padding: 16, borderRadius: 14, background: `linear-gradient(135deg,${Gold},#D4A843)`, color: Bg, fontSize: 15, fontWeight: 700, border: "none", cursor: "pointer", boxShadow: "0 4px 24px rgba(232,200,114,.2)", marginBottom: 6 }}>
+                  <button onClick={handleCheckout} style={{ display: "block", width: "100%", padding: 16, borderRadius: 14, background: `linear-gradient(135deg,${Gold},#5EC99A)`, color: Bg, fontSize: 15, fontWeight: 700, border: "none", cursor: "pointer", boxShadow: "0 4px 24px rgba(126,232,178,.2)", marginBottom: 6 }}>
                     🔓 Unlock Full Blueprint — $19
                   </button>
                   <div style={{ display: "flex", justifyContent: "center", gap: 12, marginBottom: 20 }}>
@@ -1692,7 +1966,7 @@ Answer their questions with specific, actionable advice tailored to their exact 
                     </div>
                   </div>
                   <div style={{ position: "absolute", inset: 0, display: isPaid ? "none" : "flex", alignItems: "center", justifyContent: "center", background: "rgba(8,9,12,.35)", borderRadius: 14 }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 16px", background: "rgba(232,200,114,.08)", border: "1px solid rgba(232,200,114,.15)", borderRadius: 10, fontSize: 12, fontWeight: 600, color: Gold }}>🔒 Daily schedule</div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 16px", background: "rgba(126,232,178,.08)", border: "1px solid rgba(126,232,178,.15)", borderRadius: 10, fontSize: 12, fontWeight: 600, color: Gold }}>🔒 Daily schedule</div>
                   </div>
                 </div>
 
@@ -1723,7 +1997,7 @@ Answer their questions with specific, actionable advice tailored to their exact 
                     </div>
                   </div>
                   <div style={{ position: "absolute", inset: 0, display: isPaid ? "none" : "flex", alignItems: "center", justifyContent: "center", background: "rgba(8,9,12,.35)", borderRadius: 14 }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 16px", background: "rgba(232,200,114,.08)", border: "1px solid rgba(232,200,114,.15)", borderRadius: 10, fontSize: 12, fontWeight: 600, color: Gold }}>🔒 Tools & pricing</div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 16px", background: "rgba(126,232,178,.08)", border: "1px solid rgba(126,232,178,.15)", borderRadius: 10, fontSize: 12, fontWeight: 600, color: Gold }}>🔒 Tools & pricing</div>
                   </div>
                 </div>
 
@@ -1742,7 +2016,7 @@ Answer their questions with specific, actionable advice tailored to their exact 
                     ))}
                   </div>
                   <div style={{ position: "absolute", inset: 0, display: isPaid ? "none" : "flex", alignItems: "center", justifyContent: "center", background: "rgba(8,9,12,.35)", borderRadius: 14 }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 16px", background: "rgba(232,200,114,.08)", border: "1px solid rgba(232,200,114,.15)", borderRadius: 10, fontSize: 12, fontWeight: 600, color: Gold }}>🔒 Outreach scripts</div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 16px", background: "rgba(126,232,178,.08)", border: "1px solid rgba(126,232,178,.15)", borderRadius: 10, fontSize: 12, fontWeight: 600, color: Gold }}>🔒 Outreach scripts</div>
                   </div>
                 </div>
 
@@ -1754,13 +2028,13 @@ Answer their questions with specific, actionable advice tailored to their exact 
                 <div style={{ position: "relative", marginBottom: 12, cursor: isPaid ? "default" : "pointer" }} onClick={() => { if(!isPaid) setShowPaywall(true); }}>
                   <div style={{ filter: isPaid ? "none" : "blur(6px)", opacity: isPaid ? 1 : .4, pointerEvents: isPaid ? "auto" : "none", userSelect: isPaid ? "auto" : "none" }}>
                     {/* Week tabs */}
-                    <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 4, marginBottom: 14, background: W(.015), borderRadius: 10, padding: 3 }}>
+                    <div className="tab-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 4, marginBottom: 14, background: W(.015), borderRadius: 10, padding: 3 }}>
                       {(r.weeklyPlan || []).map((w, wi) => (
                         <button key={wi} onClick={(e) => { e.stopPropagation(); if(isPaid) setWpWeek(wi); }} style={{
                           padding: "9px 4px", borderRadius: 8, fontSize: 11, fontWeight: 600, border: "none",
-                          background: wpWeek === wi ? "rgba(232,200,114,.08)" : "transparent",
+                          background: wpWeek === wi ? "rgba(126,232,178,.08)" : "transparent",
                           borderWidth: 1, borderStyle: "solid",
-                          borderColor: wpWeek === wi ? "rgba(232,200,114,.15)" : "transparent",
+                          borderColor: wpWeek === wi ? "rgba(126,232,178,.15)" : "transparent",
                           color: wpWeek === wi ? Gold : W(.3),
                         }}>{w.week || `Week ${wi+1}`}</button>
                       ))}
@@ -1772,7 +2046,7 @@ Answer their questions with specific, actionable advice tailored to their exact 
                       if (!week) return <div style={{ padding: 20, textAlign: "center", color: W(.2), fontSize: 12 }}>No weekly plan data</div>;
                       return <div style={{ background: W(.013), border: `1px solid ${W(.035)}`, borderRadius: 13, overflow: "hidden" }}>
                         {/* Week header */}
-                        <div style={{ padding: "14px 16px", background: "rgba(232,200,114,.03)", borderBottom: `1px solid ${W(.04)}` }}>
+                        <div style={{ padding: "14px 16px", background: "rgba(126,232,178,.03)", borderBottom: `1px solid ${W(.04)}` }}>
                           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 6 }}>
                             <div>
                               <div style={{ fontSize: 14, fontWeight: 700, color: Gold }}>{week.title || week.week}</div>
@@ -1797,7 +2071,7 @@ Answer their questions with specific, actionable advice tailored to their exact 
                     })()}
                   </div>
                   <div style={{ position: "absolute", inset: 0, display: isPaid ? "none" : "flex", alignItems: "center", justifyContent: "center", background: "rgba(8,9,12,.35)", borderRadius: 14 }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 16px", background: "rgba(232,200,114,.08)", border: "1px solid rgba(232,200,114,.15)", borderRadius: 10, fontSize: 12, fontWeight: 600, color: Gold }}>🔒 4-Week action plan</div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 16px", background: "rgba(126,232,178,.08)", border: "1px solid rgba(126,232,178,.15)", borderRadius: 10, fontSize: 12, fontWeight: 600, color: Gold }}>🔒 4-Week action plan</div>
                   </div>
                 </div>
 
@@ -1856,7 +2130,7 @@ Answer their questions with specific, actionable advice tailored to their exact 
                   <div style={{ fontSize: 11, color: W(.25), marginBottom: 12 }}>We'll email your report + remind you to track progress.</div>
                   <div style={{ display: "flex", gap: 8 }}>
                     <input placeholder="your@email.com" type="email" style={{ flex: 1, padding: "11px 14px", borderRadius: 10, border: `1px solid ${W(.06)}`, background: W(.02), color: "#fff", fontSize: 13, fontFamily: "'Outfit',sans-serif" }} />
-                    <button style={{ padding: "11px 18px", borderRadius: 10, border: "none", background: `linear-gradient(135deg,${Gold},#D4A843)`, color: Bg, fontSize: 13, fontWeight: 700 }}>Save</button>
+                    <button style={{ padding: "11px 18px", borderRadius: 10, border: "none", background: `linear-gradient(135deg,${Gold},#5EC99A)`, color: Bg, fontSize: 13, fontWeight: 700 }}>Save</button>
                   </div>
                 </div>
 
@@ -1883,33 +2157,32 @@ Answer their questions with specific, actionable advice tailored to their exact 
         {page === "landing" && (<>
 
         {/* ═══════════ HERO ═══════════ */}
-        <div className="hero-grid" style={{ display: "flex", gap: 40, alignItems: "center", marginBottom: 72, animation: "su .6s both" }}>
-          <div style={{ flex: 1.2 }}>
+        <div style={{ textAlign: "center", marginBottom: 80, animation: "su .6s both", paddingTop: 20 }}>
+          <div style={{ marginBottom: 20 }}>
             <LiveCounter />
-            <h1 style={{ fontSize: "clamp(30px, 6vw, 48px)", fontWeight: 900, lineHeight: 1.08, letterSpacing: -1, marginTop: 16, marginBottom: 16 }}>
-              <span style={{ color: "#fff" }}>Your AI-powered</span><br />
-              <span style={{ background: `linear-gradient(135deg,${Gold},#F0DCA0,#D4A843)`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>path to income.</span>
-            </h1>
-            <p style={{ fontSize: 16, lineHeight: 1.7, color: W(.35), maxWidth: 420, fontFamily: "'Crimson Pro',serif", fontStyle: "italic", marginBottom: 24 }}>
-              6 questions. 90 seconds. A personalized day-by-day plan to start making money — with exact tools, scripts, and revenue projections.
-            </p>
-            <button id="cta" onClick={startQuiz} style={{
-              padding: "16px 36px", borderRadius: 13,
-              background: `linear-gradient(135deg,${Gold},#D4A843)`,
-              color: Bg, fontSize: 15.5, fontWeight: 700,
-              boxShadow: "0 4px 28px rgba(232,200,114,.2)",
-              animation: "glow 3s infinite",
-            }}>
-              Build My Blueprint — Free →
-            </button>
           </div>
-          <div style={{ flex: 1 }}>
-            <DemoMockup />
+          <h1 style={{ fontSize: "clamp(36px, 7.5vw, 66px)", fontWeight: 900, lineHeight: 1.05, letterSpacing: -2, marginBottom: 20, maxWidth: 750, margin: "0 auto 20px" }}>
+            <span style={{ color: "#fff" }}>Build Your Income</span><br />
+            <span style={{ background: "linear-gradient(135deg,#818CF8,#A78BFA,#C084FC,#34D399,#6EE7B7)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>with AI Systems</span>
+          </h1>
+          <p style={{ fontSize: 17, lineHeight: 1.7, color: W(.4), maxWidth: 520, margin: "0 auto 36px" }}>
+            Discover your income bottlenecks, deploy high ROI strategies, and access world-class AI-powered blueprints.
+          </p>
+          <button id="cta" onClick={startQuiz} style={{
+            padding: "14px 36px", borderRadius: 50,
+            background: "transparent",
+            color: "#fff", fontSize: 15, fontWeight: 600,
+            border: "1px solid rgba(255,255,255,.2)",
+          }}>
+            Build My Blueprint — Free
+          </button>
+          <div style={{ marginTop: 40 }}>
+            <DashboardMockup />
           </div>
         </div>
 
         {/* ═══════════ SOCIAL PROOF BAR ═══════════ */}
-        <div style={{ display: "flex", justifyContent: "center", gap: 28, flexWrap: "wrap", marginBottom: 72, padding: "20px 0", borderTop: `1px solid ${W(.03)}`, borderBottom: `1px solid ${W(.03)}`, animation: "su .5s .2s both" }}>
+        <div className="proof-bar" style={{ display: "flex", justifyContent: "center", gap: 28, flexWrap: "wrap", marginBottom: 72, padding: "20px 0", borderTop: `1px solid ${W(.03)}`, borderBottom: `1px solid ${W(.03)}`, animation: "su .5s .2s both" }}>
           {[["47,000+", "Blueprints Generated"], ["$12M+", "Income Unlocked"], ["4.9 ★", "User Rating"], ["90 sec", "To Complete"]].map(([n, l], i) => (
             <div key={i} style={{ textAlign: "center" }}>
               <div style={{ fontSize: 20, fontWeight: 800, color: Gold }}>{n}</div>
@@ -1918,53 +2191,119 @@ Answer their questions with specific, actionable advice tailored to their exact 
           ))}
         </div>
 
-        {/* ═══════════ HOW IT WORKS ═══════════ */}
+        {/* ═══════════ HOW IT WORKS — Numbered sections ═══════════ */}
         <div style={{ marginBottom: 72, animation: "su .5s .3s both" }}>
-          <div style={{ textAlign: "center", marginBottom: 36 }}>
-            <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 3, textTransform: "uppercase", color: Gold, marginBottom: 8 }}>How It Works</div>
-            <h2 style={{ fontSize: "clamp(22px, 4vw, 32px)", fontWeight: 800 }}>Three steps. 90 seconds. Done.</h2>
-          </div>
-
-          <div className="mob-col" style={{ display: "flex", gap: 16 }}>
-            {[
-              { n: "1", icon: "📝", title: "Answer 6 questions", desc: "Tell us about your skills, schedule, budget, interests, and income goal. Takes about 60 seconds." },
-              { n: "2", icon: "🤖", title: "AI builds your plan", desc: "Our AI analyzes 1,400+ proven income models and matches the best path to your unique profile." },
-              { n: "3", icon: "🚀", title: "Follow your blueprint", desc: "Get a personalized day-by-day plan with exact tasks, tools, scripts, and revenue projections." },
-            ].map((s, i) => (
-              <div key={i} style={{
-                flex: 1, padding: "28px 22px", background: W(.015), border: `1px solid ${W(.04)}`,
-                borderRadius: 16, position: "relative", overflow: "hidden",
-              }}>
-                <div style={{ position: "absolute", top: 16, right: 18, fontSize: 48, fontWeight: 900, color: W(.03) }}>{s.n}</div>
-                <div style={{ fontSize: 32, marginBottom: 14 }}>{s.icon}</div>
-                <div style={{ fontSize: 16, fontWeight: 700, color: "#fff", marginBottom: 6 }}>{s.title}</div>
-                <p style={{ fontSize: 13, color: W(.35), lineHeight: 1.5 }}>{s.desc}</p>
+          {[
+            { n: "01", tag: "PROFILE", icon: "📝", title: "Answer 6\nSimple Questions", accent: Gold, desc: "Tell us about your skills, schedule, budget, interests, and income goal. Our AI needs just 60 seconds to understand your unique situation and constraints.", visual: (
+              <QuizDemo />
+            )},
+            { n: "02", tag: "AI ANALYSIS", icon: "🤖", title: "AI Builds Your\nPersonalized Plan", accent: Green, desc: "Our engine analyzes 1,400+ proven income models and matches the best path to your unique profile. It considers your skills, time constraints, budget, and income goals to find your highest-probability path.", visual: (
+              <div style={{ background: "linear-gradient(145deg, rgba(17,19,24,.9), rgba(13,14,18,.9))", border: `1px solid ${W(.08)}`, borderRadius: 16, padding: "18px 16px", maxWidth: 280 }}>
+                {[{l:"Scanning 1,400+ models",p:100},{l:"Matching your skills",p:100},{l:"Building revenue model",p:75},{l:"Writing your blueprint",p:30}].map((item,i)=>(
+                  <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, padding: "7px 0", opacity: item.p > 0 ? 1 : 0.3 }}>
+                    <div style={{ width: 20, height: 20, borderRadius: 6, background: item.p === 100 ? "rgba(126,232,178,.1)" : W(.03), border: `1px solid ${item.p === 100 ? "rgba(126,232,178,.2)" : W(.06)}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 8, color: Green }}>{item.p === 100 ? "✓" : ""}</div>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: 10, color: item.p === 100 ? W(.5) : W(.25), marginBottom: 3 }}>{item.l}</div>
+                      <div style={{ height: 3, background: W(.04), borderRadius: 2, overflow: "hidden" }}>
+                        <div style={{ width: `${item.p}%`, height: "100%", background: item.p === 100 ? Green : Gold, borderRadius: 2 }} />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                <div style={{ marginTop: 10, padding: "10px", background: W(.02), borderRadius: 8, border: `1px solid rgba(126,232,178,.1)`, textAlign: "center" }}>
+                  <div style={{ fontSize: 9, color: Gold, fontWeight: 600, letterSpacing: 1 }}>TOP MATCH</div>
+                  <div style={{ fontSize: 14, fontWeight: 800, color: Gold, marginTop: 2 }}>AI Content Agency</div>
+                  <div style={{ fontSize: 10, color: W(.3), marginTop: 2 }}>93% match · $3K-8K/mo</div>
+                </div>
               </div>
-            ))}
-          </div>
+            )},
+            { n: "03", tag: "EXECUTION", icon: "🚀", title: "Follow Your\nDay-by-Day Blueprint", accent: "#8BB8E8", desc: "Get a complete execution system — exact daily tasks, copy-paste scripts, real tools with pricing, revenue projections, and an AI advisor for follow-up questions. No guessing, just doing.", visual: (
+              <div style={{ background: "linear-gradient(145deg, rgba(17,19,24,.9), rgba(13,14,18,.9))", border: `1px solid ${W(.08)}`, borderRadius: 16, padding: "18px 16px", maxWidth: 280 }}>
+                <div style={{ fontSize: 9, color: Gold, fontWeight: 600, letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 8 }}>Week 1 — Monday</div>
+                {["Set up portfolio site", "Create 3 AI samples", "Send 10 outreach DMs"].map((t, i) => (
+                  <div key={i} style={{ display: "flex", alignItems: "center", gap: 7, padding: "6px 0" }}>
+                    <div style={{ width: 16, height: 16, borderRadius: 4, border: `1.5px solid ${i < 2 ? Green : W(.1)}`, background: i < 2 ? "rgba(126,232,178,.1)" : "transparent", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 7, color: Green }}>{i < 2 ? "✓" : ""}</div>
+                    <span style={{ fontSize: 10.5, color: i < 2 ? W(.3) : W(.5), textDecoration: i < 2 ? "line-through" : "none" }}>{t}</span>
+                  </div>
+                ))}
+                <div style={{ marginTop: 10, display: "flex", alignItems: "center", gap: 6 }}>
+                  <span style={{ width: 6, height: 6, borderRadius: "50%", background: Green }} />
+                  <span style={{ fontSize: 9, color: Green, fontWeight: 600 }}>New Lead Captured</span>
+                </div>
+              </div>
+            )},
+          ].map((section, si) => (
+            <div key={si} className="section-wrap" style={{ display: "flex", gap: 40, alignItems: "center", flexDirection: si % 2 !== 0 ? "row-reverse" : "row", marginBottom: si < 2 ? 64 : 0, flexWrap: "wrap", justifyContent: "center" }}>
+              <div style={{ flex: "1 1 320px", maxWidth: 420 }}>
+                <div style={{ display: "inline-block", padding: "4px 12px", borderRadius: 6, background: `${section.accent}15`, border: `1px solid ${section.accent}25`, marginBottom: 14 }}>
+                  <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", color: section.accent }}>{section.n}. {section.tag}</span>
+                </div>
+                <h2 style={{ fontSize: "clamp(24px, 5vw, 36px)", fontWeight: 900, lineHeight: 1.1, marginBottom: 14, whiteSpace: "pre-line" }}>
+                  {section.title.split("\n").map((line, li) => (
+                    <span key={li}>{li === 1 ? <span style={{ color: section.accent }}>{line}</span> : <span style={{ color: "#fff" }}>{line}</span>}{li === 0 && <br/>}</span>
+                  ))}
+                </h2>
+                <p style={{ fontSize: 14, lineHeight: 1.7, color: W(.35), maxWidth: 380 }}>{section.desc}</p>
+              </div>
+              <div className="section-visual" style={{ flex: "1 1 280px", maxWidth: 320, display: "flex", justifyContent: si % 2 !== 0 ? "flex-start" : "flex-end" }}>
+                {section.visual}
+              </div>
+            </div>
+          ))}
         </div>
 
-        {/* ═══════════ BEFORE / AFTER ═══════════ */}
-        <div className="mob-col" style={{ display: "flex", gap: 14, marginBottom: 72, animation: "su .5s .4s both" }}>
-          <div style={{ flex: 1, padding: "22px 20px", background: "rgba(255,75,75,.03)", border: "1px solid rgba(255,75,75,.08)", borderRadius: 16 }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: "#FF6B6B", textTransform: "uppercase", letterSpacing: 2, marginBottom: 12 }}>❌ Without Blueprint</div>
-            {["Months watching YouTube with no plan", "Buying $500 courses that don't fit your life", "Following generic advice meant for someone else", "Quitting after 2 weeks because it feels impossible"].map((t, i) => (
-              <div key={i} style={{ display: "flex", gap: 8, alignItems: "flex-start", marginBottom: 8 }}>
-                <span style={{ color: "#FF6B6B", fontSize: 10, marginTop: 3 }}>✗</span>
-                <span style={{ fontSize: 12.5, color: W(.35), lineHeight: 1.4 }}>{t}</span>
+        {/* ═══════════ BEFORE / AFTER (visual redesign) ═══════════ */}
+        
+        <div className="mob-col" style={{ display: "flex", gap: 0, marginBottom: 72, borderRadius: 18, overflow: "hidden", border: `1px solid ${W(.04)}` }}>
+          {/* WITHOUT — dark red side */}
+          <div style={{ flex: 1, padding: "28px 24px", background: "linear-gradient(135deg, rgba(255,75,75,.04), rgba(255,75,75,.01))", borderRight: `1px solid ${W(.04)}`, position: "relative" }}>
+            <div style={{ fontSize: 10, fontWeight: 700, color: "#FF6B6B", textTransform: "uppercase", letterSpacing: 2, marginBottom: 16 }}>❌ Without a plan</div>
+            {/* Visual: person stuck */}
+            <div style={{ background: W(.02), borderRadius: 12, padding: 16, marginBottom: 16, border: `1px solid ${W(.04)}` }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
+                <div style={{ width: 32, height: 32, borderRadius: 8, background: "rgba(255,107,107,.15)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14 }}>😩</div>
+                <div><div style={{ fontSize: 11, fontWeight: 600, color: W(.5) }}>3 months later...</div><div style={{ fontSize: 10, color: W(.2) }}>Still watching "how to make money" videos</div></div>
+              </div>
+              <div style={{ height: 4, background: W(.04), borderRadius: 2, marginBottom: 8 }}><div style={{ width: "12%", height: "100%", background: "#FF6B6B", borderRadius: 2 }} /></div>
+              <div style={{ fontSize: 10, color: W(.15) }}>Progress: Almost none</div>
+            </div>
+            {["Endless scrolling with no direction", "Bought 3 courses, finished none", "No clear first step to take", "Gave up after 2 weeks"].map((t, i) => (
+              <div key={i} style={{ display: "flex", gap: 8, alignItems: "flex-start", marginBottom: 10 }}>
+                <span style={{ color: "#FF6B6B", fontSize: 10, marginTop: 3, flexShrink: 0 }}>✗</span>
+                <span style={{ fontSize: 12.5, color: W(.3), lineHeight: 1.4 }}>{t}</span>
               </div>
             ))}
+            <div style={{ marginTop: 14, padding: "10px 14px", background: "rgba(255,107,107,.04)", borderRadius: 10, border: "1px solid rgba(255,107,107,.08)" }}>
+              <div style={{ fontSize: 20, fontWeight: 900, color: "#FF6B6B" }}>$0</div>
+              <div style={{ fontSize: 10, color: W(.2) }}>earned after 3 months</div>
+            </div>
           </div>
-          <div style={{ flex: 1, padding: "22px 20px", background: "rgba(126,232,178,.03)", border: "1px solid rgba(126,232,178,.08)", borderRadius: 16 }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: Green, textTransform: "uppercase", letterSpacing: 2, marginBottom: 12 }}>✓ With Blueprint</div>
-            {["A plan built for YOUR skills and schedule", "Exact tools and scripts — ready to copy-paste", "Day-by-day tasks so you never guess what's next", "AI chat advisor for follow-up questions", "Compare alternative paths side by side", "Progress tracker to keep you accountable"].map((t, i) => (
-              <div key={i} style={{ display: "flex", gap: 8, alignItems: "flex-start", marginBottom: 8 }}>
-                <span style={{ color: Green, fontSize: 10, marginTop: 3 }}>✓</span>
-                <span style={{ fontSize: 12.5, color: W(.35), lineHeight: 1.4 }}>{t}</span>
+          {/* WITH — green side */}
+          <div style={{ flex: 1, padding: "28px 24px", background: "linear-gradient(135deg, rgba(126,232,178,.04), rgba(126,232,178,.01))", position: "relative" }}>
+            <div style={{ fontSize: 10, fontWeight: 700, color: Green, textTransform: "uppercase", letterSpacing: 2, marginBottom: 16 }}>✓ With Ventrix Blueprint</div>
+            {/* Visual: person executing */}
+            <div style={{ background: W(.02), borderRadius: 12, padding: 16, marginBottom: 16, border: `1px solid rgba(126,232,178,.08)` }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
+                <div style={{ width: 32, height: 32, borderRadius: 8, background: "rgba(126,232,178,.15)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14 }}>🚀</div>
+                <div><div style={{ fontSize: 11, fontWeight: 600, color: W(.5) }}>3 months later...</div><div style={{ fontSize: 10, color: Green }}>Week 12: 5 clients, scaling</div></div>
+              </div>
+              <div style={{ height: 4, background: W(.04), borderRadius: 2, marginBottom: 8 }}><div style={{ width: "78%", height: "100%", background: `linear-gradient(90deg, ${Green}, #5EC99A)`, borderRadius: 2 }} /></div>
+              <div style={{ fontSize: 10, color: Green }}>Progress: On track</div>
+            </div>
+            {["Day 1: exact tasks, no guessing", "Week 1: first client outreach sent", "Week 4: first paying customer", "AI advisor answers every question"].map((t, i) => (
+              <div key={i} style={{ display: "flex", gap: 8, alignItems: "flex-start", marginBottom: 10 }}>
+                <span style={{ color: Green, fontSize: 10, marginTop: 3, flexShrink: 0 }}>✓</span>
+                <span style={{ fontSize: 12.5, color: W(.4), lineHeight: 1.4 }}>{t}</span>
               </div>
             ))}
+            <div style={{ marginTop: 14, padding: "10px 14px", background: "rgba(126,232,178,.04)", borderRadius: 10, border: "1px solid rgba(126,232,178,.08)" }}>
+              <div style={{ fontSize: 20, fontWeight: 900, color: Green }}>$3,200+</div>
+              <div style={{ fontSize: 10, color: W(.3) }}>earned after 3 months</div>
+            </div>
           </div>
         </div>
+        
+
 
         {/* ═══════════ SAMPLE BLUEPRINT ═══════════ */}
         <div style={{ marginBottom: 72, animation: "su .5s .5s both" }}>
@@ -1983,7 +2322,7 @@ Answer their questions with specific, actionable advice tailored to their exact 
             <h2 style={{ fontSize: "clamp(20px, 4vw, 28px)", fontWeight: 800 }}>A complete system, not generic advice.</h2>
           </div>
 
-          <div className="mob-col" style={{ display: "flex", gap: 14, maxWidth: 660, margin: "0 auto" }}>
+          <div className="mob-col pricing-flex" style={{ display: "flex", gap: 14, maxWidth: 660, margin: "0 auto" }}>
             {/* Free column */}
             <div style={{ flex: 1, padding: "22px 18px", background: W(.012), border: `1px solid ${W(.04)}`, borderRadius: 16 }}>
               <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: 2, color: W(.3), marginBottom: 6 }}>Free</div>
@@ -1997,8 +2336,8 @@ Answer their questions with specific, actionable advice tailored to their exact 
             </div>
 
             {/* Pro column */}
-            <div style={{ flex: 1.2, padding: "22px 18px", background: "rgba(232,200,114,.03)", border: "1px solid rgba(232,200,114,.12)", borderRadius: 16, position: "relative" }}>
-              <div style={{ position: "absolute", top: -10, right: 14, padding: "3px 10px", borderRadius: 6, background: `linear-gradient(135deg,${Gold},#D4A843)`, color: Bg, fontSize: 10, fontWeight: 700 }}>BEST VALUE</div>
+            <div style={{ flex: 1.2, padding: "22px 18px", background: "rgba(126,232,178,.03)", border: "1px solid rgba(126,232,178,.12)", borderRadius: 16, position: "relative" }}>
+              <div style={{ position: "absolute", top: -10, right: 14, padding: "3px 10px", borderRadius: 6, background: `linear-gradient(135deg,${Gold},#5EC99A)`, color: Bg, fontSize: 10, fontWeight: 700 }}>BEST VALUE</div>
               <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: 2, color: Gold, marginBottom: 6 }}>Full Blueprint</div>
               <div style={{ display: "flex", alignItems: "baseline", gap: 4, marginBottom: 2 }}>
                 <span style={{ fontSize: 14, color: W(.25), textDecoration: "line-through" }}>$49</span>
@@ -2036,7 +2375,7 @@ Answer their questions with specific, actionable advice tailored to their exact 
             <h2 style={{ fontSize: "clamp(20px, 4vw, 28px)", fontWeight: 800 }}>Real people. Real results.</h2>
             <p style={{ fontSize: 13, color: W(.25), fontFamily: "'Crimson Pro',serif", fontStyle: "italic", marginTop: 6 }}>Verified outcomes from blueprint users</p>
           </div>
-          <div className="mob-col" style={{ display: "flex", gap: 12 }}>
+          <div className="mob-col testi-flex" style={{ display: "flex", gap: 12 }}>
             {[
               {
                 t: "Went from $0 to $4,200/mo in 8 weeks following the plan exactly. The day-by-day tasks made it impossible to procrastinate. I literally just did what it said.",
@@ -2108,28 +2447,28 @@ Answer their questions with specific, actionable advice tailored to their exact 
         <div style={{ marginBottom: 72, animation: "su .5s .65s both" }}>
 
           {/* Hero credibility block */}
-          <div style={{ padding: "32px 24px", background: "linear-gradient(145deg, rgba(232,200,114,.03), rgba(126,232,178,.02))", border: "1px solid rgba(232,200,114,.08)", borderRadius: 20, marginBottom: 20, position: "relative", overflow: "hidden" }}>
-            <div style={{ position: "absolute", top: 0, left: "10%", right: "10%", height: 2, background: `linear-gradient(90deg, transparent, ${Gold}, transparent)`, borderRadius: 2 }} />
+          <div style={{ padding: "32px 24px", background: "linear-gradient(145deg, rgba(126,232,178,.03), rgba(126,232,178,.02))", border: "1px solid rgba(126,232,178,.08)", borderRadius: 20, marginBottom: 20, position: "relative", overflow: "hidden" }}>
+            <div style={{ position: "absolute", top: 0, left: "10%", right: "10%", height: 2, background: `linear-gradient(90deg, transparent, rgba(255,255,255,.15), transparent)`, borderRadius: 2 }} />
             <div style={{ textAlign: "center", marginBottom: 24 }}>
-              <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 3, textTransform: "uppercase", color: Gold, marginBottom: 8 }}>Not another AI course</div>
+              <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 3, textTransform: "uppercase", color: W(.3), marginBottom: 8 }}>Not another AI course</div>
               <h2 style={{ fontSize: "clamp(20px, 4.5vw, 30px)", fontWeight: 900, lineHeight: 1.15 }}>
                 <span style={{ color: "#fff" }}>This isn't theory.</span><br/>
-                <span style={{ color: Gold }}>It's a system built on data.</span>
+                <span style={{ background: "linear-gradient(135deg,#818CF8,#A78BFA,#C084FC,#34D399,#6EE7B7)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>It's a system built on data.</span>
               </h2>
               <p style={{ fontSize: 13, color: W(.3), fontFamily: "'Crimson Pro',serif", fontStyle: "italic", marginTop: 8, maxWidth: 480, margin: "8px auto 0" }}>Ventrix doesn't guess. It matches your exact profile against proven income models — then builds a plan only you could follow.</p>
             </div>
 
             {/* Big stats row */}
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8, marginBottom: 0 }} className="mob-col">
+            <div className="stats-4" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8, marginBottom: 0 }}>
               {[
-                { num: "1,400+", label: "Income models analyzed", icon: "🧠", desc: "Freelance, SaaS, e-commerce, content, consulting — every viable AI-powered path." },
-                { num: "47K+", label: "Blueprints generated", icon: "📋", desc: "Each one personalized to a unique combination of skills, time, and goals." },
-                { num: "Weekly", label: "Tool & price updates", icon: "🔄", desc: "AI tools change fast. Our data reflects real pricing and availability, not 2023 info." },
-                { num: "100%", label: "Real founder strategies", icon: "🎯", desc: "Every path is reverse-engineered from people actually making money this way." },
+                { num: "1,400+", label: "Income models analyzed", icon: "🧠", numColor: Green, bg: "rgba(126,232,178,.1)", desc: "Freelance, SaaS, e-commerce, content, consulting — every viable AI-powered path." },
+                { num: "47K+", label: "Blueprints generated", icon: "📋", numColor: Purple, bg: "rgba(192,132,252,.1)", desc: "Each one personalized to a unique combination of skills, time, and goals." },
+                { num: "Weekly", label: "Tool & price updates", icon: "📅", numColor: Green, bg: "rgba(126,232,178,.1)", desc: "AI tools change fast. Our data reflects real pricing and availability, not 2023 info." },
+                { num: "100%", label: "Real founder strategies", icon: "🎯", numColor: Purple, bg: "rgba(192,132,252,.1)", desc: "Every path is reverse-engineered from people actually making money this way." },
               ].map((s, i) => (
                 <div key={i} style={{ padding: "18px 14px", background: W(.015), border: `1px solid ${W(.04)}`, borderRadius: 14, textAlign: "center" }}>
-                  <div style={{ fontSize: 18, marginBottom: 8 }}>{s.icon}</div>
-                  <div style={{ fontSize: 22, fontWeight: 900, color: Gold, marginBottom: 2 }}>{s.num}</div>
+                  <div style={{ width: 36, height: 36, borderRadius: 10, background: s.bg, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 10px", fontSize: 16 }}>{s.icon}</div>
+                  <div style={{ fontSize: 22, fontWeight: 900, color: s.numColor, marginBottom: 2 }}>{s.num}</div>
                   <div style={{ fontSize: 11, fontWeight: 600, color: "#fff", marginBottom: 6 }}>{s.label}</div>
                   <div style={{ fontSize: 10.5, color: W(.25), lineHeight: 1.4 }}>{s.desc}</div>
                 </div>
@@ -2188,9 +2527,10 @@ Answer their questions with specific, actionable advice tailored to their exact 
         </div>
 
         {/* ═══════════ FAQ ═══════════ */}
-        <div style={{ marginBottom: 72, animation: "su .5s .7s both" }}>
+        
+        <div style={{ marginBottom: 72 }}>
           <div style={{ textAlign: "center", marginBottom: 28 }}>
-            <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 3, textTransform: "uppercase", color: Gold, marginBottom: 8 }}>FAQ</div>
+            <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 3, textTransform: "uppercase", color: W(.3), marginBottom: 8 }}>FAQ</div>
             <h2 style={{ fontSize: "clamp(20px, 4vw, 28px)", fontWeight: 800 }}>Common questions</h2>
           </div>
           <div style={{ maxWidth: 600, margin: "0 auto" }}>
@@ -2199,20 +2539,20 @@ Answer their questions with specific, actionable advice tailored to their exact 
             ))}
           </div>
         </div>
+        
 
         {/* ═══════════ FINAL CTA ═══════════ */}
-        <div style={{ textAlign: "center", padding: "48px 24px", background: "rgba(232,200,114,.02)", border: "1px solid rgba(232,200,114,.06)", borderRadius: 22, marginBottom: 40, animation: "su .5s .8s both" }}>
+        <div style={{ textAlign: "center", padding: "48px 24px", background: "rgba(126,232,178,.02)", border: "1px solid rgba(126,232,178,.06)", borderRadius: 22, marginBottom: 40, animation: "su .5s .8s both" }}>
           <div style={{ fontSize: 28, fontWeight: 900, lineHeight: 1.15, marginBottom: 10 }}>
             <span style={{ color: "#fff" }}>Your personalized blueprint is</span><br />
-            <span style={{ color: Gold }}>90 seconds away.</span>
+            <span style={{ background: "linear-gradient(135deg,#818CF8,#A78BFA,#C084FC,#34D399,#6EE7B7)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>90 seconds away.</span>
           </div>
           <p style={{ fontSize: 14, color: W(.3), marginBottom: 24, fontFamily: "'Crimson Pro',serif", fontStyle: "italic" }}>Free. Personalized. AI-Powered. No credit card required.</p>
           <button onClick={startQuiz} style={{
-            padding: "17px 44px", borderRadius: 14,
-            background: `linear-gradient(135deg,${Gold},#D4A843)`,
-            color: Bg, fontSize: 16, fontWeight: 700,
-            boxShadow: "0 4px 28px rgba(232,200,114,.25)",
-            animation: "glow 3s infinite",
+            padding: "14px 40px", borderRadius: 50,
+            background: "transparent",
+            color: "#fff", fontSize: 15, fontWeight: 600,
+            border: "1px solid rgba(255,255,255,.2)",
           }}>
             Build My Blueprint — Free →
           </button>
@@ -2226,6 +2566,7 @@ Answer their questions with specific, actionable advice tailored to their exact 
           <div style={{ fontSize: 10, color: W(.1) }}>Ventrix AI © 2026 • ventrixai.com</div>
         </div>
       </div>
+
     </>
   );
 }
