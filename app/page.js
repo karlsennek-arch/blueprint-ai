@@ -580,45 +580,111 @@ function DemoMockup() {
   );
 }
 
-// ─── SAMPLE BLUEPRINT PREVIEW (blurred) ─────────────────────────
+// ─── SAMPLE BLUEPRINT PREVIEW (rich teaser) ─────────────────────
 function BlueprintPreview({ isPaid = false }) {
   return (
-    <div style={{ background: W(.015), border: `1px solid ${W(.04)}`, borderRadius: 18, padding: "24px 20px", position: "relative", overflow: "hidden" }}>
-      {/* Visible part */}
-      <div style={{ marginBottom: 16 }}>
-        <div style={{ fontSize: 10, fontWeight: 600, letterSpacing: 2, textTransform: "uppercase", color: W(.2), marginBottom: 8 }}>Primary Recommendation</div>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 6, marginBottom: 6 }}>
-          <div style={{ fontSize: 20, fontWeight: 800, color: Gold }}>AI Content Agency</div>
-          <span style={{ padding: "3px 9px", borderRadius: 6, background: "rgba(126,232,178,.1)", border: "1px solid rgba(126,232,178,.2)", fontSize: 11, fontWeight: 700, color: Gold }}>93% match</span>
+    <div style={{ background: W(.015), border: `1px solid ${W(.04)}`, borderRadius: 18, padding: "28px 24px", position: "relative", overflow: "hidden" }}>
+      {/* Fully visible: Primary recommendation */}
+      <div style={{ marginBottom: 20 }}>
+        <div style={{ fontSize: 10, fontWeight: 600, letterSpacing: 2, textTransform: "uppercase", color: W(.2), marginBottom: 10 }}>Primary Recommendation</div>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 6, marginBottom: 8 }}>
+          <div style={{ fontSize: 22, fontWeight: 800, color: "#fff" }}>AI Content Agency</div>
+          <span style={{ padding: "4px 12px", borderRadius: 8, background: "rgba(126,232,178,.08)", border: "1px solid rgba(126,232,178,.18)", fontSize: 12, fontWeight: 700, color: Green }}>93% match</span>
         </div>
-        <p style={{ fontSize: 12.5, color: W(.4), lineHeight: 1.5 }}>Use AI tools to deliver premium content to businesses at 3x speed. You become the bridge between AI and businesses who need content.</p>
+        <p style={{ fontSize: 13, color: W(.4), lineHeight: 1.6 }}>Use AI tools to deliver premium content to businesses at 3x speed. You become the bridge between AI and businesses who need content.</p>
       </div>
 
-      {/* Metrics - visible */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 16 }}>
-        {[["💰 Revenue", "$3K–$8K/mo", Gold], ["⏱ First $", "2-3 weeks", Green], ["📊 Difficulty", "Medium", "#fff"], ["🎯 Match", "93%", Gold]].map(([l, v, c], i) => (
-          <div key={i} style={{ padding: "10px 12px", background: W(.015), border: `1px solid ${W(.035)}`, borderRadius: 10 }}>
-            <div style={{ fontSize: 9, color: W(.2), textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 4 }}>{l}</div>
-            <div style={{ fontSize: 15, fontWeight: 700, color: c }}>{v}</div>
+      {/* Fully visible: Metrics */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 24 }}>
+        {[["💰 REVENUE", "$3K–$8K/mo", "#fff"], ["⏱ FIRST $", "2-3 weeks", Green], ["📊 DIFFICULTY", "Medium", "#fff"], ["🎯 MATCH", "93%", Green]].map(([l, v, c], i) => (
+          <div key={i} style={{ padding: "14px 16px", background: W(.02), border: `1px solid ${W(.05)}`, borderRadius: 12 }}>
+            <div style={{ fontSize: 9, color: W(.25), textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 6 }}>{l}</div>
+            <div style={{ fontSize: 18, fontWeight: 800, color: c }}>{v}</div>
           </div>
         ))}
       </div>
 
-      {/* Blurred sections */}
-      <div style={{ filter: isPaid ? "none" : "blur(5px)", opacity: isPaid ? 1 : .4, pointerEvents: isPaid ? "auto" : "none", userSelect: isPaid ? "auto" : "none" }}>
-        <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: 3, color: Gold, marginBottom: 10 }}>Income Streams</div>
-        {["Core service — $2,000–$4,000", "Upsells — $500–$1,500", "Passive — $300–$1,000"].map((t, i) => (
-          <div key={i} style={{ padding: "10px 12px", background: W(.013), border: `1px solid ${W(.03)}`, borderRadius: 8, marginBottom: 5, fontSize: 12, color: W(.5) }}>{t}</div>
-        ))}
-        <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: 3, color: Gold, margin: "14px 0 10px" }}>Week 1 — Day by Day</div>
-        {["Mon: Set up portfolio, create samples", "Tue: Upwork + Fiverr profiles", "Wed: Research 20 clients"].map((t, i) => (
-          <div key={i} style={{ padding: "8px 12px", background: W(.013), border: `1px solid ${W(.03)}`, borderRadius: 8, marginBottom: 4, fontSize: 11, color: W(.45) }}>{t}</div>
+      {/* Fully visible: Income Streams header + first item clear, rest fading */}
+      <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: 3, color: W(.3), marginBottom: 10 }}>Income Streams</div>
+      <div style={{ padding: "12px 16px", background: W(.02), border: `1px solid ${W(.04)}`, borderRadius: 10, marginBottom: 6 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <span style={{ fontSize: 13, color: W(.5), fontWeight: 600 }}>Core service delivery</span>
+          <span style={{ fontSize: 13, fontWeight: 700, color: Green }}>$2,000–$4,000</span>
+        </div>
+        <div style={{ fontSize: 11, color: W(.25), marginTop: 4 }}>Monthly retainer clients paying for AI-powered content packages</div>
+      </div>
+      <div style={{ padding: "12px 16px", background: W(.02), border: `1px solid ${W(.04)}`, borderRadius: 10, marginBottom: 6 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <span style={{ fontSize: 13, color: W(.5), fontWeight: 600 }}>Upsell services</span>
+          <span style={{ fontSize: 13, fontWeight: 700, color: Green }}>$500–$1,500</span>
+        </div>
+        <div style={{ fontSize: 11, color: W(.25), marginTop: 4 }}>Email sequences, ad copy, social media management add-ons</div>
+      </div>
+      <div style={{ padding: "12px 16px", background: W(.02), border: `1px solid ${W(.04)}`, borderRadius: 10, marginBottom: 20, opacity: .6 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <span style={{ fontSize: 13, color: W(.5), fontWeight: 600 }}>Passive income</span>
+          <span style={{ fontSize: 13, fontWeight: 700, color: Green }}>$300–$1,000</span>
+        </div>
+        <div style={{ fontSize: 11, color: W(.25), marginTop: 4 }}>Templates, prompt packs, and digital products sold on autopilot</div>
+      </div>
+
+      {/* Visible: Tools preview — clear */}
+      <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: 3, color: W(.3), marginBottom: 10 }}>Recommended Tools</div>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 6, marginBottom: 20 }}>
+        {[["Claude Pro", "$20/mo", "AI backbone"], ["Canva Pro", "$13/mo", "Design"], ["Notion", "Free", "Manage"]].map(([n, c, p], i) => (
+          <div key={i} style={{ padding: "10px", background: W(.02), border: `1px solid ${W(.04)}`, borderRadius: 8, textAlign: "center" }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: "#fff", marginBottom: 2 }}>{n}</div>
+            <div style={{ fontSize: 10, fontWeight: 600, color: c === "Free" ? Green : W(.4) }}>{c}</div>
+            <div style={{ fontSize: 9, color: W(.2), marginTop: 2 }}>{p}</div>
+          </div>
         ))}
       </div>
 
-      {/* Overlay CTA */}
-      <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 140, background: "linear-gradient(transparent, rgba(8,9,12,.95))", display: "flex", alignItems: "flex-end", justifyContent: "center", paddingBottom: 20, pointerEvents: "none" }}>
-        <div style={{ padding: "10px 24px", borderRadius: 10, background: `linear-gradient(135deg, ${Gold}, #5EC99A)`, color: Bg, fontSize: 13, fontWeight: 700, boxShadow: "0 4px 20px rgba(126,232,178,.25)", pointerEvents: "auto" }}>
+      {/* Semi-visible: Week 1 plan — first 2 days clear, rest blurring */}
+      <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: 3, color: W(.3), marginBottom: 10 }}>Week 1 — Day by Day Plan</div>
+      <div style={{ padding: "10px 16px", background: W(.02), border: `1px solid ${W(.04)}`, borderRadius: 10, marginBottom: 5 }}>
+        <div style={{ fontSize: 11, fontWeight: 700, color: Green, marginBottom: 3 }}>Monday</div>
+        <div style={{ fontSize: 12, color: W(.45) }}>Set up portfolio site on Carrd ($0) • Create 3 AI-powered writing samples</div>
+      </div>
+      <div style={{ padding: "10px 16px", background: W(.02), border: `1px solid ${W(.04)}`, borderRadius: 10, marginBottom: 5 }}>
+        <div style={{ fontSize: 11, fontWeight: 700, color: Green, marginBottom: 3 }}>Tuesday</div>
+        <div style={{ fontSize: 12, color: W(.45) }}>Create Upwork + Fiverr profiles • Apply to 5 content gigs using AI proposals</div>
+      </div>
+      {/* Blurring from here */}
+      <div style={{ filter: isPaid ? "none" : "blur(3px)", opacity: isPaid ? 1 : .5 }}>
+        <div style={{ padding: "10px 16px", background: W(.02), border: `1px solid ${W(.04)}`, borderRadius: 10, marginBottom: 5 }}>
+          <div style={{ fontSize: 11, fontWeight: 700, color: Green, marginBottom: 3 }}>Wednesday</div>
+          <div style={{ fontSize: 12, color: W(.45) }}>Research 20 potential clients • Send personalized outreach to 10</div>
+        </div>
+      </div>
+      <div style={{ filter: isPaid ? "none" : "blur(5px)", opacity: isPaid ? 1 : .35 }}>
+        <div style={{ padding: "10px 16px", background: W(.02), border: `1px solid ${W(.04)}`, borderRadius: 10, marginBottom: 5 }}>
+          <div style={{ fontSize: 11, fontWeight: 700, color: Green, marginBottom: 3 }}>Thursday</div>
+          <div style={{ fontSize: 12, color: W(.45) }}>Follow up all conversations • Book 2 discovery calls</div>
+        </div>
+        <div style={{ padding: "10px 16px", background: W(.02), border: `1px solid ${W(.04)}`, borderRadius: 10, marginBottom: 5 }}>
+          <div style={{ fontSize: 11, fontWeight: 700, color: Green, marginBottom: 3 }}>Friday</div>
+          <div style={{ fontSize: 12, color: W(.45) }}>Send proposals within 24hrs • Ask contacts for referrals</div>
+        </div>
+      </div>
+
+      {/* Heavily blurred: Scripts + Weeks 2-4 tease */}
+      <div style={{ filter: isPaid ? "none" : "blur(6px)", opacity: isPaid ? 1 : .25, pointerEvents: isPaid ? "auto" : "none" }}>
+        <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: 3, color: W(.3), margin: "16px 0 10px" }}>Copy-Paste Outreach Scripts</div>
+        <div style={{ padding: "12px 16px", background: W(.02), border: `1px solid ${W(.04)}`, borderRadius: 10, marginBottom: 5, fontSize: 12, color: W(.4) }}>
+          "Hey [Name], I checked out [business] and noticed you're still [doing X manually]. I built something similar for [type] that saved them [X hours/week]..."
+        </div>
+        <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: 3, color: W(.3), margin: "16px 0 10px" }}>Weeks 2–4 Action Plans</div>
+        <div style={{ padding: "10px 16px", background: W(.02), border: `1px solid ${W(.04)}`, borderRadius: 10, marginBottom: 5, fontSize: 12, color: W(.4) }}>Week 2: Client Outreach — Goal: 3 discovery calls booked</div>
+        <div style={{ padding: "10px 16px", background: W(.02), border: `1px solid ${W(.04)}`, borderRadius: 10, marginBottom: 5, fontSize: 12, color: W(.4) }}>Week 3: First Delivery — Goal: First paid project completed</div>
+        <div style={{ padding: "10px 16px", background: W(.02), border: `1px solid ${W(.04)}`, borderRadius: 10, marginBottom: 5, fontSize: 12, color: W(.4) }}>Week 4: Scale & Systemize — Goal: Pipeline of 3+ projects</div>
+        <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: 3, color: W(.3), margin: "16px 0 10px" }}>6-Month Revenue Projection</div>
+        <div style={{ padding: "10px 16px", background: W(.02), border: `1px solid ${W(.04)}`, borderRadius: 10, marginBottom: 5, fontSize: 12, color: W(.4) }}>Month 1: $500–$2,000 • Month 3: $2,500–$6,000 • Month 6: $6,000–$12,000</div>
+      </div>
+
+      {/* Gradient overlay + CTA */}
+      <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 160, background: "linear-gradient(transparent, rgba(8,9,12,.97))", display: "flex", alignItems: "flex-end", justifyContent: "center", paddingBottom: 24 }}>
+        <div style={{ padding: "12px 28px", borderRadius: 50, background: `linear-gradient(135deg, ${Green}, #5EC99A)`, color: Bg, fontSize: 14, fontWeight: 700, boxShadow: "0 4px 20px rgba(126,232,178,.25)", cursor: "pointer" }}>
           🔓 Unlock Full Blueprint
         </div>
       </div>
