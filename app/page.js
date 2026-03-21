@@ -236,7 +236,7 @@ function DashboardMockup() {
         </div>
       </div>
       {/* Stats row */}
-      <div style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr 1fr 1fr", gap: 10, marginBottom: 14 }}>
+      <div className="dash-stats" style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr 1fr 1fr", gap: 10, marginBottom: 14 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <div style={{ width: 34, height: 34, borderRadius: 10, background: `linear-gradient(135deg,${Gold},#5EC99A)`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 900, color: Bg }}>V</div>
           <div>
@@ -257,7 +257,7 @@ function DashboardMockup() {
         ))}
       </div>
       {/* Bottom row: chart + number */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1.6fr", gap: 10 }}>
+      <div className="dash-bottom" style={{ display: "grid", gridTemplateColumns: "1fr 1.6fr", gap: 10 }}>
         <div style={{ padding: "12px 14px", background: W(.02), border: `1px solid ${W(.05)}`, borderRadius: 12 }}>
           <div style={{ fontSize: 32, fontWeight: 900, color: "#fff", lineHeight: 1 }}>{counter.toLocaleString()}</div>
           <div style={{ fontSize: 9, fontWeight: 600, letterSpacing: 1.5, textTransform: "uppercase", color: W(.2), marginTop: 4 }}>AI BLUEPRINTS DEPLOYED</div>
@@ -1320,7 +1320,27 @@ Respond ONLY with valid JSON (no markdown, no backticks):
         .gl1{position:fixed;top:-15%;right:-15%;width:600px;height:600px;border-radius:50%;pointer-events:none;z-index:0;background:radial-gradient(circle,rgba(126,232,178,.04),transparent 65%)}
         .gl2{position:fixed;bottom:-10%;left:-10%;width:500px;height:500px;border-radius:50%;pointer-events:none;z-index:0;background:radial-gradient(circle,rgba(126,232,178,.03),transparent 65%)}
         @keyframes scan{0%{transform:translateX(-100%)}100%{transform:translateX(250%)}}
-        @media(max-width:600px){.mob-col{flex-direction:column!important}.mob-full{width:100%!important}.hero-grid{flex-direction:column-reverse!important}}
+        @media(max-width:600px){
+          .mob-col{flex-direction:column!important}
+          .mob-full{width:100%!important}
+          .hero-grid{flex-direction:column-reverse!important}
+        }
+        @media(max-width:768px){
+          .mob-col{flex-direction:column!important}
+          .dash-stats{grid-template-columns:1fr 1fr!important}
+          .dash-bottom{grid-template-columns:1fr!important}
+          .section-wrap{flex-direction:column!important}
+          .section-wrap>div{max-width:100%!important;flex:1 1 100%!important}
+          .section-visual{justify-content:center!important}
+          .stats-4{grid-template-columns:1fr 1fr!important}
+          .pricing-flex{flex-direction:column!important}
+          .testi-flex{flex-direction:column!important}
+          .proof-bar{gap:16px!important}
+          .proof-bar>div{min-width:40%!important}
+          .compare-flex{flex-direction:column!important}
+          .tab-grid{grid-template-columns:repeat(2,1fr)!important}
+          .metrics-2{grid-template-columns:1fr!important}
+        }
         input:focus{outline:none}
         input::placeholder{color:${W(.15)}}
       `}</style>
@@ -1466,7 +1486,7 @@ Respond ONLY with valid JSON (no markdown, no backticks):
                 </div>
 
                 {/* Tab switcher */}
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 3, marginBottom: 16, background: W(.02), borderRadius: 11, padding: 3 }}>
+                <div className="tab-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 3, marginBottom: 16, background: W(.02), borderRadius: 11, padding: 3 }}>
                   <button onClick={() => setReportTab("blueprint")} style={{ padding: "9px 6px", borderRadius: 9, background: reportTab === "blueprint" ? "rgba(126,232,178,.08)" : "transparent", border: reportTab === "blueprint" ? "1px solid rgba(126,232,178,.15)" : "1px solid transparent", color: reportTab === "blueprint" ? Gold : W(.3), fontSize: 11, fontWeight: 600 }}>📋 Blueprint</button>
                   <button onClick={() => { if(isPaid) setReportTab("tracker"); else setShowPaywall(true); }} style={{ padding: "9px 6px", borderRadius: 9, background: reportTab === "tracker" ? "rgba(126,232,178,.08)" : "transparent", border: reportTab === "tracker" ? "1px solid rgba(126,232,178,.15)" : "1px solid transparent", color: reportTab === "tracker" ? Gold : isPaid ? W(.3) : W(.2), fontSize: 11, fontWeight: 600 }}>{isPaid ? "📊 Tracker" : "🔒 Tracker"}</button>
                   <button onClick={() => { if(isPaid) setReportTab("chat"); else setShowPaywall(true); }} style={{ padding: "9px 6px", borderRadius: 9, background: reportTab === "chat" ? "rgba(126,232,178,.08)" : isPaid ? "transparent" : "transparent", border: reportTab === "chat" ? "1px solid rgba(126,232,178,.15)" : "1px solid transparent", color: reportTab === "chat" ? Gold : isPaid ? W(.3) : W(.2), fontSize: 11, fontWeight: 600 }}>{isPaid ? "💬 Chat" : "🔒 Chat"}</button>
@@ -1627,7 +1647,7 @@ Answer their questions with specific, actionable advice tailored to their exact 
                   <div>
                     <div style={{ background: W(.02), border: `1px solid ${W(.04)}`, borderRadius: 16, padding: 20, marginBottom: 16 }}>
                       <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: 2, color: Gold, marginBottom: 16 }}>🔀 Compare Your Paths</div>
-                      <div className="mob-col" style={{ display: "flex", gap: 10 }}>
+                      <div className="mob-col compare-flex" style={{ display: "flex", gap: 10 }}>
                         {[
                           { ...r, label: "Primary", color: Gold, bg: "rgba(126,232,178,.03)", border: "rgba(126,232,178,.12)" },
                           ...(report.secondary ? [{ ...report.secondary, label: "Alternative", color: "#8BB8E8", bg: "rgba(139,184,232,.03)", border: "rgba(139,184,232,.12)" }] : []),
@@ -1887,7 +1907,7 @@ Answer their questions with specific, actionable advice tailored to their exact 
                 <div style={{ position: "relative", marginBottom: 12, cursor: isPaid ? "default" : "pointer" }} onClick={() => { if(!isPaid) setShowPaywall(true); }}>
                   <div style={{ filter: isPaid ? "none" : "blur(6px)", opacity: isPaid ? 1 : .4, pointerEvents: isPaid ? "auto" : "none", userSelect: isPaid ? "auto" : "none" }}>
                     {/* Week tabs */}
-                    <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 4, marginBottom: 14, background: W(.015), borderRadius: 10, padding: 3 }}>
+                    <div className="tab-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 4, marginBottom: 14, background: W(.015), borderRadius: 10, padding: 3 }}>
                       {(r.weeklyPlan || []).map((w, wi) => (
                         <button key={wi} onClick={(e) => { e.stopPropagation(); if(isPaid) setWpWeek(wi); }} style={{
                           padding: "9px 4px", borderRadius: 8, fontSize: 11, fontWeight: 600, border: "none",
@@ -2041,7 +2061,7 @@ Answer their questions with specific, actionable advice tailored to their exact 
         </div>
 
         {/* ═══════════ SOCIAL PROOF BAR ═══════════ */}
-        <div style={{ display: "flex", justifyContent: "center", gap: 28, flexWrap: "wrap", marginBottom: 72, padding: "20px 0", borderTop: `1px solid ${W(.03)}`, borderBottom: `1px solid ${W(.03)}`, animation: "su .5s .2s both" }}>
+        <div className="proof-bar" style={{ display: "flex", justifyContent: "center", gap: 28, flexWrap: "wrap", marginBottom: 72, padding: "20px 0", borderTop: `1px solid ${W(.03)}`, borderBottom: `1px solid ${W(.03)}`, animation: "su .5s .2s both" }}>
           {[["47,000+", "Blueprints Generated"], ["$12M+", "Income Unlocked"], ["4.9 ★", "User Rating"], ["90 sec", "To Complete"]].map(([n, l], i) => (
             <div key={i} style={{ textAlign: "center" }}>
               <div style={{ fontSize: 20, fontWeight: 800, color: Gold }}>{n}</div>
@@ -2113,7 +2133,7 @@ Answer their questions with specific, actionable advice tailored to their exact 
               </div>
             )},
           ].map((section, si) => (
-            <div key={si} style={{ display: "flex", gap: 40, alignItems: si % 2 !== 0 ? "center" : "center", flexDirection: si % 2 !== 0 ? "row-reverse" : "row", marginBottom: si < 2 ? 64 : 0, flexWrap: "wrap", justifyContent: "center" }}>
+            <div key={si} className="section-wrap" style={{ display: "flex", gap: 40, alignItems: "center", flexDirection: si % 2 !== 0 ? "row-reverse" : "row", marginBottom: si < 2 ? 64 : 0, flexWrap: "wrap", justifyContent: "center" }}>
               <div style={{ flex: "1 1 320px", maxWidth: 420 }}>
                 <div style={{ display: "inline-block", padding: "4px 12px", borderRadius: 6, background: `${section.accent}15`, border: `1px solid ${section.accent}25`, marginBottom: 14 }}>
                   <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", color: section.accent }}>{section.n}. {section.tag}</span>
@@ -2125,7 +2145,7 @@ Answer their questions with specific, actionable advice tailored to their exact 
                 </h2>
                 <p style={{ fontSize: 14, lineHeight: 1.7, color: W(.35), maxWidth: 380 }}>{section.desc}</p>
               </div>
-              <div style={{ flex: "1 1 280px", maxWidth: 320, display: "flex", justifyContent: si % 2 !== 0 ? "flex-start" : "flex-end" }}>
+              <div className="section-visual" style={{ flex: "1 1 280px", maxWidth: 320, display: "flex", justifyContent: si % 2 !== 0 ? "flex-start" : "flex-end" }}>
                 {section.visual}
               </div>
             </div>
@@ -2171,7 +2191,7 @@ Answer their questions with specific, actionable advice tailored to their exact 
             <h2 style={{ fontSize: "clamp(20px, 4vw, 28px)", fontWeight: 800 }}>A complete system, not generic advice.</h2>
           </div>
 
-          <div className="mob-col" style={{ display: "flex", gap: 14, maxWidth: 660, margin: "0 auto" }}>
+          <div className="mob-col pricing-flex" style={{ display: "flex", gap: 14, maxWidth: 660, margin: "0 auto" }}>
             {/* Free column */}
             <div style={{ flex: 1, padding: "22px 18px", background: W(.012), border: `1px solid ${W(.04)}`, borderRadius: 16 }}>
               <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: 2, color: W(.3), marginBottom: 6 }}>Free</div>
@@ -2224,7 +2244,7 @@ Answer their questions with specific, actionable advice tailored to their exact 
             <h2 style={{ fontSize: "clamp(20px, 4vw, 28px)", fontWeight: 800 }}>Real people. Real results.</h2>
             <p style={{ fontSize: 13, color: W(.25), fontFamily: "'Crimson Pro',serif", fontStyle: "italic", marginTop: 6 }}>Verified outcomes from blueprint users</p>
           </div>
-          <div className="mob-col" style={{ display: "flex", gap: 12 }}>
+          <div className="mob-col testi-flex" style={{ display: "flex", gap: 12 }}>
             {[
               {
                 t: "Went from $0 to $4,200/mo in 8 weeks following the plan exactly. The day-by-day tasks made it impossible to procrastinate. I literally just did what it said.",
@@ -2308,7 +2328,7 @@ Answer their questions with specific, actionable advice tailored to their exact 
             </div>
 
             {/* Big stats row */}
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8, marginBottom: 0 }} className="mob-col">
+            <div className="stats-4" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8, marginBottom: 0 }}>
               {[
                 { num: "1,400+", label: "Income models analyzed", icon: "🧠", numColor: Green, bg: "rgba(126,232,178,.1)", desc: "Freelance, SaaS, e-commerce, content, consulting — every viable AI-powered path." },
                 { num: "47K+", label: "Blueprints generated", icon: "📋", numColor: Purple, bg: "rgba(192,132,252,.1)", desc: "Each one personalized to a unique combination of skills, time, and goals." },
