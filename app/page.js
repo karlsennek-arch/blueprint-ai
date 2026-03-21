@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import { createClient } from "@supabase/supabase-js";
+import { Analytics } from "@vercel/analytics/react";
 
 const Gold = "#7EE8B2"; // Was yellow, now green for all UI elements
 const StarGold = "#FFD166"; // ONLY for star ratings
@@ -341,6 +342,146 @@ function QuizDemo() {
           <div key={i} style={{ width: i === step ? 16 : 5, height: 5, borderRadius: 3, background: i === step ? Green : W(.08), transition: "all .4s" }} />
         ))}
       </div>
+    </div>
+  );
+}
+
+// ─── SCROLL REVEAL HOOK ─────────────────────────────────────────
+function useScrollReveal() {
+  const ref = useRef(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) { el.classList.add("visible"); observer.unobserve(el); }
+    }, { threshold: 0.1, rootMargin: "0px 0px -60px 0px" });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+  return ref;
+}
+
+function ScrollReveal({ children, delay = 0 }) {
+  const ref = useScrollReveal();
+  return <div ref={ref} className="scroll-reveal" style={{ transitionDelay: `${delay}s` }}>{children}</div>;
+}
+
+// ─── STICKY MOBILE CTA ─────────────────────────────────────────
+function StickyMobileCTA({ onClick }) {
+  const [show, setShow] = useState(false);
+  useEffect(() => {
+    const onScroll = () => setShow(window.scrollY > 600);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+  return (
+    <div className={`sticky-cta ${show ? "show" : ""}`}>
+      <span style={{ fontSize: 12, color: W(.4), flex: 1 }}>Your blueprint is 90 seconds away</span>
+      <button onClick={onClick} style={{ padding: "10px 22px", borderRadius: 50, background: Green, color: Bg, fontSize: 13, fontWeight: 700, border: "none", whiteSpace: "nowrap", boxShadow: "0 2px 16px rgba(126,232,178,.3)" }}>
+        Start Free Quiz →
+      </button>
+    </div>
+  );
+}
+
+// ─── EXIT INTENT POPUP ──────────────────────────────────────────
+function ExitIntentPopup({ onClose, onStartQuiz }) {
+  return (
+    <div style={{ position: "fixed", inset: 0, zIndex: 300, display: "flex", alignItems: "center", justifyContent: "center", padding: 16, background: "rgba(0,0,0,.85)", backdropFilter: "blur(12px)", animation: "fi .3s both" }} onClick={onClose}>
+      <div onClick={e => e.stopPropagation()} style={{ width: "100%", maxWidth: 420, background: "linear-gradient(145deg,#13151A,#0D0E12)", border: `1px solid ${W(.08)}`, borderRadius: 24, padding: "36px 28px", position: "relative", textAlign: "center" }}>
+        <button onClick={onClose} style={{ position: "absolute", top: 16, right: 16, width: 28, height: 28, borderRadius: 8, background: W(.04), border: `1px solid ${W(.06)}`, color: W(.3), fontSize: 14, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>×</button>
+        <div style={{ fontSize: 40, marginBottom: 16 }}>⏳</div>
+        <h3 style={{ fontSize: 22, fontWeight: 900, marginBottom: 8 }}>Wait — your blueprint is still here.</h3>
+        <p style={{ fontSize: 14, color: W(.4), lineHeight: 1.6, marginBottom: 20 }}>You were seconds away from a personalized income plan. Take the free 90-second quiz before you go — no signup required.</p>
+        <button onClick={() => { onStartQuiz(); onClose(); }} style={{ width: "100%", padding: 14, borderRadius: 50, background: Green, color: Bg, fontSize: 15, fontWeight: 700, border: "none", marginBottom: 10, boxShadow: "0 4px 20px rgba(126,232,178,.25)" }}>
+          Build My Blueprint — Free
+        </button>
+        <button onClick={onClose} style={{ background: "none", border: "none", color: W(.2), fontSize: 12, padding: 8, cursor: "pointer" }}>No thanks, I'll figure it out myself</button>
+      </div>
+    </div>
+  );
+}
+
+// ─── INCOME CALCULATOR ──────────────────────────────────────────
+function IncomeCalculator({ onStartQuiz }) {
+  const [hours, setHours] = useState(2);
+  const [skill, setSkill] = useState(1);
+  const skillLabels = ["No skills yet", "Some skills", "Strong skills", "Expert level"];
+  const base = [800, 1500, 3000, 5000];
+  const multipliers = [0.3, 0.6, 1, 1.8];
+  const estimate = Math.round(base[skill] * multipliers[hours]);
+  const estimateHigh = Math.round(estimate * 2.2);
+
+  return (
+    <div style={{ padding: "28px 24px", background: W(.015), border: `1px solid ${W(.04)}`, borderRadius: 18, maxWidth: 540, margin: "0 auto" }}>
+      <div style={{ textAlign: "center", marginBottom: 20 }}>
+        <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 3, textTransform: "uppercase", color: Green, marginBottom: 8 }}>INCOME ESTIMATOR</div>
+        <h3 style={{ fontSize: 20, fontWeight: 800 }}>How much could <span style={{ color: Green }}>you</span> make?</h3>
+      </div>
+      {/* Hours slider */}
+      <div style={{ marginBottom: 18 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
+          <span style={{ fontSize: 12, color: W(.4) }}>Hours per week</span>
+          <span style={{ fontSize: 12, fontWeight: 700, color: "#fff" }}>{["Under 5", "5–10", "10–20", "20+"][hours]}</span>
+        </div>
+        <input type="range" min="0" max="3" value={hours} onChange={e => setHours(+e.target.value)} style={{ width: "100%", accentColor: Green, height: 4 }} />
+      </div>
+      {/* Skill level */}
+      <div style={{ marginBottom: 20 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
+          <span style={{ fontSize: 12, color: W(.4) }}>Skill level</span>
+          <span style={{ fontSize: 12, fontWeight: 700, color: "#fff" }}>{skillLabels[skill]}</span>
+        </div>
+        <div style={{ display: "flex", gap: 6 }}>
+          {skillLabels.map((s, i) => (
+            <button key={i} onClick={() => setSkill(i)} style={{
+              flex: 1, padding: "8px 4px", borderRadius: 8, fontSize: 10, fontWeight: 600,
+              background: i === skill ? "rgba(126,232,178,.1)" : W(.02),
+              border: `1px solid ${i === skill ? "rgba(126,232,178,.25)" : W(.04)}`,
+              color: i === skill ? Green : W(.3),
+            }}>{s}</button>
+          ))}
+        </div>
+      </div>
+      {/* Result */}
+      <div style={{ textAlign: "center", padding: "20px", background: W(.02), borderRadius: 14, border: `1px solid ${W(.05)}`, marginBottom: 16 }}>
+        <div style={{ fontSize: 11, color: W(.3), marginBottom: 6 }}>Estimated monthly income</div>
+        <div style={{ fontSize: 36, fontWeight: 900, color: "#fff" }}>${estimate.toLocaleString()} <span style={{ fontSize: 18, color: W(.3) }}>–</span> ${estimateHigh.toLocaleString()}</div>
+        <div style={{ fontSize: 11, color: Green, fontWeight: 600, marginTop: 4 }}>per month within 3-6 months</div>
+      </div>
+      <button onClick={onStartQuiz} style={{ width: "100%", padding: 14, borderRadius: 50, background: Green, color: Bg, fontSize: 14, fontWeight: 700, border: "none", boxShadow: "0 4px 20px rgba(126,232,178,.2)" }}>
+        Get My Personalized Blueprint →
+      </button>
+      <div style={{ textAlign: "center", fontSize: 11, color: W(.2), marginTop: 8 }}>Free • 90 seconds • No signup</div>
+    </div>
+  );
+}
+
+// ─── VIDEO TESTIMONIALS PLACEHOLDER ─────────────────────────────
+function VideoTestimonials() {
+  const vids = [
+    { name: "Marcus T.", role: "Agency Owner", result: "$4.2K/mo", color: "#534AB7" },
+    { name: "Sarah K.", role: "Digital Creator", result: "$2.8K/mo", color: "#D4537E" },
+    { name: "James L.", role: "Freelancer", result: "$6.1K/mo", color: "#1D9E75" },
+  ];
+  return (
+    <div style={{ display: "flex", gap: 12, overflowX: "auto", paddingBottom: 8 }} className="mob-col">
+      {vids.map((v, i) => (
+        <div key={i} style={{ flex: "1 1 200px", minWidth: 200, padding: "0", borderRadius: 14, overflow: "hidden", background: W(.015), border: `1px solid ${W(.04)}` }}>
+          {/* Video placeholder */}
+          <div style={{ height: 160, background: `linear-gradient(135deg, ${v.color}22, ${v.color}08)`, display: "flex", alignItems: "center", justifyContent: "center", position: "relative" }}>
+            <div style={{ width: 48, height: 48, borderRadius: "50%", background: "rgba(255,255,255,.1)", backdropFilter: "blur(4px)", border: "1px solid rgba(255,255,255,.15)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
+              <div style={{ width: 0, height: 0, borderTop: "8px solid transparent", borderBottom: "8px solid transparent", borderLeft: "14px solid #fff", marginLeft: 3 }} />
+            </div>
+            <div style={{ position: "absolute", bottom: 8, right: 8, padding: "3px 8px", borderRadius: 5, background: "rgba(0,0,0,.6)", fontSize: 10, color: "#fff" }}>2:34</div>
+          </div>
+          <div style={{ padding: "12px 14px" }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: "#fff", marginBottom: 2 }}>{v.name}</div>
+            <div style={{ fontSize: 11, color: W(.3), marginBottom: 6 }}>{v.role}</div>
+            <div style={{ display: "inline-block", padding: "2px 8px", borderRadius: 5, background: "rgba(126,232,178,.06)", border: "1px solid rgba(126,232,178,.1)", fontSize: 11, fontWeight: 700, color: Green }}>{v.result}</div>
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
@@ -704,6 +845,20 @@ export default function LandingPage() {
   const [chatLoading, setChatLoading] = useState(false);
   const [wpWeek, setWpWeek] = useState(0);
   const [trackerChecked, setTrackerChecked] = useState({});
+  const [showExitPopup, setShowExitPopup] = useState(false);
+  const exitShownRef = useRef(false);
+
+  // Exit intent detection (desktop: mouse leaves viewport top)
+  useEffect(() => {
+    const handler = (e) => {
+      if (e.clientY <= 5 && !exitShownRef.current && page === "landing") {
+        exitShownRef.current = true;
+        setShowExitPopup(true);
+      }
+    };
+    document.addEventListener("mouseout", handler);
+    return () => document.removeEventListener("mouseout", handler);
+  }, [page]);
 
   // ─── AUTH STATE ───
   const [user, setUser] = useState(null);       // { id, email }
@@ -1440,6 +1595,13 @@ Respond ONLY with valid JSON (no markdown, no backticks):
         .gl1{position:fixed;top:-15%;right:-15%;width:600px;height:600px;border-radius:50%;pointer-events:none;z-index:0;background:radial-gradient(circle,rgba(126,232,178,.04),transparent 65%)}
         .gl2{position:fixed;bottom:-10%;left:-10%;width:500px;height:500px;border-radius:50%;pointer-events:none;z-index:0;background:radial-gradient(circle,rgba(126,232,178,.03),transparent 65%)}
         @keyframes scan{0%{transform:translateX(-100%)}100%{transform:translateX(250%)}}
+        @keyframes slideInRight{from{opacity:0;transform:translateX(80px)}to{opacity:1;transform:translateX(0)}}
+        @keyframes slideOutRight{from{opacity:1;transform:translateX(0)}to{opacity:0;transform:translateX(80px)}}
+        @keyframes slideUp{from{opacity:0;transform:translateY(60px)}to{opacity:1;transform:translateY(0)}}
+        .scroll-reveal{opacity:0;transform:translateY(40px);transition:opacity .7s cubic-bezier(.4,0,.2,1),transform .7s cubic-bezier(.4,0,.2,1)}.scroll-reveal.visible{opacity:1;transform:translateY(0)}
+        .sticky-cta{position:fixed;bottom:0;left:0;right:0;z-index:100;padding:12px 16px;background:rgba(8,9,12,.92);backdrop-filter:blur(16px);border-top:1px solid rgba(255,255,255,.06);transform:translateY(100%);transition:transform .3s ease;display:none}
+        .sticky-cta.show{transform:translateY(0)}
+        @media(max-width:768px){.sticky-cta{display:flex;align-items:center;justify-content:center;gap:12px}}
         @media(max-width:600px){
           .mob-col{flex-direction:column!important}
           .mob-full{width:100%!important}
@@ -1468,6 +1630,8 @@ Respond ONLY with valid JSON (no markdown, no backticks):
       <div className="bgG" /><div className="gl1" /><div className="gl2" />
       <StarField />
       {showPaywall && <PaywallPopup onClose={() => setShowPaywall(false)} />}
+      {showExitPopup && <ExitIntentPopup onClose={() => setShowExitPopup(false)} onStartQuiz={startQuiz} />}
+      {page === "landing" && <StickyMobileCTA onClick={startQuiz} />}
 
       <div style={{ position: "relative", zIndex: 1, maxWidth: 900, margin: "0 auto", padding: "24px 20px 80px" }}>
 
@@ -2251,27 +2415,64 @@ Answer their questions with specific, actionable advice tailored to their exact 
           ))}
         </div>
 
-        {/* ═══════════ BEFORE / AFTER ═══════════ */}
-        <div className="mob-col" style={{ display: "flex", gap: 14, marginBottom: 72, animation: "su .5s .4s both" }}>
-          <div style={{ flex: 1, padding: "22px 20px", background: "rgba(255,75,75,.03)", border: "1px solid rgba(255,75,75,.08)", borderRadius: 16 }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: "#FF6B6B", textTransform: "uppercase", letterSpacing: 2, marginBottom: 12 }}>❌ Without Blueprint</div>
-            {["Months watching YouTube with no plan", "Buying $500 courses that don't fit your life", "Following generic advice meant for someone else", "Quitting after 2 weeks because it feels impossible"].map((t, i) => (
-              <div key={i} style={{ display: "flex", gap: 8, alignItems: "flex-start", marginBottom: 8 }}>
-                <span style={{ color: "#FF6B6B", fontSize: 10, marginTop: 3 }}>✗</span>
-                <span style={{ fontSize: 12.5, color: W(.35), lineHeight: 1.4 }}>{t}</span>
+        {/* ═══════════ BEFORE / AFTER (visual redesign) ═══════════ */}
+        <ScrollReveal>
+        <div className="mob-col" style={{ display: "flex", gap: 0, marginBottom: 72, borderRadius: 18, overflow: "hidden", border: `1px solid ${W(.04)}` }}>
+          {/* WITHOUT — dark red side */}
+          <div style={{ flex: 1, padding: "28px 24px", background: "linear-gradient(135deg, rgba(255,75,75,.04), rgba(255,75,75,.01))", borderRight: `1px solid ${W(.04)}`, position: "relative" }}>
+            <div style={{ fontSize: 10, fontWeight: 700, color: "#FF6B6B", textTransform: "uppercase", letterSpacing: 2, marginBottom: 16 }}>❌ Without a plan</div>
+            {/* Visual: person stuck */}
+            <div style={{ background: W(.02), borderRadius: 12, padding: 16, marginBottom: 16, border: `1px solid ${W(.04)}` }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
+                <div style={{ width: 32, height: 32, borderRadius: 8, background: "rgba(255,107,107,.15)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14 }}>😩</div>
+                <div><div style={{ fontSize: 11, fontWeight: 600, color: W(.5) }}>3 months later...</div><div style={{ fontSize: 10, color: W(.2) }}>Still watching "how to make money" videos</div></div>
+              </div>
+              <div style={{ height: 4, background: W(.04), borderRadius: 2, marginBottom: 8 }}><div style={{ width: "12%", height: "100%", background: "#FF6B6B", borderRadius: 2 }} /></div>
+              <div style={{ fontSize: 10, color: W(.15) }}>Progress: Almost none</div>
+            </div>
+            {["Endless scrolling with no direction", "Bought 3 courses, finished none", "No clear first step to take", "Gave up after 2 weeks"].map((t, i) => (
+              <div key={i} style={{ display: "flex", gap: 8, alignItems: "flex-start", marginBottom: 10 }}>
+                <span style={{ color: "#FF6B6B", fontSize: 10, marginTop: 3, flexShrink: 0 }}>✗</span>
+                <span style={{ fontSize: 12.5, color: W(.3), lineHeight: 1.4 }}>{t}</span>
               </div>
             ))}
+            <div style={{ marginTop: 14, padding: "10px 14px", background: "rgba(255,107,107,.04)", borderRadius: 10, border: "1px solid rgba(255,107,107,.08)" }}>
+              <div style={{ fontSize: 20, fontWeight: 900, color: "#FF6B6B" }}>$0</div>
+              <div style={{ fontSize: 10, color: W(.2) }}>earned after 3 months</div>
+            </div>
           </div>
-          <div style={{ flex: 1, padding: "22px 20px", background: "rgba(126,232,178,.03)", border: "1px solid rgba(126,232,178,.08)", borderRadius: 16 }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: Green, textTransform: "uppercase", letterSpacing: 2, marginBottom: 12 }}>✓ With Blueprint</div>
-            {["A plan built for YOUR skills and schedule", "Exact tools and scripts — ready to copy-paste", "Day-by-day tasks so you never guess what's next", "AI chat advisor for follow-up questions", "Compare alternative paths side by side", "Progress tracker to keep you accountable"].map((t, i) => (
-              <div key={i} style={{ display: "flex", gap: 8, alignItems: "flex-start", marginBottom: 8 }}>
-                <span style={{ color: Green, fontSize: 10, marginTop: 3 }}>✓</span>
-                <span style={{ fontSize: 12.5, color: W(.35), lineHeight: 1.4 }}>{t}</span>
+          {/* WITH — green side */}
+          <div style={{ flex: 1, padding: "28px 24px", background: "linear-gradient(135deg, rgba(126,232,178,.04), rgba(126,232,178,.01))", position: "relative" }}>
+            <div style={{ fontSize: 10, fontWeight: 700, color: Green, textTransform: "uppercase", letterSpacing: 2, marginBottom: 16 }}>✓ With Ventrix Blueprint</div>
+            {/* Visual: person executing */}
+            <div style={{ background: W(.02), borderRadius: 12, padding: 16, marginBottom: 16, border: `1px solid rgba(126,232,178,.08)` }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
+                <div style={{ width: 32, height: 32, borderRadius: 8, background: "rgba(126,232,178,.15)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14 }}>🚀</div>
+                <div><div style={{ fontSize: 11, fontWeight: 600, color: W(.5) }}>3 months later...</div><div style={{ fontSize: 10, color: Green }}>Week 12: 5 clients, scaling</div></div>
+              </div>
+              <div style={{ height: 4, background: W(.04), borderRadius: 2, marginBottom: 8 }}><div style={{ width: "78%", height: "100%", background: `linear-gradient(90deg, ${Green}, #5EC99A)`, borderRadius: 2 }} /></div>
+              <div style={{ fontSize: 10, color: Green }}>Progress: On track</div>
+            </div>
+            {["Day 1: exact tasks, no guessing", "Week 1: first client outreach sent", "Week 4: first paying customer", "AI advisor answers every question"].map((t, i) => (
+              <div key={i} style={{ display: "flex", gap: 8, alignItems: "flex-start", marginBottom: 10 }}>
+                <span style={{ color: Green, fontSize: 10, marginTop: 3, flexShrink: 0 }}>✓</span>
+                <span style={{ fontSize: 12.5, color: W(.4), lineHeight: 1.4 }}>{t}</span>
               </div>
             ))}
+            <div style={{ marginTop: 14, padding: "10px 14px", background: "rgba(126,232,178,.04)", borderRadius: 10, border: "1px solid rgba(126,232,178,.08)" }}>
+              <div style={{ fontSize: 20, fontWeight: 900, color: Green }}>$3,200+</div>
+              <div style={{ fontSize: 10, color: W(.3) }}>earned after 3 months</div>
+            </div>
           </div>
         </div>
+        </ScrollReveal>
+
+        {/* ═══════════ INCOME CALCULATOR ═══════════ */}
+        <ScrollReveal>
+        <div style={{ marginBottom: 72 }}>
+          <IncomeCalculator onStartQuiz={startQuiz} />
+        </div>
+        </ScrollReveal>
 
         {/* ═══════════ SAMPLE BLUEPRINT ═══════════ */}
         <div style={{ marginBottom: 72, animation: "su .5s .5s both" }}>
@@ -2494,10 +2695,23 @@ Answer their questions with specific, actionable advice tailored to their exact 
           </div>
         </div>
 
-        {/* ═══════════ FAQ ═══════════ */}
-        <div style={{ marginBottom: 72, animation: "su .5s .7s both" }}>
+        {/* ═══════════ VIDEO TESTIMONIALS ═══════════ */}
+        <ScrollReveal>
+        <div style={{ marginBottom: 72 }}>
           <div style={{ textAlign: "center", marginBottom: 28 }}>
-            <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 3, textTransform: "uppercase", color: Gold, marginBottom: 8 }}>FAQ</div>
+            <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 3, textTransform: "uppercase", color: Purple, marginBottom: 8 }}>VIDEO STORIES</div>
+            <h2 style={{ fontSize: "clamp(20px, 4vw, 28px)", fontWeight: 800 }}>Hear it from them directly</h2>
+            <p style={{ fontSize: 13, color: W(.25), marginTop: 6, fontFamily: "'Crimson Pro',serif", fontStyle: "italic" }}>Real blueprint users sharing their journey</p>
+          </div>
+          <VideoTestimonials />
+        </div>
+        </ScrollReveal>
+
+        {/* ═══════════ FAQ ═══════════ */}
+        <ScrollReveal>
+        <div style={{ marginBottom: 72 }}>
+          <div style={{ textAlign: "center", marginBottom: 28 }}>
+            <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 3, textTransform: "uppercase", color: W(.3), marginBottom: 8 }}>FAQ</div>
             <h2 style={{ fontSize: "clamp(20px, 4vw, 28px)", fontWeight: 800 }}>Common questions</h2>
           </div>
           <div style={{ maxWidth: 600, margin: "0 auto" }}>
@@ -2506,6 +2720,7 @@ Answer their questions with specific, actionable advice tailored to their exact 
             ))}
           </div>
         </div>
+        </ScrollReveal>
 
         {/* ═══════════ FINAL CTA ═══════════ */}
         <div style={{ textAlign: "center", padding: "48px 24px", background: "rgba(126,232,178,.02)", border: "1px solid rgba(126,232,178,.06)", borderRadius: 22, marginBottom: 40, animation: "su .5s .8s both" }}>
@@ -2532,6 +2747,7 @@ Answer their questions with specific, actionable advice tailored to their exact 
           <div style={{ fontSize: 10, color: W(.1) }}>Ventrix AI © 2026 • ventrixai.com</div>
         </div>
       </div>
+      <Analytics />
     </>
   );
 }
