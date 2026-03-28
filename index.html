@@ -1,0 +1,1431 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Webutviklerne AS | Profesjonell Webutvikling for Norske Bedrifter</title>
+<meta name="description" content="Vi bygger moderne, raske og SEO-optimaliserte nettsider for norske bedrifter. Kontakt oss for et gratis tilbud.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ═══════ RESET & BASE ═══════ */
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#06070B;--bg2:#0C0D14;--bg3:#12131C;
+  --accent:#4F8CFF;--accent2:#7C3AED;--accent3:#EC4899;
+  --green:#34D399;--gold:#F5A623;--coral:#FF6B6B;
+  --w100:#fff;--w80:rgba(255,255,255,.8);--w60:rgba(255,255,255,.6);
+  --w40:rgba(255,255,255,.4);--w25:rgba(255,255,255,.25);
+  --w15:rgba(255,255,255,.15);--w08:rgba(255,255,255,.08);
+  --w04:rgba(255,255,255,.04);--w02:rgba(255,255,255,.02);
+  --radius:16px;--radius-sm:10px;--radius-lg:24px;
+  --font-display:'Syne',sans-serif;
+  --font-body:'Outfit',sans-serif;
+  --font-mono:'JetBrains Mono',monospace;
+}
+html{scroll-behavior:smooth;scroll-padding-top:90px}
+body{background:var(--bg);color:var(--w80);font-family:var(--font-body);-webkit-font-smoothing:antialiased;overflow-x:hidden;line-height:1.6}
+::selection{background:rgba(79,140,255,.3);color:#fff}
+a{color:inherit;text-decoration:none}
+img{max-width:100%;display:block}
+button{font-family:inherit;cursor:pointer;border:none;background:none}
+
+/* ═══════ CURSOR GLOW ═══════ */
+.cursor-glow{position:fixed;width:800px;height:800px;border-radius:50%;pointer-events:none;z-index:0;
+  background:radial-gradient(circle,rgba(79,140,255,.06) 0%,rgba(124,58,237,.02) 40%,transparent 70%);
+  transition:left .2s ease-out,top .2s ease-out;transform:translate(-50%,-50%)}
+
+/* ═══════ GRAIN OVERLAY ═══════ */
+.grain{position:fixed;inset:0;pointer-events:none;z-index:9999;opacity:.025;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-repeat:repeat;background-size:128px 128px}
+
+/* ═══════ NAVBAR ═══════ */
+.nav{position:fixed;top:0;left:0;right:0;z-index:1000;padding:0 40px;transition:all .5s cubic-bezier(.4,0,.2,1)}
+.nav.scrolled{background:rgba(6,7,11,.88);backdrop-filter:blur(24px) saturate(1.6);border-bottom:1px solid var(--w08)}
+.nav-inner{max-width:920px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:80px}
+.nav-logo{display:flex;align-items:center;gap:12px;text-decoration:none}
+.nav-logo-icon{width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-weight:800;font-size:18px;color:#fff;position:relative;overflow:hidden}
+.nav-logo-icon::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,transparent 40%,rgba(255,255,255,.2) 50%,transparent 60%);transform:translateX(-100%);transition:transform .6s}
+.nav-logo:hover .nav-logo-icon::after{transform:translateX(100%)}
+.nav-logo-text span{display:block;font-family:var(--font-body);font-weight:800;font-size:15px;color:#fff;letter-spacing:-.3px}
+.nav-logo-text small{font-size:10px;color:var(--w25);letter-spacing:2px;text-transform:uppercase;font-weight:500}
+.nav-links{display:flex;align-items:center;gap:28px}
+.nav-links a{font-size:13px;font-weight:500;color:var(--w40);transition:color .25s;position:relative}
+.nav-links a::after{content:'';position:absolute;bottom:-4px;left:0;width:0;height:2px;background:var(--accent);border-radius:1px;transition:width .3s}
+.nav-links a:hover{color:#fff}
+.nav-links a:hover::after{width:100%}
+.nav-cta{padding:10px 22px;border-radius:var(--radius-sm);background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-size:13px;font-weight:700;letter-spacing:.2px;transition:all .25s;box-shadow:0 2px 20px rgba(79,140,255,.2)}
+.nav-cta:hover{transform:translateY(-2px);box-shadow:0 6px 32px rgba(79,140,255,.35)}
+.hamburger{display:none;flex-direction:column;gap:5px;padding:8px}
+.hamburger span{width:24px;height:2px;background:#fff;border-radius:2px;transition:all .3s}
+.mobile-menu{display:none;position:fixed;top:80px;left:0;right:0;bottom:0;background:rgba(6,7,11,.97);backdrop-filter:blur(24px);z-index:999;padding:40px;flex-direction:column;gap:0}
+.mobile-menu.open{display:flex}
+.mobile-menu a{display:block;padding:20px 0;font-size:22px;font-weight:600;color:var(--w60);border-bottom:1px solid var(--w08);font-family:var(--font-body)}
+
+/* ═══════ SECTIONS ═══════ */
+.section{padding:100px 40px;max-width:920px;margin:0 auto;position:relative}
+.section-tag{font-size:11px;font-weight:700;letter-spacing:4px;text-transform:uppercase;color:var(--accent);margin-bottom:14px;display:flex;align-items:center;gap:10px}
+.section-tag::before{content:'';width:28px;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:1px}
+.section-title{font-family:var(--font-body);font-size:clamp(28px,4vw,42px);font-weight:800;line-height:1.15;letter-spacing:-1px;margin-bottom:18px;max-width:600px}
+.section-title .gradient{background:linear-gradient(135deg,var(--accent),var(--accent2),var(--accent3));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-size:200% 200%;animation:gradShift 5s ease infinite}
+.section-sub{font-size:16px;color:var(--w40);max-width:520px;line-height:1.7}
+
+@keyframes gradShift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+
+/* ═══════ SCROLL ANIMATIONS ═══════ */
+.reveal{opacity:0;transform:translateY(50px);transition:all .8s cubic-bezier(.4,0,.2,1)}
+.reveal.visible{opacity:1;transform:translateY(0)}
+.reveal-left{opacity:0;transform:translateX(-60px);transition:all .8s cubic-bezier(.4,0,.2,1)}
+.reveal-left.visible{opacity:1;transform:translateX(0)}
+.reveal-right{opacity:0;transform:translateX(60px);transition:all .8s cubic-bezier(.4,0,.2,1)}
+.reveal-right.visible{opacity:1;transform:translateX(0)}
+.reveal-scale{opacity:0;transform:scale(.92);transition:all .7s cubic-bezier(.4,0,.2,1)}
+.reveal-scale.visible{opacity:1;transform:scale(1)}
+.stagger-1{transition-delay:.1s}.stagger-2{transition-delay:.2s}.stagger-3{transition-delay:.3s}.stagger-4{transition-delay:.4s}.stagger-5{transition-delay:.5s}.stagger-6{transition-delay:.6s}
+
+/* ═══════ HERO ═══════ */
+.hero{padding-top:140px;padding-bottom:120px;position:relative;overflow:hidden}
+.hero-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:60px;align-items:center}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;padding:7px 16px;border-radius:50px;background:rgba(79,140,255,.06);border:1px solid rgba(79,140,255,.15);margin-bottom:28px}
+.hero-badge .dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+.hero-badge span{font-size:12.5px;font-weight:500;color:var(--w60)}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.8)}}
+.hero h1{font-family:var(--font-body);font-size:clamp(32px,4.5vw,48px);font-weight:800;line-height:1.12;letter-spacing:-1px;margin-bottom:22px;max-width:520px}
+.hero h1 .gradient{background:linear-gradient(135deg,var(--accent),var(--accent2),var(--accent3));background-size:300% 300%;animation:gradShift 4s ease infinite;-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero p{font-size:16px;line-height:1.75;color:var(--w40);max-width:460px;margin-bottom:36px}
+.hero-btns{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:48px}
+.btn-primary{padding:14px 30px;border-radius:12px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-size:14.5px;font-weight:700;box-shadow:0 4px 28px rgba(79,140,255,.25);transition:all .3s;position:relative;overflow:hidden}
+.btn-primary::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,transparent 40%,rgba(255,255,255,.15) 50%,transparent 60%);transform:translateX(-100%);transition:transform .5s}
+.btn-primary:hover{transform:translateY(-3px);box-shadow:0 8px 40px rgba(79,140,255,.4)}
+.btn-primary:hover::before{transform:translateX(100%)}
+.btn-secondary{padding:14px 30px;border-radius:12px;color:#fff;font-size:14.5px;font-weight:600;border:1px solid var(--w15);transition:all .3s;backdrop-filter:blur(4px)}
+.btn-secondary:hover{border-color:var(--w25);background:var(--w04);transform:translateY(-2px)}
+.hero-stats{display:flex;gap:32px}
+.hero-stat .num{font-family:var(--font-body);font-size:24px;font-weight:800;color:var(--accent);line-height:1}
+.hero-stat .label{font-size:12.5px;color:var(--w25);margin-top:4px}
+
+/* Hero visual */
+.hero-visual{position:relative}
+.hero-demo{background:linear-gradient(160deg,var(--bg3),var(--bg2));border:1px solid var(--w08);border-radius:20px;overflow:hidden;box-shadow:0 40px 100px rgba(0,0,0,.5),0 0 60px rgba(79,140,255,.04);animation:floatBrowser 6s ease-in-out infinite;position:relative}
+@keyframes floatBrowser{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-10px) rotate(.3deg)}}
+.demo-header{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--w06)}
+.demo-dots{display:flex;gap:6px}
+.demo-dots span{width:10px;height:10px;border-radius:50%}
+.demo-dots span:nth-child(1){background:#FF5F57}
+.demo-dots span:nth-child(2){background:#FFBD2E}
+.demo-dots span:nth-child(3){background:#28CA42}
+.demo-tag{font-size:9px;font-weight:700;letter-spacing:2px;color:var(--accent);text-transform:uppercase;display:flex;align-items:center;gap:6px}
+.demo-tag .tag-dot{width:5px;height:5px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+.demo-body{padding:22px 20px;min-height:310px;position:relative}
+.demo-screen{position:absolute;inset:0;padding:22px 20px;opacity:0;transform:translateY(12px);transition:all .5s cubic-bezier(.4,0,.2,1);pointer-events:none}
+.demo-screen.active{opacity:1;transform:translateY(0);pointer-events:auto}
+
+/* Step indicators */
+.demo-steps{display:flex;justify-content:center;gap:6px;padding:12px 18px;border-top:1px solid var(--w06)}
+.demo-step-dot{width:8px;height:8px;border-radius:50%;background:var(--w08);transition:all .4s;cursor:pointer}
+.demo-step-dot.active{width:24px;border-radius:4px;background:var(--accent)}
+.demo-step-label{text-align:center;padding:8px 18px 14px;font-size:11px;font-weight:600;color:var(--w40);border-top:none}
+
+/* Demo animations */
+@keyframes typeIn{from{width:0}to{width:100%}}
+@keyframes fadeSlideUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes drawLine{from{width:0}to{width:100%}}
+@keyframes fillBar{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes popIn{0%{opacity:0;transform:scale(.8)}60%{transform:scale(1.05)}100%{opacity:1;transform:scale(1)}}
+.demo-screen.active .demo-anim-1{animation:fadeSlideUp .4s .1s both}
+.demo-screen.active .demo-anim-2{animation:fadeSlideUp .4s .25s both}
+.demo-screen.active .demo-anim-3{animation:fadeSlideUp .4s .4s both}
+.demo-screen.active .demo-anim-4{animation:fadeSlideUp .4s .55s both}
+.demo-screen.active .demo-anim-5{animation:fadeSlideUp .4s .7s both}
+.demo-screen.active .demo-pop-1{animation:popIn .35s .2s both}
+.demo-screen.active .demo-pop-2{animation:popIn .35s .4s both}
+.demo-screen.active .demo-pop-3{animation:popIn .35s .6s both}
+.demo-screen.active .demo-pop-4{animation:popIn .35s .8s both}
+.demo-screen.active .demo-fill{animation:fillBar .8s .3s both;transform-origin:left}
+.hero-glow{position:absolute;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(79,140,255,.12),transparent 70%);top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;z-index:-1;animation:glowPulse 4s ease infinite}
+@keyframes glowPulse{0%,100%{opacity:.6;transform:translate(-50%,-50%) scale(1)}50%{opacity:1;transform:translate(-50%,-50%) scale(1.15)}}
+
+/* ═══════ MARQUEE ═══════ */
+.marquee-section{overflow:hidden;padding:40px 0;border-top:1px solid var(--w04);border-bottom:1px solid var(--w04);position:relative}
+.marquee-track{display:flex;gap:60px;animation:marquee 25s linear infinite;width:max-content}
+.marquee-track:hover{animation-play-state:paused}
+.marquee-item{font-size:15px;font-weight:600;color:var(--w15);letter-spacing:2px;text-transform:uppercase;white-space:nowrap;display:flex;align-items:center;gap:12px}
+.marquee-item .sep{width:6px;height:6px;border-radius:50%;background:var(--accent);opacity:.3}
+@keyframes marquee{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+
+/* ═══════ STATS BAR ═══════ */
+.stats-bar{display:flex;justify-content:center;gap:40px;padding:18px 28px;background:linear-gradient(145deg,rgba(79,140,255,.03),rgba(124,58,237,.02));border:1px solid rgba(79,140,255,.06);border-radius:12px;margin:-30px auto 0;position:relative;z-index:10;max-width:920px}
+.stat-item{text-align:center;position:relative;display:flex;align-items:center;gap:10px}
+.stat-item:not(:last-child)::after{content:'';position:absolute;right:-20px;top:20%;height:60%;width:1px;background:var(--w06)}
+.stat-item .icon{font-size:14px}
+.stat-item .num{font-family:var(--font-body);font-size:18px;font-weight:800;color:#fff;line-height:1}
+.stat-item .label{font-size:11px;color:var(--w25)}
+
+/* ═══════ SERVICES ═══════ */
+.services-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:36px}
+.service-card{padding:20px 18px;background:var(--w02);border:1px solid var(--w06);border-radius:var(--radius);transition:all .45s cubic-bezier(.4,0,.2,1);position:relative;overflow:hidden;cursor:default}
+.service-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent),var(--accent2));opacity:0;transition:opacity .35s}
+.service-card:hover{background:var(--w04);border-color:rgba(79,140,255,.2);transform:translateY(-8px);box-shadow:0 24px 64px rgba(0,0,0,.3),0 0 40px rgba(79,140,255,.06)}
+.service-card:hover::before{opacity:1}
+.service-icon{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,rgba(79,140,255,.1),rgba(124,58,237,.1));border:1px solid rgba(79,140,255,.12);display:flex;align-items:center;justify-content:center;font-size:16px;margin-bottom:12px;transition:transform .4s}
+.service-card:hover .service-icon{transform:scale(1.1) rotate(-5deg)}
+.service-card h3{font-family:var(--font-body);font-size:15px;font-weight:700;color:#fff;margin-bottom:10px;letter-spacing:-.2px}
+.service-card p{font-size:12px;color:var(--w40);line-height:1.55;margin-bottom:10px}
+.service-features{display:flex;flex-direction:column;gap:4px}
+.service-features li{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--w50);list-style:none}
+.service-features .check{color:var(--green);font-size:10px;font-weight:700;flex-shrink:0}
+.service-card .learn-more{display:inline-flex;align-items:center;gap:6px;margin-top:14px;font-size:12px;font-weight:600;color:var(--accent);opacity:0;transform:translateY(8px);transition:all .35s}
+.service-card:hover .learn-more{opacity:1;transform:translateY(0)}
+
+/* ═══════ DIFFERENTIATOR ═══════ */
+.diff-grid{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:48px;align-items:center}
+.diff-left{display:flex;flex-direction:column;gap:24px}
+.diff-card{padding:24px;background:var(--w02);border:1px solid var(--w06);border-radius:var(--radius);display:flex;gap:18px;transition:all .35s;position:relative;overflow:hidden}
+.diff-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:0 2px 2px 0;transition:all .35s}
+.diff-card:nth-child(1)::before{background:var(--accent)}
+.diff-card:nth-child(2)::before{background:var(--accent2)}
+.diff-card:nth-child(3)::before{background:var(--green)}
+.diff-card:nth-child(4)::before{background:var(--gold)}
+.diff-card:hover{background:var(--w04);border-color:var(--w08);transform:translateX(8px)}
+.diff-icon{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.diff-card:nth-child(1) .diff-icon{background:rgba(79,140,255,.1)}
+.diff-card:nth-child(2) .diff-icon{background:rgba(124,58,237,.1)}
+.diff-card:nth-child(3) .diff-icon{background:rgba(52,211,153,.1)}
+.diff-card:nth-child(4) .diff-icon{background:rgba(245,166,35,.1)}
+.diff-card h4{font-family:var(--font-body);font-size:16px;font-weight:700;color:#fff;margin-bottom:4px}
+.diff-card p{font-size:13px;color:var(--w40);line-height:1.55}
+.diff-visual{position:relative}
+.diff-compare{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.diff-col{padding:28px 22px;border-radius:var(--radius);overflow:hidden;position:relative}
+.diff-col.bad{background:rgba(255,107,107,.03);border:1px solid rgba(255,107,107,.08)}
+.diff-col.good{background:rgba(52,211,153,.03);border:1px solid rgba(52,211,153,.08)}
+.diff-col-tag{font-size:10px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;margin-bottom:16px}
+.diff-col.bad .diff-col-tag{color:var(--coral)}
+.diff-col.good .diff-col-tag{color:var(--green)}
+.diff-list{display:flex;flex-direction:column;gap:12px}
+.diff-list-item{display:flex;align-items:center;gap:10px;font-size:12.5px}
+.diff-col.bad .diff-list-item{color:var(--w25)}
+.diff-col.good .diff-list-item{color:var(--w60)}
+.diff-list-item .icon{font-size:11px;flex-shrink:0}
+
+/* ═══════ PROCESS / TIMELINE ═══════ */
+.process-timeline{position:relative;margin-top:64px;padding-left:60px}
+.process-timeline::before{content:'';position:absolute;left:28px;top:0;bottom:0;width:2px;background:linear-gradient(180deg,var(--accent),var(--accent2),var(--green),var(--gold));border-radius:1px}
+.process-step{position:relative;padding:0 0 64px 40px}
+.process-step:last-child{padding-bottom:0}
+.process-dot{position:absolute;left:-44px;top:4px;width:24px;height:24px;border-radius:50%;background:var(--bg);border:2px solid var(--accent);display:flex;align-items:center;justify-content:center;z-index:2;transition:all .4s}
+.process-step:nth-child(2) .process-dot{border-color:var(--accent2)}
+.process-step:nth-child(3) .process-dot{border-color:var(--green)}
+.process-step:nth-child(4) .process-dot{border-color:var(--gold)}
+.process-dot-inner{width:8px;height:8px;border-radius:50%;background:var(--accent)}
+.process-step:nth-child(2) .process-dot-inner{background:var(--accent2)}
+.process-step:nth-child(3) .process-dot-inner{background:var(--green)}
+.process-step:nth-child(4) .process-dot-inner{background:var(--gold)}
+.process-step .step-num{font-family:var(--font-mono);font-size:11px;font-weight:500;letter-spacing:3px;margin-bottom:8px}
+.process-step:nth-child(1) .step-num{color:var(--accent)}
+.process-step:nth-child(2) .step-num{color:var(--accent2)}
+.process-step:nth-child(3) .step-num{color:var(--green)}
+.process-step:nth-child(4) .step-num{color:var(--gold)}
+.process-step h3{font-family:var(--font-body);font-size:21px;font-weight:700;color:#fff;margin-bottom:8px;letter-spacing:-.5px}
+.process-step p{font-size:14.5px;color:var(--w40);line-height:1.65;max-width:500px}
+.process-step .step-detail{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
+.process-step .step-detail span{padding:5px 12px;border-radius:8px;font-size:11.5px;font-weight:500;background:var(--w04);border:1px solid var(--w06);color:var(--w40)}
+
+/* ═══════ PORTFOLIO ═══════ */
+.portfolio-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:44px}
+.portfolio-card{border-radius:var(--radius-lg);overflow:hidden;border:1px solid var(--w06);background:var(--w02);transition:all .5s cubic-bezier(.4,0,.2,1);position:relative}
+.portfolio-card:hover{transform:translateY(-10px);box-shadow:0 32px 80px rgba(0,0,0,.4);border-color:var(--w08)}
+.portfolio-preview{height:220px;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.portfolio-preview::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,transparent 60%,var(--bg2));pointer-events:none}
+.portfolio-card:nth-child(1) .portfolio-preview{background:linear-gradient(145deg,rgba(79,140,255,.08),rgba(52,211,153,.04))}
+.portfolio-card:nth-child(2) .portfolio-preview{background:linear-gradient(145deg,rgba(124,58,237,.08),rgba(236,72,153,.04))}
+.portfolio-card:nth-child(3) .portfolio-preview{background:linear-gradient(145deg,rgba(52,211,153,.08),rgba(79,140,255,.04))}
+.portfolio-card:nth-child(4) .portfolio-preview{background:linear-gradient(145deg,rgba(245,166,35,.08),rgba(124,58,237,.04))}
+.portfolio-mockup{transition:transform .6s cubic-bezier(.4,0,.2,1)}
+.portfolio-card:hover .portfolio-mockup{transform:scale(1.06) translateY(-4px)}
+.portfolio-info{padding:18px 22px}
+.portfolio-category{font-size:10px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--accent);margin-bottom:6px}
+.portfolio-info h3{font-family:var(--font-body);font-size:16px;font-weight:700;color:#fff;margin-bottom:6px;letter-spacing:-.3px}
+.portfolio-info p{font-size:12.5px;color:var(--w35);line-height:1.55}
+.portfolio-tags{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+.portfolio-tags span{padding:4px 10px;border-radius:6px;font-size:11px;font-weight:500;background:var(--w04);border:1px solid var(--w06);color:var(--w40)}
+.portfolio-card .portfolio-result{display:flex;align-items:center;gap:8px;margin-top:14px;padding:10px 14px;background:rgba(52,211,153,.04);border:1px solid rgba(52,211,153,.08);border-radius:var(--radius-sm)}
+.portfolio-result .result-icon{color:var(--green);font-size:14px}
+.portfolio-result .result-text{font-size:12.5px;color:var(--green);font-weight:600}
+
+/* ═══════ PRICING ═══════ */
+.pricing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:44px}
+.price-card{padding:40px 30px;background:var(--w02);border:1px solid var(--w06);border-radius:var(--radius-lg);transition:all .45s;position:relative;overflow:hidden}
+.price-card.featured{border-color:rgba(79,140,255,.3);background:linear-gradient(160deg,rgba(79,140,255,.04),rgba(124,58,237,.02))}
+.price-card.featured::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent),var(--accent2))}
+.price-card:hover{transform:translateY(-6px);box-shadow:0 24px 64px rgba(0,0,0,.3)}
+.price-badge{display:inline-block;padding:5px 12px;border-radius:6px;font-size:10.5px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:16px}
+.price-card:nth-child(1) .price-badge{background:rgba(79,140,255,.08);color:var(--accent)}
+.price-card:nth-child(2) .price-badge{background:rgba(124,58,237,.08);color:var(--accent2)}
+.price-card:nth-child(3) .price-badge{background:rgba(52,211,153,.08);color:var(--green)}
+.price-card h3{font-family:var(--font-body);font-size:20px;font-weight:700;color:#fff;margin-bottom:6px}
+.price-card .price-desc{font-size:13.5px;color:var(--w35);margin-bottom:24px;line-height:1.55}
+.price-amount{display:flex;align-items:baseline;gap:4px;margin-bottom:6px}
+.price-amount .from{font-size:14px;color:var(--w25)}
+.price-amount .amount{font-family:var(--font-body);font-size:38px;font-weight:800;color:#fff}
+.price-amount .unit{font-size:14px;color:var(--w25)}
+.price-note{font-size:12px;color:var(--w20);margin-bottom:28px}
+.price-features{display:flex;flex-direction:column;gap:12px;margin-bottom:28px}
+.price-features li{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--w60);list-style:none}
+.price-features .check{color:var(--green);font-size:12px;font-weight:700}
+.price-btn{display:block;width:100%;padding:15px;border-radius:var(--radius-sm);font-size:14.5px;font-weight:700;text-align:center;transition:all .3s}
+.price-card:nth-child(1) .price-btn,.price-card:nth-child(3) .price-btn{background:var(--w04);border:1px solid var(--w08);color:#fff}
+.price-card:nth-child(1) .price-btn:hover,.price-card:nth-child(3) .price-btn:hover{background:var(--w08);border-color:var(--w15)}
+.price-card:nth-child(2) .price-btn{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;box-shadow:0 4px 20px rgba(79,140,255,.2)}
+.price-card:nth-child(2) .price-btn:hover{transform:translateY(-2px);box-shadow:0 6px 28px rgba(79,140,255,.3)}
+
+/* ═══════ ABOUT / OM OSS ═══════ */
+.about-grid{display:grid;grid-template-columns:1fr 1.2fr;gap:48px;margin-top:48px;align-items:start}
+.about-photo-area{position:relative}
+.about-photo{width:100%;aspect-ratio:3/3.5;border-radius:var(--radius-lg);background:linear-gradient(160deg,var(--bg3),var(--bg2));border:1px solid var(--w08);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;overflow:hidden;position:relative}
+.about-photo .initials{width:100px;height:100px;border-radius:28px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-family:var(--font-body);font-size:36px;font-weight:800;color:#fff}
+.about-photo .photo-label{font-size:13px;color:var(--w20)}
+.about-float-card{position:absolute;padding:16px 20px;background:rgba(12,13,20,.9);backdrop-filter:blur(16px);border:1px solid var(--w08);border-radius:var(--radius-sm);z-index:2;animation:floatCard 5s ease-in-out infinite}
+.about-float-card.card-1{top:-16px;right:-16px;animation-delay:0s}
+.about-float-card.card-2{bottom:40px;left:-20px;animation-delay:1.5s}
+@keyframes floatCard{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.about-float-card .fc-label{font-size:10px;color:var(--w25);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:4px}
+.about-float-card .fc-value{font-family:var(--font-body);font-size:18px;font-weight:700;color:#fff}
+.about-float-card .fc-sub{font-size:11px;color:var(--green);margin-top:2px}
+.about-content h3{font-family:var(--font-body);font-size:24px;font-weight:700;color:#fff;margin-bottom:16px;letter-spacing:-.5px}
+.about-content>p{font-size:15px;color:var(--w45);line-height:1.75;margin-bottom:16px}
+.about-tech{display:flex;gap:10px;flex-wrap:wrap;margin:24px 0}
+.about-tech span{padding:7px 16px;border-radius:8px;font-size:12.5px;font-weight:500;background:var(--w02);border:1px solid var(--w06);color:var(--w40);transition:all .3s}
+.about-tech span:hover{border-color:rgba(79,140,255,.2);color:var(--accent);background:rgba(79,140,255,.04)}
+.about-contact{display:flex;flex-direction:column;gap:14px;margin-top:28px;padding-top:28px;border-top:1px solid var(--w06)}
+.about-contact-item{display:flex;align-items:center;gap:14px}
+.about-contact-item .aci{width:44px;height:44px;border-radius:12px;background:var(--w04);border:1px solid var(--w06);display:flex;align-items:center;justify-content:center;font-size:17px}
+.about-contact-item .act{font-size:14px;color:var(--w60)}
+
+/* ═══════ WHY US ═══════ */
+.why-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:40px}
+.why-card{padding:22px 20px;background:var(--w02);border:1px solid var(--w06);border-radius:var(--radius);transition:all .4s;position:relative;overflow:hidden}
+.why-card:hover{background:var(--w04);transform:translateY(-4px);border-color:var(--w08)}
+.why-card .why-num{display:none}
+.why-card .why-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:12px}
+.why-card:nth-child(1) .why-icon{background:rgba(79,140,255,.1)}
+.why-card:nth-child(2) .why-icon{background:rgba(124,58,237,.1)}
+.why-card:nth-child(3) .why-icon{background:rgba(52,211,153,.1)}
+.why-card:nth-child(4) .why-icon{background:rgba(245,166,35,.1)}
+.why-card:nth-child(5) .why-icon{background:rgba(236,72,153,.1)}
+.why-card:nth-child(6) .why-icon{background:rgba(79,140,255,.1)}
+.why-card h4{font-family:var(--font-body);font-size:15px;font-weight:700;color:#fff;margin-bottom:4px}
+.why-card p{font-size:12.5px;color:var(--w35);line-height:1.55}
+
+/* ═══════ TESTIMONIALS ═══════ */
+.testimonials-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:44px}
+.testimonial-card{padding:32px 26px;background:var(--w02);border:1px solid var(--w06);border-radius:var(--radius-lg);transition:all .4s;position:relative}
+.testimonial-card:hover{background:var(--w04);transform:translateY(-4px)}
+.testi-stars{display:flex;gap:2px;margin-bottom:16px}
+.testi-stars span{color:var(--gold);font-size:14px}
+.testi-quote{font-size:14.5px;color:var(--w60);line-height:1.7;margin-bottom:24px;font-style:italic}
+.testi-author{display:flex;align-items:center;gap:12px;border-top:1px solid var(--w06);padding-top:18px}
+.testi-avatar{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;font-family:var(--font-body)}
+.testimonial-card:nth-child(1) .testi-avatar{background:rgba(79,140,255,.1);color:var(--accent)}
+.testimonial-card:nth-child(2) .testi-avatar{background:rgba(124,58,237,.1);color:var(--accent2)}
+.testimonial-card:nth-child(3) .testi-avatar{background:rgba(52,211,153,.1);color:var(--green)}
+.testi-name{font-size:14px;font-weight:700;color:#fff}
+.testi-role{font-size:12px;color:var(--w25)}
+
+/* ═══════ FAQ ═══════ */
+.faq-list{max-width:740px;margin:56px auto 0}
+.faq-item{border-bottom:1px solid var(--w06);overflow:hidden}
+.faq-q{width:100%;padding:22px 0;display:flex;justify-content:space-between;align-items:center;background:none;border:none;cursor:pointer;text-align:left}
+.faq-q span{font-family:var(--font-body);font-size:15.5px;font-weight:600;color:#fff;padding-right:20px}
+.faq-q .faq-icon{width:28px;height:28px;border-radius:8px;background:var(--w04);display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--accent);flex-shrink:0;transition:all .35s}
+.faq-item.open .faq-icon{background:rgba(79,140,255,.1);transform:rotate(45deg)}
+.faq-a{max-height:0;opacity:0;transition:all .4s cubic-bezier(.4,0,.2,1);overflow:hidden}
+.faq-item.open .faq-a{max-height:300px;opacity:1}
+.faq-a p{font-size:14.5px;color:var(--w40);line-height:1.7;padding-bottom:22px}
+
+/* ═══════ CTA SECTION ═══════ */
+.cta-section{text-align:center;padding:72px 40px;margin:0 auto;background:linear-gradient(160deg,rgba(79,140,255,.06),rgba(124,58,237,.04));border:1px solid rgba(79,140,255,.1);border-radius:28px;position:relative;overflow:hidden;max-width:920px}
+.cta-section::before{content:'';position:absolute;top:0;left:10%;right:10%;height:2px;background:linear-gradient(90deg,transparent,rgba(79,140,255,.4),transparent);border-radius:1px}
+.cta-section::after{content:'';position:absolute;width:400px;height:400px;border-radius:50%;background:radial-gradient(circle,rgba(79,140,255,.08),transparent 70%);bottom:-200px;left:50%;transform:translateX(-50%);pointer-events:none}
+
+/* ═══════ CONTACT ═══════ */
+.contact-grid{display:grid;grid-template-columns:1fr 1.3fr;gap:48px;margin-top:48px;align-items:start}
+.contact-info{display:flex;flex-direction:column;gap:18px;margin-top:24px}
+.contact-info-item{display:flex;align-items:center;gap:14px;padding:16px;background:var(--w02);border:1px solid var(--w06);border-radius:var(--radius);transition:all .3s}
+.contact-info-item:hover{background:var(--w04);border-color:var(--w08);transform:translateX(6px)}
+.contact-info-item .cii-icon{width:44px;height:44px;border-radius:12px;background:var(--w04);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.contact-info-item .cii-text .cii-label{font-size:11px;color:var(--w25);letter-spacing:1px;text-transform:uppercase;margin-bottom:2px}
+.contact-info-item .cii-text .cii-value{font-size:14.5px;color:#fff;font-weight:600}
+.contact-form{padding:40px 32px;background:var(--w02);border:1px solid var(--w06);border-radius:var(--radius-lg)}
+.contact-form h3{font-family:var(--font-body);font-size:20px;font-weight:700;color:#fff;margin-bottom:6px}
+.contact-form .form-sub{font-size:13.5px;color:var(--w35);margin-bottom:28px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+.form-input{width:100%;padding:15px 18px;border-radius:var(--radius-sm);background:var(--w04);border:1px solid var(--w06);color:#fff;font-size:14px;font-family:var(--font-body);outline:none;transition:all .25s}
+.form-input:focus{border-color:rgba(79,140,255,.4);box-shadow:0 0 0 3px rgba(79,140,255,.08)}
+.form-input::placeholder{color:var(--w25)}
+select.form-input{appearance:none;cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='rgba(255,255,255,.3)' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center}
+select.form-input option{background:var(--bg2);color:#fff}
+textarea.form-input{resize:vertical;min-height:120px}
+.form-submit{width:100%;padding:16px;border-radius:var(--radius-sm);background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-size:15px;font-weight:700;transition:all .3s;box-shadow:0 4px 20px rgba(79,140,255,.2);cursor:pointer;border:none;font-family:var(--font-body);margin-top:4px}
+.form-submit:hover{transform:translateY(-2px);box-shadow:0 6px 28px rgba(79,140,255,.35)}
+.form-note{text-align:center;font-size:12px;color:var(--w20);margin-top:12px}
+
+/* ═══════ FOOTER ═══════ */
+.footer{padding:60px 40px 40px;border-top:1px solid var(--w06);max-width:920px;margin:80px auto 0}
+.footer-grid{display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;gap:48px;margin-bottom:48px}
+.footer-brand p{font-size:13.5px;color:var(--w30);line-height:1.65;margin-top:16px;max-width:280px}
+.footer-col h4{font-family:var(--font-body);font-size:14px;font-weight:700;color:#fff;margin-bottom:18px;letter-spacing:.3px}
+.footer-col a{display:block;font-size:13.5px;color:var(--w30);padding:5px 0;transition:color .2s}
+.footer-col a:hover{color:var(--accent)}
+.footer-bottom{display:flex;justify-content:space-between;align-items:center;padding-top:28px;border-top:1px solid var(--w06);flex-wrap:wrap;gap:12px}
+.footer-bottom p{font-size:12px;color:var(--w15)}
+
+/* ═══════ RESPONSIVE ═══════ */
+@media(max-width:1024px){
+  .hero-grid{grid-template-columns:1fr;text-align:center;gap:40px}
+  .hero h1{margin-left:auto;margin-right:auto}
+  .hero p{margin-left:auto;margin-right:auto}
+  .hero-btns{justify-content:center}
+  .hero-stats{justify-content:center}
+  .section-title{margin-left:auto;margin-right:auto;text-align:center}
+  .section-tag{justify-content:center}
+  .section-sub{margin-left:auto;margin-right:auto;text-align:center}
+  .services-grid{grid-template-columns:1fr 1fr}
+  .pricing-grid{grid-template-columns:1fr 1fr}
+  .diff-grid{grid-template-columns:1fr}
+  .about-grid{grid-template-columns:1fr}
+  .contact-grid{grid-template-columns:1fr}
+  .footer-grid{grid-template-columns:1fr 1fr}
+  .stats-bar{flex-wrap:wrap;gap:24px}
+  .why-grid{grid-template-columns:1fr 1fr}
+}
+@media(max-width:768px){
+  .section{padding:70px 20px}
+  .nav{padding:0 20px}
+  .nav-links{display:none}
+  .hamburger{display:flex}
+  .hero{padding-top:120px;padding-bottom:80px}
+  .hero h1{font-size:clamp(28px,7vw,40px);max-width:100%}
+  .services-grid,.portfolio-grid,.pricing-grid,.testimonials-grid,.why-grid{grid-template-columns:1fr}
+  .stats-bar{flex-wrap:wrap;gap:20px;margin:-20px 20px 0;padding:16px 20px}
+  .stat-item:not(:last-child)::after{display:none}
+  .diff-compare{grid-template-columns:1fr}
+  .process-timeline{padding-left:40px}
+  .process-timeline::before{left:14px}
+  .process-dot{left:-34px}
+  .footer-grid{grid-template-columns:1fr}
+  .cta-section{margin:0 20px;padding:60px 24px}
+  .form-row{grid-template-columns:1fr}
+  .hero-visual{display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- CURSOR GLOW -->
+<div class="cursor-glow" id="cursorGlow"></div>
+
+<!-- GRAIN -->
+<div class="grain"></div>
+
+<!-- ═══════ NAVBAR ═══════ -->
+<nav class="nav" id="navbar">
+  <div class="nav-inner">
+    <a href="#hero" class="nav-logo">
+      <div class="nav-logo-icon">W</div>
+      <div class="nav-logo-text">
+        <span>Webutviklerne</span>
+        <small>Digitalbyrå</small>
+      </div>
+    </a>
+    <div class="nav-links">
+      <a href="#tjenester">Tjenester</a>
+      <a href="#skiller">Hva Skiller Oss</a>
+      <a href="#prosess">Prosess</a>
+      <a href="#portefolje">Portefølje</a>
+      <a href="#priser">Priser</a>
+      <a href="#om">Om Oss</a>
+      <a href="#faq">FAQ</a>
+      <a href="#kontakt" class="nav-cta">Få Gratis Tilbud</a>
+    </div>
+    <button class="hamburger" id="hamburger" onclick="toggleMenu()">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- MOBILE MENU -->
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#tjenester" onclick="closeMenu()">Tjenester</a>
+  <a href="#skiller" onclick="closeMenu()">Hva Skiller Oss</a>
+  <a href="#prosess" onclick="closeMenu()">Prosess</a>
+  <a href="#portefolje" onclick="closeMenu()">Portefølje</a>
+  <a href="#priser" onclick="closeMenu()">Priser</a>
+  <a href="#om" onclick="closeMenu()">Om Oss</a>
+  <a href="#faq" onclick="closeMenu()">FAQ</a>
+  <a href="#kontakt" onclick="closeMenu()" style="color:var(--accent)">Få Gratis Tilbud →</a>
+</div>
+
+<!-- ═══════ HERO ═══════ -->
+<section class="section hero" id="hero">
+  <div class="hero-grid">
+    <div>
+      <div class="hero-badge reveal">
+        <span class="dot"></span>
+        <span>Tilgjengelig for nye prosjekter</span>
+      </div>
+      <h1 class="reveal stagger-1">
+        Vi bygger nettsider<br>
+        som gir bedriften din<br>
+        <span class="gradient">reelle resultater.</span>
+      </h1>
+      <p class="reveal stagger-2">Profesjonelle, moderne nettsider for norske bedrifter. Fra idé til lansering — vi tar oss av alt slik at du kan fokusere på det du gjør best.</p>
+      <div class="hero-btns reveal stagger-3">
+        <a href="#kontakt" class="btn-primary">Få Gratis Tilbud →</a>
+        <a href="#portefolje" class="btn-secondary">Se Våre Prosjekter</a>
+      </div>
+      <div class="hero-stats reveal stagger-4">
+        <div class="hero-stat"><div class="num" data-count="50">0</div><div class="label">Prosjekter levert</div></div>
+        <div class="hero-stat"><div class="num">4.9★</div><div class="label">Kundetilfredshet</div></div>
+        <div class="hero-stat"><div class="num">100%</div><div class="label">Norskeid byrå</div></div>
+      </div>
+    </div>
+    <div class="hero-visual reveal-right stagger-2">
+      <div class="hero-glow"></div>
+      <div class="hero-demo" id="heroDemo">
+        <div class="demo-header">
+          <div class="demo-dots"><span></span><span></span><span></span></div>
+          <div class="demo-tag"><span class="tag-dot"></span> Slik jobber vi</div>
+        </div>
+        <div class="demo-body">
+
+          <!-- SCREEN 1: Samtale -->
+          <div class="demo-screen active" data-step="0">
+            <div style="font-size:9px;font-weight:700;letter-spacing:2px;color:var(--accent);text-transform:uppercase;margin-bottom:12px" class="demo-anim-1">Steg 01 — Samtale</div>
+            <div style="font-size:15px;font-weight:700;color:#fff;margin-bottom:14px" class="demo-anim-2">Vi forstår din bedrift</div>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <div class="demo-anim-2" style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--w04);border:1px solid var(--w06);border-radius:10px">
+                <div style="width:32px;height:32px;border-radius:8px;background:rgba(79,140,255,.1);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">💬</div>
+                <div><div style="font-size:11px;font-weight:600;color:#fff">Hva trenger bedriften din?</div><div style="font-size:10px;color:var(--w25)">Vi lytter og forstår dine mål</div></div>
+              </div>
+              <div class="demo-anim-3" style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--w04);border:1px solid var(--w06);border-radius:10px">
+                <div style="width:32px;height:32px;border-radius:8px;background:rgba(52,211,153,.1);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">🎯</div>
+                <div><div style="font-size:11px;font-weight:600;color:#fff">Målgruppe & konkurrenter</div><div style="font-size:10px;color:var(--w25)">Analyse av markedet</div></div>
+              </div>
+              <div class="demo-anim-4" style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:rgba(79,140,255,.04);border:1px solid rgba(79,140,255,.12);border-radius:10px">
+                <div style="width:32px;height:32px;border-radius:8px;background:rgba(79,140,255,.1);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">📋</div>
+                <div><div style="font-size:11px;font-weight:600;color:var(--accent)">Tilbud sendt — 0 kr</div><div style="font-size:10px;color:var(--w25)">Uforpliktende, alltid</div></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SCREEN 2: Design -->
+          <div class="demo-screen" data-step="1">
+            <div style="font-size:9px;font-weight:700;letter-spacing:2px;color:var(--accent2);text-transform:uppercase;margin-bottom:12px" class="demo-anim-1">Steg 02 — Design</div>
+            <div style="font-size:15px;font-weight:700;color:#fff;margin-bottom:14px" class="demo-anim-2">Vi designer din nettside</div>
+            <!-- Mini wireframe mockup -->
+            <div class="demo-anim-3" style="background:var(--w04);border:1px solid var(--w06);border-radius:12px;padding:14px;margin-bottom:10px">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+                <div style="width:60px;height:6px;background:var(--accent);border-radius:3px;opacity:.5" class="demo-fill"></div>
+                <div style="display:flex;gap:8px"><div style="width:20px;height:4px;background:var(--w08);border-radius:2px"></div><div style="width:20px;height:4px;background:var(--w08);border-radius:2px"></div><div style="width:20px;height:4px;background:var(--w08);border-radius:2px"></div></div>
+              </div>
+              <div class="demo-anim-4" style="height:8px;background:var(--w06);border-radius:3px;width:80%;margin-bottom:6px"></div>
+              <div class="demo-anim-4" style="height:8px;background:var(--w04);border-radius:3px;width:55%;margin-bottom:14px"></div>
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">
+                <div class="demo-pop-1" style="height:48px;background:rgba(79,140,255,.06);border:1px solid rgba(79,140,255,.1);border-radius:6px"></div>
+                <div class="demo-pop-2" style="height:48px;background:rgba(124,58,237,.06);border:1px solid rgba(124,58,237,.1);border-radius:6px"></div>
+                <div class="demo-pop-3" style="height:48px;background:rgba(52,211,153,.06);border:1px solid rgba(52,211,153,.1);border-radius:6px"></div>
+              </div>
+            </div>
+            <div class="demo-anim-5" style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:rgba(124,58,237,.04);border:1px solid rgba(124,58,237,.1);border-radius:8px">
+              <span style="font-size:12px">🎨</span>
+              <span style="font-size:10.5px;color:var(--accent2);font-weight:600">Du godkjenner designet før vi koder</span>
+            </div>
+          </div>
+
+          <!-- SCREEN 3: Utvikling -->
+          <div class="demo-screen" data-step="2">
+            <div style="font-size:9px;font-weight:700;letter-spacing:2px;color:var(--green);text-transform:uppercase;margin-bottom:12px" class="demo-anim-1">Steg 03 — Utvikling</div>
+            <div style="font-size:15px;font-weight:700;color:#fff;margin-bottom:14px" class="demo-anim-2">Vi bygger med moderne kode</div>
+            <!-- Code editor mockup -->
+            <div class="demo-anim-3" style="background:#0D0E14;border:1px solid var(--w06);border-radius:10px;padding:14px;font-family:var(--font-mono);font-size:10.5px;line-height:1.8;overflow:hidden">
+              <div class="demo-anim-2" style="color:var(--w15)">// dinbedrift.no</div>
+              <div class="demo-anim-3"><span style="color:var(--accent2)">import</span> <span style="color:var(--accent)">{ NextPage }</span> <span style="color:var(--accent2)">from</span> <span style="color:var(--green)">'next'</span></div>
+              <div class="demo-anim-3"><span style="color:var(--accent2)">import</span> <span style="color:var(--accent)">{ Booking }</span> <span style="color:var(--accent2)">from</span> <span style="color:var(--green)">'./components'</span></div>
+              <div class="demo-anim-4" style="margin-top:4px"><span style="color:var(--accent2)">export default</span> <span style="color:var(--gold)">function</span> <span style="color:var(--accent)">Home</span>() {</div>
+              <div class="demo-anim-4" style="padding-left:14px"><span style="color:var(--accent2)">return</span> <span style="color:var(--w40)">&lt;</span><span style="color:var(--coral)">Layout</span><span style="color:var(--w40)">&gt;</span></div>
+              <div class="demo-anim-5" style="padding-left:28px"><span style="color:var(--w40)">&lt;</span><span style="color:var(--coral)">Hero</span> <span style="color:var(--accent)">title</span>=<span style="color:var(--green)">"..."</span> <span style="color:var(--w40)">/&gt;</span></div>
+              <div class="demo-anim-5" style="padding-left:28px"><span style="color:var(--w40)">&lt;</span><span style="color:var(--coral)">Booking</span> <span style="color:var(--accent)">provider</span>=<span style="color:var(--green)">"vipps"</span> <span style="color:var(--w40)">/&gt;</span></div>
+            </div>
+            <div style="display:flex;gap:6px;margin-top:10px">
+              <div class="demo-pop-1" style="padding:5px 10px;border-radius:6px;background:rgba(52,211,153,.06);border:1px solid rgba(52,211,153,.1);font-size:9.5px;color:var(--green);font-weight:600">React</div>
+              <div class="demo-pop-2" style="padding:5px 10px;border-radius:6px;background:rgba(79,140,255,.06);border:1px solid rgba(79,140,255,.1);font-size:9.5px;color:var(--accent);font-weight:600">Next.js</div>
+              <div class="demo-pop-3" style="padding:5px 10px;border-radius:6px;background:rgba(124,58,237,.06);border:1px solid rgba(124,58,237,.1);font-size:9.5px;color:var(--accent2);font-weight:600">Vercel</div>
+              <div class="demo-pop-4" style="padding:5px 10px;border-radius:6px;background:rgba(245,166,35,.06);border:1px solid rgba(245,166,35,.1);font-size:9.5px;color:var(--gold);font-weight:600">99/100</div>
+            </div>
+          </div>
+
+          <!-- SCREEN 4: Lansering -->
+          <div class="demo-screen" data-step="3">
+            <div style="font-size:9px;font-weight:700;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:12px" class="demo-anim-1">Steg 04 — Lansering</div>
+            <div style="font-size:15px;font-weight:700;color:#fff;margin-bottom:14px" class="demo-anim-2">Din nettside er live!</div>
+            <!-- Success state -->
+            <div class="demo-anim-3" style="text-align:center;padding:16px 0 10px">
+              <div class="demo-pop-1" style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,var(--green),#059669);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:20px;box-shadow:0 4px 20px rgba(52,211,153,.25)">✓</div>
+              <div class="demo-anim-3" style="font-size:13px;font-weight:700;color:var(--green);margin-bottom:4px">dinbedrift.no er live</div>
+              <div class="demo-anim-4" style="font-size:10px;color:var(--w25)">SSL • SEO • Analytics — alt er klart</div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px">
+              <div class="demo-pop-2" style="padding:10px;background:var(--w04);border:1px solid var(--w06);border-radius:8px;text-align:center">
+                <div style="font-size:16px;font-weight:800;color:var(--accent)">+340%</div>
+                <div style="font-size:9px;color:var(--w25);margin-top:2px">Mer synlig i Google</div>
+              </div>
+              <div class="demo-pop-3" style="padding:10px;background:var(--w04);border:1px solid var(--w06);border-radius:8px;text-align:center">
+                <div style="font-size:16px;font-weight:800;color:var(--green)">0.8s</div>
+                <div style="font-size:9px;color:var(--w25);margin-top:2px">Lastetid</div>
+              </div>
+            </div>
+            <div class="demo-anim-5" style="margin-top:10px;padding:8px 12px;background:rgba(245,166,35,.04);border:1px solid rgba(245,166,35,.1);border-radius:8px;display:flex;align-items:center;gap:8px">
+              <span style="font-size:12px">🛡️</span>
+              <span style="font-size:10.5px;color:var(--gold);font-weight:600">Vedlikehold & support inkludert</span>
+            </div>
+          </div>
+
+        </div>
+        <!-- Step indicator -->
+        <div class="demo-steps" id="demoSteps">
+          <div class="demo-step-dot active" data-goto="0"></div>
+          <div class="demo-step-dot" data-goto="1"></div>
+          <div class="demo-step-dot" data-goto="2"></div>
+          <div class="demo-step-dot" data-goto="3"></div>
+        </div>
+        <div class="demo-step-label" id="demoLabel">Samtale → Design → Utvikling → Lansering</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ MARQUEE ═══════ -->
+<div class="marquee-section">
+  <div class="marquee-track" id="marqueeTrack"></div>
+</div>
+
+<!-- ═══════ STATS BAR ═══════ -->
+<div class="stats-bar reveal">
+  <div class="stat-item"><div class="num" data-count="50" data-suffix="+">0</div><div class="label">Prosjekter</div></div>
+  <div class="stat-item"><div class="num" data-count="98" data-suffix="%">0</div><div class="label">Tilfredshet</div></div>
+  <div class="stat-item"><div class="num">14 d</div><div class="label">Leveringstid</div></div>
+  <div class="stat-item"><div class="num">24/7</div><div class="label">Support</div></div>
+</div>
+
+<!-- ═══════ TJENESTER ═══════ -->
+<section class="section" id="tjenester">
+  <div class="section-tag reveal">Våre Tjenester</div>
+  <h2 class="section-title reveal stagger-1">Alt din bedrift trenger<br><span class="gradient">for å lykkes på nett</span></h2>
+  <div class="services-grid">
+    <div class="service-card reveal stagger-1">
+      <div class="service-icon">🌐</div>
+      <h3>Nettsider</h3>
+      <ul class="service-features">
+        <li><span class="check">✓</span> Responsivt mobildesign</li>
+        <li><span class="check">✓</span> SEO-optimalisert</li>
+        <li><span class="check">✓</span> Rask lastetid</li>
+      </ul>
+    </div>
+    <div class="service-card reveal stagger-2">
+      <div class="service-icon">🛒</div>
+      <h3>Nettbutikk</h3>
+      <ul class="service-features">
+        <li><span class="check">✓</span> Shopify / WooCommerce</li>
+        <li><span class="check">✓</span> Vipps & Klarna</li>
+        <li><span class="check">✓</span> Produkthåndtering</li>
+      </ul>
+    </div>
+    <div class="service-card reveal stagger-3">
+      <div class="service-icon">🚀</div>
+      <h3>Webapper</h3>
+      <ul class="service-features">
+        <li><span class="check">✓</span> React & Next.js</li>
+        <li><span class="check">✓</span> Booking-systemer</li>
+        <li><span class="check">✓</span> API-integrasjoner</li>
+      </ul>
+    </div>
+    <div class="service-card reveal stagger-4">
+      <div class="service-icon">📈</div>
+      <h3>SEO</h3>
+      <ul class="service-features">
+        <li><span class="check">✓</span> Google Business</li>
+        <li><span class="check">✓</span> Lokal SEO</li>
+        <li><span class="check">✓</span> Analyse & rapport</li>
+      </ul>
+    </div>
+    <div class="service-card reveal stagger-5">
+      <div class="service-icon">🎨</div>
+      <h3>Redesign</h3>
+      <ul class="service-features">
+        <li><span class="check">✓</span> Moderne design</li>
+        <li><span class="check">✓</span> Ytelsesoptimalisering</li>
+        <li><span class="check">✓</span> Innholdsmigrasjon</li>
+      </ul>
+    </div>
+    <div class="service-card reveal stagger-6">
+      <div class="service-icon">🔧</div>
+      <h3>Vedlikehold</h3>
+      <ul class="service-features">
+        <li><span class="check">✓</span> Oppdateringer</li>
+        <li><span class="check">✓</span> Sikkerhetskopier</li>
+        <li><span class="check">✓</span> Prioritert support</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ HVA SKILLER OSS ═══════ -->
+<section class="section" id="skiller">
+  <div class="section-tag reveal">Hva Skiller Oss</div>
+  <h2 class="section-title reveal stagger-1">Ikke bare en nettside.<br><span class="gradient">Et konkurransefortrinn.</span></h2>
+  <p class="section-sub reveal stagger-2">De fleste byråer leverer maler. Vi bygger skreddersydde løsninger som faktisk gir resultater for din bedrift.</p>
+
+  <div class="diff-grid">
+    <div class="diff-left">
+      <div class="diff-card reveal-left stagger-1">
+        <div class="diff-icon">🎯</div>
+        <div>
+          <h4>Personlig oppfølging</h4>
+          <p>Du snakker direkte med utvikleren — ingen mellomledd, ingen misforståelser. Rask respons og tett samarbeid.</p>
+        </div>
+      </div>
+      <div class="diff-card reveal-left stagger-2">
+        <div class="diff-icon">💻</div>
+        <div>
+          <h4>Kodet fra scratch</h4>
+          <p>Ingen WordPress-maler eller drag-and-drop. Hver nettside er skreddersydd med ren, rask kode som Google elsker.</p>
+        </div>
+      </div>
+      <div class="diff-card reveal-left stagger-3">
+        <div class="diff-icon">📊</div>
+        <div>
+          <h4>Resultatfokusert</h4>
+          <p>Vi bygger ikke bare pene nettsider — vi bygger verktøy som genererer leads, bookinger og salg for din bedrift.</p>
+        </div>
+      </div>
+      <div class="diff-card reveal-left stagger-4">
+        <div class="diff-icon">🇳🇴</div>
+        <div>
+          <h4>Lokalt & norsk</h4>
+          <p>Vi forstår det norske markedet, norske kunder, og lokale behov. Ingen utenlandske frilansere du ikke kan nå.</p>
+        </div>
+      </div>
+    </div>
+    <div class="diff-visual reveal-right stagger-2">
+      <div class="diff-compare">
+        <div class="diff-col bad">
+          <div class="diff-col-tag">Andre Byråer</div>
+          <div class="diff-list">
+            <div class="diff-list-item"><span class="icon" style="color:var(--coral)">✕</span> Dyre WordPress-maler</div>
+            <div class="diff-list-item"><span class="icon" style="color:var(--coral)">✕</span> Uker med ventetid</div>
+            <div class="diff-list-item"><span class="icon" style="color:var(--coral)">✕</span> Treg og oppblåst kode</div>
+            <div class="diff-list-item"><span class="icon" style="color:var(--coral)">✕</span> Snakker med prosjektleder</div>
+            <div class="diff-list-item"><span class="icon" style="color:var(--coral)">✕</span> Skjulte kostnader</div>
+            <div class="diff-list-item"><span class="icon" style="color:var(--coral)">✕</span> Dyr vedlikeholdsavtale</div>
+            <div class="diff-list-item"><span class="icon" style="color:var(--coral)">✕</span> Generisk mal-design</div>
+          </div>
+        </div>
+        <div class="diff-col good">
+          <div class="diff-col-tag">Webutviklerne</div>
+          <div class="diff-list">
+            <div class="diff-list-item"><span class="icon" style="color:var(--green)">✓</span> Skreddersydd kode</div>
+            <div class="diff-list-item"><span class="icon" style="color:var(--green)">✓</span> 2-4 ukers leveringstid</div>
+            <div class="diff-list-item"><span class="icon" style="color:var(--green)">✓</span> Lynrask ytelse</div>
+            <div class="diff-list-item"><span class="icon" style="color:var(--green)">✓</span> Direkte med utvikler</div>
+            <div class="diff-list-item"><span class="icon" style="color:var(--green)">✓</span> Fast pris, ingen overraskelser</div>
+            <div class="diff-list-item"><span class="icon" style="color:var(--green)">✓</span> Rimelig vedlikehold</div>
+            <div class="diff-list-item"><span class="icon" style="color:var(--green)">✓</span> Unikt, tilpasset design</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ HVORFOR VELGE OSS ═══════ -->
+<section class="section" id="hvorfor">
+  <div class="section-tag reveal">Hvorfor Velge Oss</div>
+  <h2 class="section-title reveal stagger-1">6 grunner til å velge<br><span class="gradient">Webutviklerne</span></h2>
+  <div class="why-grid">
+    <div class="why-card reveal stagger-1"><div class="why-num">01</div><div class="why-icon">⚡</div><h4>Lynrask Levering</h4><p>De fleste prosjekter er ferdig på 2-4 uker. Ingen unødvendig ventetid — vi jobber effektivt og målrettet.</p></div>
+    <div class="why-card reveal stagger-2"><div class="why-num">02</div><div class="why-icon">💰</div><h4>Konkurransedyktige Priser</h4><p>Premium kvalitet til fornuftige priser. Ingen skjulte kostnader, ingen overraskelser — alltid fast pris.</p></div>
+    <div class="why-card reveal stagger-3"><div class="why-num">03</div><div class="why-icon">🔧</div><h4>Moderne Teknologi</h4><p>Vi bruker React, Next.js og de nyeste verktøyene. Din nettside blir rask, sikker og klar for fremtiden.</p></div>
+    <div class="why-card reveal stagger-4"><div class="why-num">04</div><div class="why-icon">📱</div><h4>Perfekt på Alle Skjermer</h4><p>Responsivt design som ser fantastisk ut på mobil, nettbrett og desktop. Over 60% bruker mobilen.</p></div>
+    <div class="why-card reveal stagger-5"><div class="why-num">05</div><div class="why-icon">🤝</div><h4>Personlig Service</h4><p>Du snakker alltid direkte med utvikleren. Ingen mellomledd, ingen bortkastet tid. Vi er tilgjengelige når du trenger oss.</p></div>
+    <div class="why-card reveal stagger-6"><div class="why-num">06</div><div class="why-icon">📈</div><h4>Fokus på Resultater</h4><p>Vi bygger nettsider som genererer henvendelser og salg — ikke bare pene bilder. Din suksess er vår suksess.</p></div>
+  </div>
+</section>
+
+<!-- ═══════ PROSESS ═══════ -->
+<section class="section" id="prosess">
+  <div class="section-tag reveal">Slik Jobber Vi</div>
+  <h2 class="section-title reveal stagger-1">Fra idé til ferdig nettside<br><span class="gradient">i fire steg</span></h2>
+  <p class="section-sub reveal stagger-2">En enkel, transparent prosess der du er involvert hele veien. Ingen overraskelser.</p>
+  <div class="process-timeline">
+    <div class="process-step reveal-left stagger-1">
+      <div class="process-dot"><div class="process-dot-inner"></div></div>
+      <div class="step-num">STEG 01</div>
+      <h3>Gratis Konsultasjon</h3>
+      <p>Vi starter med en uforpliktende samtale for å forstå din bedrift, dine mål og dine behov. Du forteller oss hva du trenger — vi lytter og gir deg et forslag.</p>
+      <div class="step-detail"><span>15-30 min samtale</span><span>Behovsanalyse</span><span>Tilbud innen 24t</span></div>
+    </div>
+    <div class="process-step reveal-left stagger-2">
+      <div class="process-dot"><div class="process-dot-inner"></div></div>
+      <div class="step-num">STEG 02</div>
+      <h3>Design & Prototyping</h3>
+      <p>Vi lager et skreddersydd designforslag som reflekterer din merkevare. Du får se nøyaktig hvordan nettsiden vil se ut før vi begynner å bygge.</p>
+      <div class="step-detail"><span>Wireframes</span><span>Visuelt design</span><span>Dine tilbakemeldinger</span></div>
+    </div>
+    <div class="process-step reveal-left stagger-3">
+      <div class="process-dot"><div class="process-dot-inner"></div></div>
+      <div class="step-num">STEG 03</div>
+      <h3>Utvikling & Testing</h3>
+      <p>Vi bygger nettsiden med moderne teknologi, tester grundig på alle enheter og nettlesere, og sørger for at alt fungerer perfekt.</p>
+      <div class="step-detail"><span>Ren kode</span><span>Cross-browser testing</span><span>Ytelsesoptimalisering</span></div>
+    </div>
+    <div class="process-step reveal-left stagger-4">
+      <div class="process-dot"><div class="process-dot-inner"></div></div>
+      <div class="step-num">STEG 04</div>
+      <h3>Lansering & Oppfølging</h3>
+      <p>Vi lanserer nettsiden din og sørger for at den er synlig i søkemotorer. Etter lansering tilbyr vi vedlikehold og support.</p>
+      <div class="step-detail"><span>Go-live!</span><span>SEO-oppsett</span><span>Vedlikeholdsavtale</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ PORTEFØLJE ═══════ -->
+<section class="section" id="portefolje">
+  <div class="section-tag reveal">Portefølje</div>
+  <h2 class="section-title reveal stagger-1">Prosjekter vi er<br><span class="gradient">stolte av</span></h2>
+  <p class="section-sub reveal stagger-2">Et utvalg av nettsider og applikasjoner vi har bygget for norske bedrifter.</p>
+  <div class="portfolio-grid">
+    <div class="portfolio-card reveal stagger-1">
+      <div class="portfolio-preview">
+        <div class="portfolio-mockup">
+          <svg viewBox="0 0 320 200" width="300" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="320" height="200" rx="10" fill="#0E1017" stroke="rgba(255,255,255,.08)"/>
+            <rect y="0" width="320" height="24" rx="10" fill="#13141C"/>
+            <circle cx="14" cy="12" r="3.5" fill="#FF5F57"/><circle cx="24" cy="12" r="3.5" fill="#FFBD2E"/><circle cx="34" cy="12" r="3.5" fill="#28CA42"/>
+            <rect x="80" y="7" width="160" height="10" rx="5" fill="rgba(255,255,255,.04)" stroke="rgba(255,255,255,.06)"/>
+            <text x="130" y="14.5" font-size="5.5" fill="rgba(255,255,255,.2)" font-family="sans-serif">fysikalsk-institutt.no</text>
+            <!-- Hero area -->
+            <rect x="16" y="34" width="120" height="6" rx="3" fill="rgba(52,211,153,.15)"/>
+            <rect x="16" y="44" width="90" height="4" rx="2" fill="rgba(255,255,255,.06)"/>
+            <rect x="16" y="52" width="70" height="4" rx="2" fill="rgba(255,255,255,.04)"/>
+            <rect x="16" y="62" width="60" height="16" rx="6" fill="#34D399" opacity=".8"/>
+            <text x="28" y="72.5" font-size="5.5" fill="#06070B" font-weight="600" font-family="sans-serif">Bestill time</text>
+            <!-- Image placeholder -->
+            <rect x="170" y="32" width="134" height="50" rx="6" fill="rgba(52,211,153,.06)" stroke="rgba(52,211,153,.08)"/>
+            <circle cx="237" cy="57" r="10" fill="rgba(52,211,153,.1)"/><text x="233" y="60" font-size="10" fill="rgba(52,211,153,.3)">+</text>
+            <!-- Cards row -->
+            <rect x="16" y="92" width="92" height="44" rx="6" fill="rgba(255,255,255,.02)" stroke="rgba(255,255,255,.04)"/>
+            <rect x="24" y="100" width="36" height="3" rx="1.5" fill="rgba(52,211,153,.2)"/>
+            <rect x="24" y="108" width="60" height="2.5" rx="1" fill="rgba(255,255,255,.06)"/>
+            <rect x="24" y="114" width="50" height="2.5" rx="1" fill="rgba(255,255,255,.04)"/>
+            <rect x="114" y="92" width="92" height="44" rx="6" fill="rgba(255,255,255,.02)" stroke="rgba(255,255,255,.04)"/>
+            <rect x="122" y="100" width="36" height="3" rx="1.5" fill="rgba(79,140,255,.2)"/>
+            <rect x="122" y="108" width="60" height="2.5" rx="1" fill="rgba(255,255,255,.06)"/>
+            <rect x="122" y="114" width="50" height="2.5" rx="1" fill="rgba(255,255,255,.04)"/>
+            <rect x="212" y="92" width="92" height="44" rx="6" fill="rgba(255,255,255,.02)" stroke="rgba(255,255,255,.04)"/>
+            <rect x="220" y="100" width="36" height="3" rx="1.5" fill="rgba(124,58,237,.2)"/>
+            <rect x="220" y="108" width="60" height="2.5" rx="1" fill="rgba(255,255,255,.06)"/>
+            <rect x="220" y="114" width="50" height="2.5" rx="1" fill="rgba(255,255,255,.04)"/>
+            <!-- Footer -->
+            <rect x="0" y="146" width="320" height="54" fill="rgba(255,255,255,.01)"/>
+            <rect x="16" y="156" width="50" height="3" rx="1.5" fill="rgba(255,255,255,.06)"/>
+            <rect x="16" y="164" width="80" height="2" rx="1" fill="rgba(255,255,255,.03)"/>
+          </svg>
+        </div>
+      </div>
+      <div class="portfolio-info">
+        <div class="portfolio-category">Helsevesen</div>
+        <h3>Brumunddal Fysikalske Institutt</h3>
+        <p>Komplett nettside med online booking og PasientSky-integrasjon for fysioterapi-klinikk.</p>
+        <div class="portfolio-tags"><span>Next.js</span><span>PasientSky</span><span>Responsiv</span></div>
+        <div class="portfolio-result"><span class="result-icon">📈</span><span class="result-text">+40% flere bookinger</span></div>
+      </div>
+    </div>
+    <div class="portfolio-card reveal stagger-2">
+      <div class="portfolio-preview">
+        <div class="portfolio-mockup">
+          <svg viewBox="0 0 320 200" width="300" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="320" height="200" rx="10" fill="#0E1017" stroke="rgba(255,255,255,.08)"/>
+            <rect y="0" width="320" height="24" rx="10" fill="#13141C"/>
+            <circle cx="14" cy="12" r="3.5" fill="#FF5F57"/><circle cx="24" cy="12" r="3.5" fill="#FFBD2E"/><circle cx="34" cy="12" r="3.5" fill="#28CA42"/>
+            <rect x="80" y="7" width="160" height="10" rx="5" fill="rgba(255,255,255,.04)" stroke="rgba(255,255,255,.06)"/>
+            <text x="120" y="14.5" font-size="5.5" fill="rgba(255,255,255,.2)" font-family="sans-serif">tannlege-nordaas.no</text>
+            <!-- Hero -->
+            <rect x="16" y="34" width="110" height="6" rx="3" fill="rgba(124,58,237,.15)"/>
+            <rect x="16" y="44" width="80" height="4" rx="2" fill="rgba(255,255,255,.06)"/>
+            <rect x="16" y="52" width="65" height="4" rx="2" fill="rgba(255,255,255,.04)"/>
+            <rect x="16" y="62" width="55" height="16" rx="6" fill="#7C3AED" opacity=".8"/>
+            <text x="24" y="72.5" font-size="5.5" fill="#fff" font-weight="600" font-family="sans-serif">Bestill time</text>
+            <!-- Calendar widget -->
+            <rect x="170" y="32" width="134" height="70" rx="8" fill="rgba(124,58,237,.04)" stroke="rgba(124,58,237,.08)"/>
+            <text x="210" y="46" font-size="6" fill="rgba(124,58,237,.5)" font-weight="600" font-family="sans-serif">Mars 2026</text>
+            <g transform="translate(180,52)">
+              <rect width="18" height="14" rx="3" fill="rgba(255,255,255,.03)"/><text x="6" y="10" font-size="5" fill="rgba(255,255,255,.15)" font-family="sans-serif">M</text>
+              <rect x="22" width="18" height="14" rx="3" fill="rgba(255,255,255,.03)"/><text x="28" y="10" font-size="5" fill="rgba(255,255,255,.15)" font-family="sans-serif">T</text>
+              <rect x="44" width="18" height="14" rx="3" fill="rgba(124,58,237,.12)" stroke="rgba(124,58,237,.25)"/><text x="49" y="10" font-size="5" fill="rgba(124,58,237,.7)" font-family="sans-serif">O</text>
+              <rect x="66" width="18" height="14" rx="3" fill="rgba(255,255,255,.03)"/><text x="72" y="10" font-size="5" fill="rgba(255,255,255,.15)" font-family="sans-serif">T</text>
+              <rect x="88" width="18" height="14" rx="3" fill="rgba(255,255,255,.03)"/><text x="94" y="10" font-size="5" fill="rgba(255,255,255,.15)" font-family="sans-serif">F</text>
+            </g>
+            <!-- Services -->
+            <rect x="16" y="112" width="140" height="30" rx="6" fill="rgba(255,255,255,.02)" stroke="rgba(255,255,255,.04)"/>
+            <rect x="24" y="120" width="50" height="3" rx="1.5" fill="rgba(124,58,237,.15)"/>
+            <rect x="24" y="128" width="100" height="2" rx="1" fill="rgba(255,255,255,.04)"/>
+            <rect x="164" y="112" width="140" height="30" rx="6" fill="rgba(255,255,255,.02)" stroke="rgba(255,255,255,.04)"/>
+            <rect x="172" y="120" width="50" height="3" rx="1.5" fill="rgba(124,58,237,.15)"/>
+            <rect x="172" y="128" width="100" height="2" rx="1" fill="rgba(255,255,255,.04)"/>
+            <!-- Footer -->
+            <rect x="0" y="152" width="320" height="48" fill="rgba(255,255,255,.01)"/>
+            <rect x="16" y="162" width="50" height="3" rx="1.5" fill="rgba(255,255,255,.06)"/>
+          </svg>
+        </div>
+      </div>
+      <div class="portfolio-info">
+        <div class="portfolio-category">Tannhelse</div>
+        <h3>Tannlege Nordaas, Elverum</h3>
+        <p>Profesjonell nettside med timebestilling og tjenesteoversikt for tannlegepraksis.</p>
+        <div class="portfolio-tags"><span>Shopify</span><span>Booking</span><span>SEO</span></div>
+        <div class="portfolio-result"><span class="result-icon">📈</span><span class="result-text">2x flere nye pasienter</span></div>
+      </div>
+    </div>
+    <div class="portfolio-card reveal stagger-3">
+      <div class="portfolio-preview">
+        <div class="portfolio-mockup">
+          <svg viewBox="0 0 320 200" width="300" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="320" height="200" rx="10" fill="#0E1017" stroke="rgba(255,255,255,.08)"/>
+            <rect y="0" width="320" height="24" rx="10" fill="#13141C"/>
+            <circle cx="14" cy="12" r="3.5" fill="#FF5F57"/><circle cx="24" cy="12" r="3.5" fill="#FFBD2E"/><circle cx="34" cy="12" r="3.5" fill="#28CA42"/>
+            <rect x="80" y="7" width="160" height="10" rx="5" fill="rgba(255,255,255,.04)" stroke="rgba(255,255,255,.06)"/>
+            <text x="118" y="14.5" font-size="5.5" fill="rgba(255,255,255,.2)" font-family="sans-serif">hedmark-håndverk.no</text>
+            <!-- Hero w/ gallery -->
+            <rect x="16" y="34" width="130" height="6" rx="3" fill="rgba(52,211,153,.12)"/>
+            <rect x="16" y="44" width="100" height="4" rx="2" fill="rgba(255,255,255,.06)"/>
+            <rect x="16" y="52" width="55" height="16" rx="6" fill="rgba(52,211,153,.7)"/>
+            <text x="24" y="62.5" font-size="5.5" fill="#06070B" font-weight="600" font-family="sans-serif">Kontakt oss</text>
+            <!-- Photo grid -->
+            <rect x="16" y="78" width="92" height="56" rx="6" fill="rgba(255,255,255,.04)" stroke="rgba(255,255,255,.04)"/>
+            <rect x="24" y="86" width="76" height="32" rx="4" fill="rgba(52,211,153,.04)"/>
+            <circle cx="62" cy="102" r="6" fill="rgba(52,211,153,.08)"/>
+            <rect x="114" y="78" width="92" height="56" rx="6" fill="rgba(255,255,255,.04)" stroke="rgba(255,255,255,.04)"/>
+            <rect x="122" y="86" width="76" height="32" rx="4" fill="rgba(79,140,255,.04)"/>
+            <circle cx="160" cy="102" r="6" fill="rgba(79,140,255,.08)"/>
+            <rect x="212" y="78" width="92" height="56" rx="6" fill="rgba(255,255,255,.04)" stroke="rgba(255,255,255,.04)"/>
+            <rect x="220" y="86" width="76" height="32" rx="4" fill="rgba(245,166,35,.04)"/>
+            <circle cx="258" cy="102" r="6" fill="rgba(245,166,35,.08)"/>
+            <!-- Contact bar -->
+            <rect x="16" y="144" width="288" height="22" rx="6" fill="rgba(255,255,255,.02)" stroke="rgba(255,255,255,.03)"/>
+            <rect x="24" y="152" width="60" height="3" rx="1.5" fill="rgba(255,255,255,.06)"/>
+            <rect x="244" y="149" width="50" height="12" rx="4" fill="rgba(52,211,153,.12)"/>
+          </svg>
+        </div>
+      </div>
+      <div class="portfolio-info">
+        <div class="portfolio-category">Bygg & Anlegg</div>
+        <h3>Lokalt Håndverksfirma</h3>
+        <p>Responsiv nettside med prosjektgalleri og kontaktskjema for håndverksbedrift.</p>
+        <div class="portfolio-tags"><span>HTML/CSS</span><span>Galleri</span><span>Kontaktskjema</span></div>
+        <div class="portfolio-result"><span class="result-icon">📈</span><span class="result-text">3x flere henvendelser</span></div>
+      </div>
+    </div>
+    <div class="portfolio-card reveal stagger-4">
+      <div class="portfolio-preview">
+        <div class="portfolio-mockup">
+          <svg viewBox="0 0 320 200" width="300" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="320" height="200" rx="10" fill="#0E1017" stroke="rgba(255,255,255,.08)"/>
+            <rect y="0" width="320" height="24" rx="10" fill="#13141C"/>
+            <circle cx="14" cy="12" r="3.5" fill="#FF5F57"/><circle cx="24" cy="12" r="3.5" fill="#FFBD2E"/><circle cx="34" cy="12" r="3.5" fill="#28CA42"/>
+            <rect x="80" y="7" width="160" height="10" rx="5" fill="rgba(255,255,255,.04)" stroke="rgba(255,255,255,.06)"/>
+            <text x="125" y="14.5" font-size="5.5" fill="rgba(255,255,255,.2)" font-family="sans-serif">restaurant-bestill.no</text>
+            <!-- Hero w/ food img -->
+            <rect x="16" y="34" width="140" height="52" rx="8" fill="rgba(245,166,35,.04)" stroke="rgba(245,166,35,.06)"/>
+            <circle cx="86" cy="60" r="14" fill="rgba(245,166,35,.06)"/>
+            <text x="80" y="63" font-size="12" fill="rgba(245,166,35,.2)">🍕</text>
+            <rect x="170" y="34" width="134" height="6" rx="3" fill="rgba(245,166,35,.12)"/>
+            <rect x="170" y="44" width="100" height="4" rx="2" fill="rgba(255,255,255,.06)"/>
+            <rect x="170" y="52" width="55" height="16" rx="6" fill="rgba(245,166,35,.7)"/>
+            <text x="178" y="62.5" font-size="5.5" fill="#06070B" font-weight="600" font-family="sans-serif">Se meny</text>
+            <!-- Menu items -->
+            <rect x="16" y="96" width="288" height="24" rx="6" fill="rgba(255,255,255,.02)" stroke="rgba(255,255,255,.04)"/>
+            <rect x="24" y="104" width="60" height="3" rx="1.5" fill="rgba(255,255,255,.08)"/>
+            <rect x="270" y="104" width="26" height="3" rx="1.5" fill="rgba(245,166,35,.2)"/>
+            <rect x="16" y="124" width="288" height="24" rx="6" fill="rgba(245,166,35,.02)" stroke="rgba(245,166,35,.06)"/>
+            <rect x="24" y="132" width="50" height="3" rx="1.5" fill="rgba(255,255,255,.08)"/>
+            <rect x="270" y="132" width="26" height="3" rx="1.5" fill="rgba(245,166,35,.2)"/>
+            <rect x="16" y="152" width="288" height="24" rx="6" fill="rgba(255,255,255,.02)" stroke="rgba(255,255,255,.04)"/>
+            <rect x="24" y="160" width="70" height="3" rx="1.5" fill="rgba(255,255,255,.08)"/>
+            <rect x="270" y="160" width="26" height="3" rx="1.5" fill="rgba(245,166,35,.2)"/>
+          </svg>
+        </div>
+      </div>
+      <div class="portfolio-info">
+        <div class="portfolio-category">Restaurant</div>
+        <h3>Restaurant & Takeaway</h3>
+        <p>Nettside med online bestilling, meny og integrasjon med leveringstjenester.</p>
+        <div class="portfolio-tags"><span>Next.js</span><span>Bestilling</span><span>Stripe</span></div>
+        <div class="portfolio-result"><span class="result-icon">📈</span><span class="result-text">25% bestillinger via nett</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ PRISER ═══════ -->
+<section class="section" id="priser">
+  <div style="text-align:center">
+    <div class="section-tag reveal" style="justify-content:center">Priser</div>
+    <h2 class="section-title reveal stagger-1" style="text-align:center;margin:0 auto 20px">Transparente priser.<br><span class="gradient">Ingen overraskelser.</span></h2>
+    <p class="section-sub reveal stagger-2" style="margin:0 auto">Velg pakken som passer din bedrift. Alle priser inkluderer design, utvikling, og lansering.</p>
+  </div>
+  <div class="pricing-grid">
+    <div class="price-card reveal stagger-1">
+      <div class="price-badge">Starter</div>
+      <h3>Enkel Bedriftsnettside</h3>
+      <div class="price-desc">Perfekt for små bedrifter som trenger en profesjonell tilstedeværelse på nett.</div>
+      <div class="price-amount"><span class="from">fra</span><span class="amount">8 000</span><span class="unit">kr</span></div>
+      <div class="price-note">Engangspris • Ferdig på 1-2 uker</div>
+      <ul class="price-features">
+        <li><span class="check">✓</span> Opptil 5 sider</li>
+        <li><span class="check">✓</span> Responsivt design</li>
+        <li><span class="check">✓</span> Kontaktskjema</li>
+        <li><span class="check">✓</span> SEO-grunnoppsett</li>
+        <li><span class="check">✓</span> SSL-sertifikat</li>
+        <li><span class="check">✓</span> Google Analytics</li>
+        <li><span class="check">✓</span> 30 dagers support</li>
+      </ul>
+      <a href="#kontakt" class="price-btn">Kom i gang →</a>
+    </div>
+    <div class="price-card featured reveal stagger-2">
+      <div class="price-badge" style="background:rgba(124,58,237,.12);color:var(--accent2)">Mest populær</div>
+      <h3>Profesjonell Nettside</h3>
+      <div class="price-desc">For bedrifter som ønsker mer funksjonalitet, integrasjoner og et unikt design.</div>
+      <div class="price-amount"><span class="from">fra</span><span class="amount">15 000</span><span class="unit">kr</span></div>
+      <div class="price-note">Engangspris • Ferdig på 2-4 uker</div>
+      <ul class="price-features">
+        <li><span class="check">✓</span> Alt i Starter +</li>
+        <li><span class="check">✓</span> Opptil 10 sider</li>
+        <li><span class="check">✓</span> CMS for enkel redigering</li>
+        <li><span class="check">✓</span> Booking-integrasjon</li>
+        <li><span class="check">✓</span> Google Business oppsett</li>
+        <li><span class="check">✓</span> Avansert SEO</li>
+        <li><span class="check">✓</span> Animasjoner & interaksjoner</li>
+        <li><span class="check">✓</span> 90 dagers support</li>
+      </ul>
+      <a href="#kontakt" class="price-btn">Kom i gang →</a>
+    </div>
+    <div class="price-card reveal stagger-3">
+      <div class="price-badge">Enterprise</div>
+      <h3>Nettbutikk / Webapp</h3>
+      <div class="price-desc">Komplette e-handelsløsninger eller skreddersydde webapplikasjoner for din bedrift.</div>
+      <div class="price-amount"><span class="from">fra</span><span class="amount">25 000</span><span class="unit">kr</span></div>
+      <div class="price-note">Engangspris • Ferdig på 4-8 uker</div>
+      <ul class="price-features">
+        <li><span class="check">✓</span> Alt i Profesjonell +</li>
+        <li><span class="check">✓</span> Ubegrenset sider</li>
+        <li><span class="check">✓</span> Nettbutikk (Shopify)</li>
+        <li><span class="check">✓</span> Vipps & Klarna</li>
+        <li><span class="check">✓</span> Egendefinerte funksjoner</li>
+        <li><span class="check">✓</span> API-integrasjoner</li>
+        <li><span class="check">✓</span> Brukerautentisering</li>
+        <li><span class="check">✓</span> 6 måneders support</li>
+      </ul>
+      <a href="#kontakt" class="price-btn">Få tilbud →</a>
+    </div>
+  </div>
+  <div class="reveal stagger-3" style="text-align:center;margin-top:36px">
+    <p style="font-size:14px;color:var(--w25)">Alle priser er eks. mva. Vedlikehold fra 500 kr/mnd. <a href="#kontakt" style="color:var(--accent);text-decoration:underline">Kontakt oss</a> for skreddersydd tilbud.</p>
+  </div>
+</section>
+
+<!-- ═══════ KUNDEOMTALER ═══════ -->
+<section class="section">
+  <div style="text-align:center">
+    <div class="section-tag reveal" style="justify-content:center">Kundeomtaler</div>
+    <h2 class="section-title reveal stagger-1" style="text-align:center;margin:0 auto 20px">Hva kundene våre<br><span class="gradient">sier om oss</span></h2>
+  </div>
+  <div class="testimonials-grid">
+    <div class="testimonial-card reveal stagger-1">
+      <div class="testi-stars"><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></div>
+      <p class="testi-quote">"Webutviklerne leverte en fantastisk nettside som har økt bookingene våre med over 40%. Profesjonell, rask og enkel å jobbe med. Anbefales på det sterkeste!"</p>
+      <div class="testi-author">
+        <div class="testi-avatar">KN</div>
+        <div><div class="testi-name">Kari Nordmann</div><div class="testi-role">Daglig leder, Fysioterapi Klinikken</div></div>
+      </div>
+    </div>
+    <div class="testimonial-card reveal stagger-2">
+      <div class="testi-stars"><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></div>
+      <p class="testi-quote">"Endelig en utvikler som forstår hva små bedrifter trenger. Nettsiden vår ser ut som den kostet tre ganger så mye. Michael er dyktig og tilgjengelig."</p>
+      <div class="testi-author">
+        <div class="testi-avatar">EH</div>
+        <div><div class="testi-name">Erik Hansen</div><div class="testi-role">Eier, Hansen Rørlegger AS</div></div>
+      </div>
+    </div>
+    <div class="testimonial-card reveal stagger-3">
+      <div class="testi-stars"><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></div>
+      <p class="testi-quote">"Fra første samtale til ferdig nettside tok det bare 3 uker. Hele prosessen var smidig og vi er ekstremt fornøyd med resultatet. Tusen takk!"</p>
+      <div class="testi-author">
+        <div class="testi-avatar">LB</div>
+        <div><div class="testi-name">Lise Bakken</div><div class="testi-role">Grunnlegger, Bakken Interiør</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ OM OSS ═══════ -->
+<section class="section" id="om">
+  <div class="section-tag reveal">Om Oss</div>
+  <h2 class="section-title reveal stagger-1">Hei, jeg er<br><span class="gradient">Michael Karlsen</span></h2>
+  <div class="about-grid">
+    <div class="about-photo-area reveal-left stagger-2">
+      <div class="about-photo">
+        <div class="initials">MK</div>
+        <div class="photo-label">Legg til profilbilde her</div>
+      </div>
+      <div class="about-float-card card-1">
+        <div class="fc-label">Prosjekter</div>
+        <div class="fc-value">50+</div>
+        <div class="fc-sub">Levert i 2024-2026</div>
+      </div>
+      <div class="about-float-card card-2">
+        <div class="fc-label">Kundetilfredshet</div>
+        <div class="fc-value">4.9 ★</div>
+        <div class="fc-sub">Gjennomsnittlig rating</div>
+      </div>
+    </div>
+    <div class="about-content reveal-right stagger-2">
+      <h3>Grunnlegger av Webutviklerne AS</h3>
+      <p>Jeg er en norsk webutvikler og gründer som brenner for å hjelpe lokale bedrifter med å bli synlige på nett. Med erfaring innen moderne webutvikling, design og digital markedsføring tilbyr jeg en komplett pakke — fra første konsultasjon til ferdig lansert nettside.</p>
+      <p>Jeg startet Webutviklerne fordi jeg så at alt for mange norske bedrifter enten manglet en nettside, eller hadde en som var utdatert og ikke fungerte. Min misjon er å gjøre profesjonell webutvikling tilgjengelig for alle — uansett størrelse på bedriften.</p>
+      <p>Hver eneste nettside jeg bygger er skreddersydd for kundens behov og mål. Ingen maler, ingen copy-paste — bare ren, rask kode som gir resultater.</p>
+      <div class="about-tech">
+        <span>Next.js</span><span>React</span><span>Shopify</span><span>Node.js</span><span>Vercel</span><span>Supabase</span><span>TypeScript</span><span>Tailwind</span>
+      </div>
+      <div class="about-contact">
+        <div class="about-contact-item"><div class="aci">📞</div><div class="act">+47 969 12 922</div></div>
+        <div class="about-contact-item"><div class="aci">📧</div><div class="act">Webutviklerne.studio@gmail.com</div></div>
+        <div class="about-contact-item"><div class="aci">📍</div><div class="act">Brumunddal, Innlandet, Norge</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ FAQ ═══════ -->
+<section class="section" id="faq">
+  <div style="text-align:center">
+    <div class="section-tag reveal" style="justify-content:center">FAQ</div>
+    <h2 class="section-title reveal stagger-1" style="text-align:center;margin:0 auto 20px">Vanlige spørsmål</h2>
+    <p class="section-sub reveal stagger-2" style="margin:0 auto">Finner du ikke svaret du leter etter? <a href="#kontakt" style="color:var(--accent)">Kontakt oss</a> direkte.</p>
+  </div>
+  <div class="faq-list">
+    <div class="faq-item reveal stagger-1"><button class="faq-q" onclick="toggleFaq(this)"><span>Hva koster en nettside?</span><div class="faq-icon">+</div></button><div class="faq-a"><p>Prisene varierer basert på prosjektets omfang. En enkel bedriftsnettside starter fra 8 000 kr, mens mer avanserte løsninger med booking-systemer eller nettbutikk kan koste fra 15 000 - 25 000+ kr. Vi gir alltid et uforpliktende tilbud først.</p></div></div>
+    <div class="faq-item reveal stagger-2"><button class="faq-q" onclick="toggleFaq(this)"><span>Hvor lang tid tar det å lage en nettside?</span><div class="faq-icon">+</div></button><div class="faq-a"><p>En standard bedriftsnettside tar vanligvis 2-4 uker fra start til lansering. Mer komplekse prosjekter med nettbutikk eller spesialtilpassede funksjoner kan ta 4-8 uker. Vi holder deg oppdatert hele veien.</p></div></div>
+    <div class="faq-item reveal stagger-3"><button class="faq-q" onclick="toggleFaq(this)"><span>Hva skjer etter nettsiden er lansert?</span><div class="faq-icon">+</div></button><div class="faq-a"><p>Vi tilbyr løpende vedlikeholdsavtaler fra 500 kr/mnd som inkluderer oppdateringer, sikkerhetskopier, og teknisk support. Du kan også kontakte oss for endringer og forbedringer når som helst.</p></div></div>
+    <div class="faq-item reveal stagger-4"><button class="faq-q" onclick="toggleFaq(this)"><span>Trenger jeg å kunne noe teknisk?</span><div class="faq-icon">+</div></button><div class="faq-a"><p>Absolutt ikke. Vi håndterer alt det tekniske — fra domene og hosting til design og utvikling. Du trenger bare å fortelle oss hva du ønsker, så ordner vi resten.</p></div></div>
+    <div class="faq-item reveal stagger-5"><button class="faq-q" onclick="toggleFaq(this)"><span>Kan dere hjelpe med eksisterende nettsider?</span><div class="faq-icon">+</div></button><div class="faq-a"><p>Ja! Vi tilbyr redesign av eksisterende nettsider, ytelsesoptimalisering, SEO-forbedringer, og tillegg av nye funksjoner. Vi kan vurdere din nåværende nettside gratis.</p></div></div>
+    <div class="faq-item reveal stagger-6"><button class="faq-q" onclick="toggleFaq(this)"><span>Tilbyr dere hosting og domene?</span><div class="faq-icon">+</div></button><div class="faq-a"><p>Vi hjelper med å sette opp hosting og domene som en del av prosjektet. Vi anbefaler løsninger som Vercel og moderne hosting-plattformer som gir best ytelse, sikkerhet og hastighet.</p></div></div>
+    <div class="faq-item reveal"><button class="faq-q" onclick="toggleFaq(this)"><span>Jobber dere kun med bedrifter i Innlandet?</span><div class="faq-icon">+</div></button><div class="faq-a"><p>Nei, vi jobber med bedrifter over hele Norge. Alt arbeid gjøres digitalt, så lokasjon spiller ingen rolle. Vi har kunder fra Kristiansand til Tromsø.</p></div></div>
+    <div class="faq-item reveal"><button class="faq-q" onclick="toggleFaq(this)"><span>Hva om jeg ikke er fornøyd med designet?</span><div class="faq-icon">+</div></button><div class="faq-a"><p>Vi inkluderer alltid revisjonsrunder i prosjektet. Du får se designforslaget før vi begynner å kode, og kan gi tilbakemeldinger og justeringer. Vi jobber til du er 100% fornøyd.</p></div></div>
+  </div>
+</section>
+
+<!-- ═══════ CTA ═══════ -->
+<section class="section">
+  <div class="cta-section reveal-scale">
+    <div class="section-tag reveal" style="justify-content:center">Klar for å komme i gang?</div>
+    <h2 class="section-title reveal stagger-1" style="text-align:center;margin:0 auto 20px">La oss bygge noe<br><span class="gradient">fantastisk sammen</span></h2>
+    <p style="font-size:17px;color:var(--w35);max-width:500px;margin:0 auto 36px;line-height:1.65" class="reveal stagger-2">Kontakt oss i dag for en gratis og uforpliktende samtale. Vi svarer alltid innen 24 timer.</p>
+    <a href="#kontakt" class="btn-primary reveal stagger-3" style="display:inline-block">Få Gratis Tilbud →</a>
+    <div style="display:flex;justify-content:center;gap:28px;margin-top:28px;flex-wrap:wrap" class="reveal stagger-4">
+      <span style="font-size:12.5px;color:var(--w25);display:flex;align-items:center;gap:6px"><span style="color:var(--green)">✓</span> Gratis konsultasjon</span>
+      <span style="font-size:12.5px;color:var(--w25);display:flex;align-items:center;gap:6px"><span style="color:var(--green)">✓</span> Svar innen 24 timer</span>
+      <span style="font-size:12.5px;color:var(--w25);display:flex;align-items:center;gap:6px"><span style="color:var(--green)">✓</span> Ingen binding</span>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ KONTAKT ═══════ -->
+<section class="section" id="kontakt">
+  <div class="section-tag reveal">Kontakt Oss</div>
+  <h2 class="section-title reveal stagger-1">Fortell oss om<br><span class="gradient">ditt prosjekt</span></h2>
+  <p class="section-sub reveal stagger-2">Fyll ut skjemaet, så tar vi kontakt for en uforpliktende samtale.</p>
+  <div class="contact-grid">
+    <div class="reveal-left stagger-2">
+      <div class="contact-info">
+        <div class="contact-info-item">
+          <div class="cii-icon">📞</div>
+          <div class="cii-text"><div class="cii-label">Telefon</div><div class="cii-value">+47 969 12 922</div></div>
+        </div>
+        <div class="contact-info-item">
+          <div class="cii-icon">📧</div>
+          <div class="cii-text"><div class="cii-label">E-post</div><div class="cii-value">Webutviklerne.studio@gmail.com</div></div>
+        </div>
+        <div class="contact-info-item">
+          <div class="cii-icon">📍</div>
+          <div class="cii-text"><div class="cii-label">Lokasjon</div><div class="cii-value">Brumunddal, Innlandet, Norge</div></div>
+        </div>
+        <div class="contact-info-item">
+          <div class="cii-icon">⏰</div>
+          <div class="cii-text"><div class="cii-label">Responstid</div><div class="cii-value">Innen 24 timer</div></div>
+        </div>
+      </div>
+      <div style="margin-top:32px;padding:24px;background:rgba(79,140,255,.03);border:1px solid rgba(79,140,255,.08);border-radius:var(--radius)">
+        <div style="font-size:14px;font-weight:600;color:#fff;margin-bottom:6px">💬 Foretrekker du å ringe?</div>
+        <p style="font-size:13px;color:var(--w35);line-height:1.6">Ring oss direkte på <strong style="color:var(--accent)">+47 969 12 922</strong> for en uforpliktende prat. Vi er tilgjengelige hverdager 09-18.</p>
+      </div>
+    </div>
+    <div class="contact-form reveal-right stagger-2">
+      <h3>Send oss en melding</h3>
+      <p class="form-sub">Vi svarer innen 24 timer med et uforpliktende tilbud.</p>
+      <div class="form-row">
+        <input type="text" class="form-input" placeholder="Ditt navn" required>
+        <input type="email" class="form-input" placeholder="E-postadresse" required>
+      </div>
+      <div class="form-row">
+        <input type="tel" class="form-input" placeholder="Telefon (valgfritt)">
+        <select class="form-input">
+          <option value="">Velg type prosjekt</option>
+          <option>Nettside</option>
+          <option>Nettbutikk</option>
+          <option>Webapplikasjon</option>
+          <option>Redesign</option>
+          <option>SEO & Markedsføring</option>
+          <option>Annet</option>
+        </select>
+      </div>
+      <textarea class="form-input" placeholder="Fortell oss litt om prosjektet ditt, hva slags bedrift du har, og hva du ønsker å oppnå med nettsiden..." required></textarea>
+      <button type="submit" class="form-submit" onclick="submitForm(this)">Send Henvendelse →</button>
+      <p class="form-note">100% uforpliktende • Svar innen 24 timer • Ingen skjulte kostnader</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ FOOTER ═══════ -->
+<footer class="footer">
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <a href="#hero" class="nav-logo" style="margin-bottom:0">
+        <div class="nav-logo-icon">W</div>
+        <div class="nav-logo-text"><span>Webutviklerne</span><small>Digitalbyrå</small></div>
+      </a>
+      <p>Vi bygger moderne, raske og profesjonelle nettsider for norske bedrifter. Fra idé til lansering — vi tar oss av alt.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Tjenester</h4>
+      <a href="#tjenester">Nettsider</a>
+      <a href="#tjenester">Nettbutikk</a>
+      <a href="#tjenester">Webapplikasjoner</a>
+      <a href="#tjenester">SEO</a>
+      <a href="#tjenester">Redesign</a>
+      <a href="#tjenester">Vedlikehold</a>
+    </div>
+    <div class="footer-col">
+      <h4>Selskapet</h4>
+      <a href="#om">Om oss</a>
+      <a href="#portefolje">Portefølje</a>
+      <a href="#priser">Priser</a>
+      <a href="#faq">FAQ</a>
+      <a href="#kontakt">Kontakt</a>
+    </div>
+    <div class="footer-col">
+      <h4>Kontakt</h4>
+      <a href="tel:+4796912922">+47 969 12 922</a>
+      <a href="mailto:Webutviklerne.studio@gmail.com">Webutviklerne.studio@gmail.com</a>
+      <a>Brumunddal, Norge</a>
+      <a>Org.nr: Webutviklerne AS</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2026 Webutviklerne AS · Alle rettigheter reservert</p>
+    <div style="display:flex;gap:20px">
+      <a href="#" style="font-size:12px;color:var(--w15);transition:color .2s" onmouseover="this.style.color='var(--w40)'" onmouseout="this.style.color='var(--w15)'">Personvern</a>
+      <a href="#" style="font-size:12px;color:var(--w15);transition:color .2s" onmouseover="this.style.color='var(--w40)'" onmouseout="this.style.color='var(--w15)'">Vilkår</a>
+      <a href="#" style="font-size:12px;color:var(--w15);transition:color .2s" onmouseover="this.style.color='var(--w40)'" onmouseout="this.style.color='var(--w15)'">Cookies</a>
+    </div>
+  </div>
+</footer>
+
+<!-- ═══════ SCRIPTS ═══════ -->
+<script>
+// ─── CURSOR GLOW ──────────────────────────
+const glow = document.getElementById('cursorGlow');
+document.addEventListener('mousemove', e => {
+  glow.style.left = e.clientX + 'px';
+  glow.style.top = e.clientY + 'px';
+});
+
+// ─── NAVBAR SCROLL ────────────────────────
+const nav = document.getElementById('navbar');
+window.addEventListener('scroll', () => {
+  nav.classList.toggle('scrolled', window.scrollY > 50);
+}, { passive: true });
+
+// ─── MOBILE MENU ──────────────────────────
+function toggleMenu() {
+  document.getElementById('mobileMenu').classList.toggle('open');
+  const spans = document.querySelectorAll('.hamburger span');
+  const open = document.getElementById('mobileMenu').classList.contains('open');
+  spans[0].style.transform = open ? 'rotate(45deg) translateY(7px)' : '';
+  spans[1].style.opacity = open ? '0' : '1';
+  spans[2].style.transform = open ? 'rotate(-45deg) translateY(-7px)' : '';
+}
+function closeMenu() {
+  document.getElementById('mobileMenu').classList.remove('open');
+  const spans = document.querySelectorAll('.hamburger span');
+  spans[0].style.transform = '';
+  spans[1].style.opacity = '1';
+  spans[2].style.transform = '';
+}
+
+// ─── SCROLL REVEAL ────────────────────────
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+    }
+  });
+}, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+document.querySelectorAll('.reveal, .reveal-left, .reveal-right, .reveal-scale').forEach(el => observer.observe(el));
+
+// ─── ANIMATED COUNTERS ────────────────────
+const counterObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const el = entry.target;
+      const target = parseInt(el.dataset.count);
+      if (!target || el.dataset.done) return;
+      el.dataset.done = 'true';
+      const suffix = el.dataset.suffix || '';
+      let current = 0;
+      const step = target / 60;
+      const timer = setInterval(() => {
+        current += step;
+        if (current >= target) {
+          el.textContent = target.toLocaleString() + suffix;
+          clearInterval(timer);
+        } else {
+          el.textContent = Math.floor(current).toLocaleString() + suffix;
+        }
+      }, 20);
+      counterObserver.unobserve(el);
+    }
+  });
+}, { threshold: 0.5 });
+
+document.querySelectorAll('[data-count]').forEach(el => counterObserver.observe(el));
+
+// ─── HERO DEMO STEPPER ───────────────────
+const demoScreens = document.querySelectorAll('.demo-screen');
+const demoDots = document.querySelectorAll('.demo-step-dot');
+const stepLabels = ['Samtale', 'Design', 'Utvikling', 'Lansering'];
+let currentStep = 0;
+let demoTimer;
+
+function goToStep(step) {
+  currentStep = step;
+  demoScreens.forEach(s => s.classList.remove('active'));
+  demoDots.forEach(d => d.classList.remove('active'));
+  demoScreens[step].classList.add('active');
+  demoDots[step].classList.add('active');
+  const label = document.getElementById('demoLabel');
+  if (label) {
+    label.innerHTML = stepLabels.map((l, i) =>
+      i === step ? `<span style="color:var(--accent);font-weight:700">${l}</span>` : `<span style="color:var(--w15)">${l}</span>`
+    ).join(' <span style="color:var(--w08)">→</span> ');
+  }
+}
+
+function nextStep() {
+  goToStep((currentStep + 1) % 4);
+}
+
+function startDemoTimer() {
+  clearInterval(demoTimer);
+  demoTimer = setInterval(nextStep, 3500);
+}
+
+demoDots.forEach(dot => {
+  dot.addEventListener('click', () => {
+    goToStep(parseInt(dot.dataset.goto));
+    startDemoTimer();
+  });
+});
+
+goToStep(0);
+startDemoTimer();
+
+// ─── MARQUEE ──────────────────────────────
+const marqueeItems = ['Next.js', 'React', 'Shopify', 'Vercel', 'Supabase', 'Stripe', 'Node.js', 'TypeScript', 'Tailwind CSS', 'Google Analytics', 'SEO', 'Responsivt Design', 'E-handel', 'API-integrasjoner', 'Webapplikasjoner'];
+const track = document.getElementById('marqueeTrack');
+if (track) {
+  const html = marqueeItems.map(item => `<div class="marquee-item"><span class="sep"></span>${item}</div>`).join('');
+  track.innerHTML = html + html;
+}
+
+// ─── FAQ ──────────────────────────────────
+function toggleFaq(btn) {
+  const item = btn.parentElement;
+  const wasOpen = item.classList.contains('open');
+  document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+  if (!wasOpen) item.classList.add('open');
+}
+
+// ─── FORM SUBMIT ──────────────────────────
+function submitForm(btn) {
+  const form = btn.closest('.contact-form');
+  const inputs = form.querySelectorAll('.form-input');
+  let valid = true;
+  inputs.forEach(input => {
+    if (input.required && !input.value.trim()) {
+      input.style.borderColor = 'rgba(255,107,107,.4)';
+      valid = false;
+      setTimeout(() => { input.style.borderColor = ''; }, 2000);
+    }
+  });
+  if (!valid) return;
+
+  btn.textContent = 'Sender...';
+  btn.style.opacity = '.7';
+  setTimeout(() => {
+    form.innerHTML = `
+      <div style="text-align:center;padding:40px 0">
+        <div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,var(--green),#059669);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:28px;animation:pulse 2s infinite">✓</div>
+        <h3 style="font-family:var(--font-body);font-size:22px;font-weight:700;color:#fff;margin-bottom:8px">Takk for din henvendelse!</h3>
+        <p style="font-size:15px;color:var(--w40);line-height:1.6">Vi tar kontakt innen 24 timer med et uforpliktende tilbud.<br>Du kan også ringe oss direkte på <strong style="color:var(--accent)">+47 969 12 922</strong></p>
+      </div>
+    `;
+  }, 1200);
+}
+
+// ─── SMOOTH ANCHOR LINKS ──────────────────
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    e.preventDefault();
+    const target = document.querySelector(a.getAttribute('href'));
+    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+});
+
+// ─── TILT EFFECT ON SERVICE CARDS ─────────
+document.querySelectorAll('.service-card, .portfolio-card, .price-card').forEach(card => {
+  card.addEventListener('mousemove', e => {
+    const rect = card.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width - 0.5;
+    const y = (e.clientY - rect.top) / rect.height - 0.5;
+    card.style.transform = `translateY(-8px) perspective(800px) rotateX(${y * -4}deg) rotateY(${x * 4}deg)`;
+  });
+  card.addEventListener('mouseleave', () => {
+    card.style.transform = '';
+  });
+});
+</script>
+</body>
+</html>
